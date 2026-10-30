@@ -46,6 +46,7 @@ claude mcp add lolbins -- \
 | `get_probe_script` | Returns the probe script, for targets that cannot take it on stdin |
 | `import_probe_output` | Builds a scan and report from probe output captured on the target |
 | `list_scans` | Lists saved scans with their target, macOS version and report path |
+| `render_report` | Rebuilds a saved scan's HTML report, byte-identical to `lolbins render` |
 | `list_lolbins` | Lists a scan's report binaries, filtered by text, tactic, flag or entitlement prefix |
 | `get_lolbin` | Everything the report says about one binary: description, abuse, ATT&CK techniques with links, worked commands, file facts, SIP, signing, entitlements with values and Apple documentation links, TCC grants, XPC evidence |
 | `explain_entitlement` | Apple's documentation and link for an entitlement key, or its namespace meaning |

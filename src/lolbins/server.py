@@ -32,6 +32,7 @@ from lolbins.scan import (
     load_scan,
     rejoin_catalog,
 )
+from lolbins.site import render_site
 from lolbins.targets import Discovery, discover
 from lolbins.views import (
     EntitlementExplanation,
@@ -55,7 +56,8 @@ link, SIP protection and TCC grants.
    ["ssh", "-o", "BatchMode=yes", "user@host", "/bin/bash", "-s"]. When no such argv exists,
    run get_probe_script's script on the target by any means and pass its saved stdout to
    import_probe_output.
-3. Both return a scan_id. Pass it to list_lolbins and get_lolbin. list_scans shows earlier scans.
+3. Both return a scan_id. Pass it to list_lolbins and get_lolbin. list_scans shows earlier scans;
+   render_report rebuilds a saved scan's HTML report.
 """
 READ_ONLY = ToolAnnotations(read_only_hint=True, open_world_hint=False)
 RUNS_COMMAND = ToolAnnotations(
@@ -63,6 +65,9 @@ RUNS_COMMAND = ToolAnnotations(
 )
 WRITES_REPORT = ToolAnnotations(
     read_only_hint=False, destructive_hint=False, idempotent_hint=False, open_world_hint=False
+)
+REWRITES_REPORT = ToolAnnotations(
+    read_only_hint=False, destructive_hint=False, idempotent_hint=True, open_world_hint=False
 )
 
 ScanId = Annotated[str, Field(description="A scan_id from list_scans or scan_target")]
@@ -191,6 +196,19 @@ class Tools:
         listing["scans"].sort(key=lambda s: s["collected_at"] or "", reverse=True)
         return listing
 
+    def render_report(self, scan_id: ScanId) -> ScanSummary:
+        """Rebuild a saved scan's HTML report from its scan.json with the current catalog.
+
+        Replaces the report's index.html and assets/data.js; scan.json is left alone. The result
+        is byte-identical to `lolbins render` on the same scan.json.
+        """
+        scan = self._load(scan_id)
+        try:
+            render_site(scan, self.reports_dir / scan_id)
+        except OSError as exc:
+            raise ToolError(f"cannot write the report for {scan_id}: {exc}") from exc
+        return self._summary(scan_id, scan)
+
     def list_lolbins(
         self,
         scan_id: ScanId,
@@ -274,6 +292,7 @@ def build_server(reports_dir: Path, catalog: Catalog) -> MCPServer:
     server.add_tool(tools.scan_target, annotations=RUNS_COMMAND)
     server.add_tool(tools.get_probe_script, annotations=READ_ONLY)
     server.add_tool(tools.import_probe_output, annotations=WRITES_REPORT)
+    server.add_tool(tools.render_report, annotations=REWRITES_REPORT)
     for read_only in (
         tools.list_scans,
         tools.list_lolbins,

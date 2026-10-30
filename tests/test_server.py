@@ -7,6 +7,7 @@ from conftest import ENTITLEMENTS_PLIST, b64, f_record, probe_text
 from mcp import Client
 from parity import mismatches, report_data
 
+from lolbins import cli
 from lolbins import server as server_module
 from lolbins.catalog import load_catalog
 from lolbins.probe import ProbeError, parse_output
@@ -91,6 +92,7 @@ def test_speaks_protocol_2026_07_28(server):
         "get_probe_script",
         "import_probe_output",
         "list_scans",
+        "render_report",
         "list_lolbins",
         "get_lolbin",
         "explain_entitlement",
@@ -246,6 +248,23 @@ def test_explain_entitlement_links_apple_docs(server):
         "apple_docs_url": None,
         "weakens_runtime": None,
     }
+
+
+def test_render_report_matches_the_cli(server, reports: Path, tmp_path: Path):
+    report_dir = reports / SCAN_ID
+    (report_dir / "index.html").unlink()
+    (report_dir / "assets" / "data.js").write_text("stale")
+    result = call(server, "render_report", {"scan_id": SCAN_ID})
+    assert result.structured_content["report"] == str(report_dir / "index.html")
+
+    cli_dir = tmp_path / "cli"
+    assert cli.main(["render", str(report_dir / "scan.json"), "-o", str(cli_dir)]) == 0
+    for name in ("index.html", "assets/data.js"):
+        assert (report_dir / name).read_bytes() == (cli_dir / name).read_bytes()
+
+
+def test_render_report_rejects_unknown_scans(server):
+    assert call(server, "render_report", {"scan_id": "nope"}).is_error
 
 
 def test_discover_targets_runs_discovery(server, monkeypatch):
