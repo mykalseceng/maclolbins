@@ -1,7 +1,8 @@
 # lolbins
 
-Enumerates macOS living-off-the-land binaries (LOLBins) on a Parallels VM and builds a static
-site documenting each one.
+Enumerates macOS living-off-the-land binaries (LOLBins) on a Mac or macOS VM and builds a static
+site documenting each one. The same data is served to agents over MCP (see
+[MCP server](#mcp-server)).
 
 ## Usage
 
@@ -27,6 +28,47 @@ Each scan directory contains:
 
 `reports/` is gitignored because scans contain host details.
 
+## MCP server
+
+`lolbins mcp` serves scans over the Model Context Protocol on stdio. It speaks protocol revision
+2026-07-28 (stateless: no `initialize` handshake or session; `tools/list` carries a one-hour
+public cache hint) through the `mcp` 2.x Python SDK's `MCPServer`. To add it to Claude Code:
+
+```sh
+claude mcp add lolbins -- \
+  uv --directory /path/to/lolbins run lolbins mcp --reports /path/to/lolbins/reports
+```
+
+| Tool | What it does |
+|------|--------------|
+| `discover_targets` | Lists this Mac, Parallels, Tart, VMware Fusion and UTM VMs, and `~/.ssh/config` hosts, each with a suggested scan command |
+| `scan_target` | Pipes the probe into any argv that runs bash reading stdin on the target; saves `scan.json` and the HTML report |
+| `get_probe_script` | Returns the probe script, for targets that cannot take it on stdin |
+| `import_probe_output` | Builds a scan and report from probe output captured on the target |
+| `list_scans` | Lists saved scans with their target, macOS version and report path |
+| `list_lolbins` | Lists a scan's report binaries, filtered by text, tactic, flag or entitlement prefix |
+| `get_lolbin` | Everything the report says about one binary: description, abuse, ATT&CK techniques with links, worked commands, file facts, SIP, signing, entitlements with values and Apple documentation links, TCC grants, XPC evidence |
+| `explain_entitlement` | Apple's documentation and link for an entitlement key, or its namespace meaning |
+
+The server does not decide how to reach the binaries; the agent does. `scan_target` takes any argv
+that starts bash reading a script from stdin on the target:
+
+| Target | Command |
+|--------|---------|
+| This Mac | `["/bin/bash", "-s"]` |
+| Parallels | `["prlctl", "exec", "<vm>", "--current-user", "/bin/bash", "-s"]` |
+| Tart | `["tart", "exec", "-i", "<vm>", "/bin/bash", "-s"]` (needs the Tart Guest Agent) |
+| Any Mac with Remote Login, including VMware Fusion and UTM guests | `["ssh", "-o", "BatchMode=yes", "user@host", "/bin/bash", "-s"]` |
+
+VMware Fusion's `vmrun` and UTM's `utmctl` cannot attach stdin to a program in a macOS guest; reach
+those guests over SSH, or run `get_probe_script`'s script in the guest by any means and pass its
+saved stdout to `import_probe_output`.
+
+`scan_target` and `import_probe_output` return a `scan_id`, the name of the scan's report
+directory; the query tools take it as an argument, so scans from `lolbins scan` are served too.
+Every answer about a binary is built from the same data the HTML report renders
+(`site_data()`), and `tests/parity.py` checks the two agree field by field.
+
 ## How it works
 
 | File | Role |
@@ -41,7 +83,11 @@ Each scan directory contains:
 | `src/lolbins/apple_entitlements.json` | Apple's documented entitlements (built by `scripts/update_apple_entitlements.py`) |
 | `src/lolbins/browser.html` | The report page: a column browser that reads `assets/data.js` |
 | `src/lolbins/site.py` | Writes the report page and its data file |
-| `src/lolbins/cli.py` | `scan` and `render` commands |
+| `src/lolbins/reports.py` | Writes each scan into its report directory; finds scans by ID |
+| `src/lolbins/targets.py` | Finds reachable Macs and VMs and the command that reaches each |
+| `src/lolbins/views.py` | Shapes report data into the MCP server's answers |
+| `src/lolbins/server.py` | The MCP server and its tools |
+| `src/lolbins/cli.py` | `scan`, `render` and `mcp` commands |
 
 The probe inventories top-level executables in `/bin`, `/sbin`, `/usr/bin`, `/usr/sbin` and
 `/usr/libexec`, plus every catalog path. This broad inventory is retained in `scan.json` so the
@@ -97,8 +143,8 @@ installed, is marked *Inactive shim*; an absent path is *Missing*. Selections ar
   the technique in `[techniques]`. The loader rejects unknown techniques, duplicate names or
   paths, and unused technique definitions.
 - **Refresh Apple's entitlement docs:** `uv run python scripts/update_apple_entitlements.py`.
-- **Scan another target:** `run_probe` accepts any argv that runs bash reading the script
-  from stdin, e.g. `["ssh", "host", "/bin/bash", "-s"]`.
+- **Scan another target:** use the MCP server's `scan_target`, or call `run_probe` with any
+  argv that runs bash reading the script from stdin, e.g. `["ssh", "host", "/bin/bash", "-s"]`.
 
 ## Development
 

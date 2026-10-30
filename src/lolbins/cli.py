@@ -1,4 +1,4 @@
-"""Command-line entry point: `lolbins scan` and `lolbins render`."""
+"""Command-line entry point: `lolbins scan`, `lolbins render` and `lolbins mcp`."""
 
 import argparse
 import sys
@@ -6,14 +6,15 @@ from pathlib import Path
 
 from lolbins.catalog import CatalogError, load_catalog
 from lolbins.probe import ProbeError, parallels_command, run_probe
+from lolbins.reports import write_report
 from lolbins.scan import (
     DEFAULT_SCAN_DIRS,
     ScanFileError,
     build_scan,
     load_scan,
     rejoin_catalog,
-    save_scan,
 )
+from lolbins.server import build_server
 from lolbins.site import render_site
 
 
@@ -23,6 +24,8 @@ def main(argv: list[str] | None = None) -> int:
     try:
         if args.command == "scan":
             return _scan(args)
+        if args.command == "mcp":
+            return _mcp(args)
         return _render(args)
     except (CatalogError, ProbeError, ScanFileError) as exc:
         print(f"lolbins: error: {exc}", file=sys.stderr)
@@ -53,6 +56,15 @@ def _parser() -> argparse.ArgumentParser:
         "-o", "--output", type=Path, help="site directory (default: beside scan.json)"
     )
     render.add_argument("--catalog", type=Path, help="catalog TOML (default: packaged catalog)")
+
+    mcp = commands.add_parser("mcp", help="serve scans and the catalog over MCP on stdio")
+    mcp.add_argument(
+        "--reports",
+        type=Path,
+        default=Path("reports"),
+        help="directory holding scan directories (default: ./reports)",
+    )
+    mcp.add_argument("--catalog", type=Path, help="catalog TOML (default: packaged catalog)")
     return parser
 
 
@@ -63,11 +75,7 @@ def _scan(args: argparse.Namespace) -> int:
     probe = run_probe(parallels_command(args.vm), scan_dirs, catalog.all_paths(), args.timeout)
     scan = build_scan(catalog, probe, target=args.vm, scan_dirs=scan_dirs)
 
-    stamp = scan["facts"].get("collected_at", "unknown").replace(":", "").replace("-", "")
-    out_dir = args.out / f"{_safe_name(args.vm)}-{stamp}"
-    out_dir.mkdir(parents=True, exist_ok=False)
-    save_scan(scan, out_dir / "scan.json")
-    index = render_site(scan, out_dir)
+    out_dir = write_report(scan, args.out)
 
     present = sum(1 for entry in scan["entries"] if entry["status"] == "present")
     print(
@@ -75,7 +83,7 @@ def _scan(args: argparse.Namespace) -> int:
         f"{len(scan['inventory'])} binaries inventoried",
         file=sys.stderr,
     )
-    print(index)
+    print(out_dir / "index.html")
     return 0
 
 
@@ -87,5 +95,6 @@ def _render(args: argparse.Namespace) -> int:
     return 0
 
 
-def _safe_name(name: str) -> str:
-    return "".join(c if c.isalnum() or c in "-_." else "_" for c in name)
+def _mcp(args: argparse.Namespace) -> int:
+    build_server(args.reports.resolve(), load_catalog(args.catalog)).run("stdio")
+    return 0

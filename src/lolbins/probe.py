@@ -198,18 +198,18 @@ def run_probe(
         )
     except FileNotFoundError as exc:
         raise ProbeError(
-            f"cannot run {command[0]!r}: not found on PATH. "
-            "Is Parallels Desktop installed (prlctl ships with it)?"
+            f"cannot run {command[0]!r}: not found on PATH. Is the tool that reaches the target "
+            "installed (prlctl ships with Parallels Desktop)?"
         ) from exc
     except subprocess.TimeoutExpired as exc:
         raise ProbeError(
-            f"probe did not finish within {timeout:.0f}s; raise --timeout or check the VM"
+            f"probe did not finish within {timeout:.0f}s; raise the timeout or check the target"
         ) from exc
     if proc.returncode != 0:
         detail = proc.stderr.strip()[-2000:] or "(no stderr)"
         raise ProbeError(
             f"probe failed with exit code {proc.returncode} running {shlex.join(command)}: "
-            f"{detail}. Check that the VM is running and a user is logged in."
+            f"{detail}. Check that the target is running and reachable, and a user is logged in."
         )
     return parse_output(proc.stdout)
 

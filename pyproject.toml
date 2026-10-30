@@ -1,10 +1,12 @@
 [project]
 name = "lolbins"
 version = "0.1.0"
-description = "Enumerate living-off-the-land binaries on a macOS Parallels VM and report on them."
+description = "Enumerate macOS living-off-the-land binaries, report on them and serve them over MCP."
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "mcp==2.3.0",
+]
 
 [project.scripts]
 lolbins = "lolbins.cli:main"
