@@ -2,10 +2,10 @@ from pathlib import Path
 
 from conftest import f_record, probe_text
 
-from lolbins import cli
-from lolbins.catalog import load_catalog
-from lolbins.probe import ProbeError, parse_output
-from lolbins.scan import load_scan
+from maclolbins import cli
+from maclolbins.catalog import load_catalog
+from maclolbins.probe import ProbeError, parse_output
+from maclolbins.scan import load_scan
 
 
 def test_scan_writes_json_and_html(tmp_path: Path, monkeypatch, capsys):
@@ -39,7 +39,7 @@ def test_probe_errors_become_exit_code_1(tmp_path: Path, monkeypatch, capsys):
 
     monkeypatch.setattr(cli, "run_probe", failing_run_probe)
     assert cli.main(["scan", "--vm", "macOS", "--out", str(tmp_path)]) == 1
-    assert "lolbins: error: VM not running" in capsys.readouterr().err
+    assert "maclolbins: error: VM not running" in capsys.readouterr().err
 
 
 def test_render_reports_unreadable_scan(tmp_path: Path, capsys):

@@ -166,7 +166,7 @@ def parallels_command(vm: str) -> list[str]:
 
 def build_script(scan_dirs: Sequence[str], extra_paths: Sequence[str]) -> str:
     """Prefix probe.sh with heredoc assignments carrying its inputs."""
-    body = resources.files("lolbins").joinpath("probe.sh").read_text(encoding="utf-8")
+    body = resources.files("maclolbins").joinpath("probe.sh").read_text(encoding="utf-8")
     preamble = _heredoc_assignment("LOLBINS_SCAN_DIRS", scan_dirs) + _heredoc_assignment(
         "LOLBINS_EXTRA_PATHS", extra_paths
     )

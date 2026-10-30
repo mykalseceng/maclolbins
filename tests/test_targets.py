@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from lolbins.targets import DiscoveryError, discover, run_listing
+from maclolbins.targets import DiscoveryError, discover, run_listing
 
 PRLCTL_LIST = json.dumps(
     [

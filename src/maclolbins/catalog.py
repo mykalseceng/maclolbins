@@ -68,7 +68,7 @@ class Catalog:
 
 def default_catalog_path() -> Path:
     """Return the catalog.toml shipped with the package."""
-    return Path(str(resources.files("lolbins").joinpath("catalog.toml")))
+    return Path(str(resources.files("maclolbins").joinpath("catalog.toml")))
 
 
 def load_catalog(path: Path | None = None) -> Catalog:

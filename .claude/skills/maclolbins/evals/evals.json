@@ -1,16 +1,16 @@
 {
-  "skill_name": "macos-lolbins",
+  "skill_name": "maclolbins",
   "evals": [
     {
       "id": 1,
       "name": "live-report-parallels",
       "prompt": "Run a fresh LOLBins scan of my Parallels VM (it's called macOS) and give me the HTML report so I can browse it.",
-      "expected_output": "A new scan via scan_target with a prlctl exec command; the lolbins report (index.html + assets/data.js) exactly as lolbins renders it, and its path.",
+      "expected_output": "A new scan via scan_target with a prlctl exec command; the maclolbins report (index.html + assets/data.js) exactly as maclolbins renders it, and its path.",
       "files": [],
       "assertions": [
         "Scanned the Parallels VM with scan_target using a prlctl exec command",
-        "Report index.html is byte-identical to lolbins' report page",
-        "Report data.js is byte-identical to `lolbins render` of the scan's scan.json",
+        "Report index.html is byte-identical to maclolbins' report page",
+        "Report data.js is byte-identical to `maclolbins render` of the scan's scan.json",
         "Report contains the same 116 binaries as the reference report for this VM",
         "Answer gives the path to the report's index.html",
         "No report files were written or edited by hand"
@@ -20,12 +20,12 @@
       "id": 2,
       "name": "rebuild-deleted-report",
       "prompt": "I accidentally deleted the HTML report for my Oct 27 LOLBin scan (the scan.json is still there). Can you get the report back? No new scan please, the VM has changed since.",
-      "expected_output": "render_report on macOS-20261027T002354Z, no new scan; the rebuilt report is byte-identical to `lolbins render`.",
+      "expected_output": "render_report on macOS-20261027T002354Z, no new scan; the rebuilt report is byte-identical to `maclolbins render`.",
       "files": [],
       "assertions": [
         "Did not run a new scan",
-        "Rebuilt index.html is byte-identical to lolbins' report page",
-        "Rebuilt data.js is byte-identical to `lolbins render` of the scan's scan.json",
+        "Rebuilt index.html is byte-identical to maclolbins' report page",
+        "Rebuilt data.js is byte-identical to `maclolbins render` of the scan's scan.json",
         "Answer gives the path to the rebuilt index.html",
         "No report files were written or edited by hand"
       ]
@@ -42,7 +42,7 @@
         "Links the ATT&CK technique pages T1059.002, T1562.001, T1562.004 and T1113",
         "Links at least one ATT&CK tactic page (attack.mitre.org/tactics/TA...)",
         "Notes the ATT&CK v20 replacement for a revoked technique (T1685 or T1686)",
-        "Every developer.apple.com link is a documented-entitlement page lolbins knows (none invented)",
+        "Every developer.apple.com link is a documented-entitlement page maclolbins knows (none invented)",
         "Says which scan the answer is based on (scan_id or collection date)"
       ]
     },

@@ -1,16 +1,16 @@
 ---
-name: macos-lolbins
-description: Scan a Mac or macOS VM for living-off-the-land binaries (LOLBins) with the lolbins MCP server, reproduce the lolbins HTML report exactly, and answer questions about the binaries it finds — abuse, MITRE ATT&CK techniques and tactics with links, entitlements with Apple documentation links, code signing, SIP and TCC. Use this skill whenever the user mentions macOS LOLBins or LOOBins, a LOLBin report or scan, abusable or dual-use macOS system binaries, entitlements or TCC/SIP posture of Apple binaries, ATT&CK mapping for macOS tools, or scanning a Parallels, VMware Fusion, UTM, Tart or local Mac target, even if they don't name the lolbins tools.
+name: maclolbins
+description: Scan a Mac or macOS VM for living-off-the-land binaries (LOLBins) with the MacLOLBins MCP server, reproduce the MacLOLBins HTML report exactly, and answer questions about the binaries it finds — abuse, MITRE ATT&CK techniques and tactics with links, entitlements with Apple documentation links, code signing, SIP and TCC. Use this skill whenever the user mentions macOS LOLBins or LOOBins, a LOLBin report or scan, abusable or dual-use macOS system binaries, entitlements or TCC/SIP posture of Apple binaries, ATT&CK mapping for macOS tools, or scanning a Parallels, VMware Fusion, UTM, Tart or local Mac target, even if they don't name the MacLOLBins tools.
 ---
 
-# macOS LOLBins
+# MacLOLBins
 
-The lolbins MCP server (tools appear as `mcp__lolbins__<tool>`) probes a Mac read-only, matches
+The MacLOLBins MCP server (tools appear as `mcp__maclolbins__<tool>`) probes a Mac read-only, matches
 what it finds against a catalogue of abusable Apple binaries, and renders an HTML report.
 This skill covers the two things people want from it, often in the same conversation:
 
 - **The report.** A browsable `index.html` showing every catalogued binary on the target. It
-  is produced by lolbins itself, so reproducing it means running the right tools, not writing
+  is produced by MacLOLBins itself, so reproducing it means running the right tools, not writing
   HTML.
 - **Answers.** Targeted questions such as "which of these can skip TCC prompts?" or "how is
   osascript abused?", answered from the same data with ATT&CK and Apple links.
@@ -46,8 +46,8 @@ The server does not decide where the binaries live; you do.
 
 ## Producing the report
 
-The report is `<reports>/<scan_id>/index.html` plus `assets/data.js`, rendered by lolbins from
-`scan.json`. It is the same report whether it came from `lolbins scan`, `scan_target`,
+The report is `<reports>/<scan_id>/index.html` plus `assets/data.js`, rendered by MacLOLBins from
+`scan.json`. It is the same report whether it came from `maclolbins scan`, `scan_target`,
 `import_probe_output` or `render_report`, and it is reproducible byte for byte. Hand-written
 HTML, summaries or edits to those files are not the report, so do not create or modify them;
 if the user wants something different, that is an answer or a new artifact, named as such.
@@ -116,10 +116,10 @@ Lists of several binaries read better as a table with path, techniques and the r
 
 ## When the tools are not connected
 
-The repo's `.mcp.json` registers the server as `lolbins` (`uv run lolbins mcp --reports
-reports`, run from the repo root). If no `mcp__lolbins__*` tools are available, tell the user to
+The repo's `.mcp.json` registers the server as `maclolbins` (`uv run maclolbins mcp --reports
+reports`, run from the repo root). If no `mcp__maclolbins__*` tools are available, tell the user to
 approve the project MCP server (`/mcp` in Claude Code) or restart the session. From a shell,
-`uv run lolbins scan --vm <parallels vm>` and `uv run lolbins render <scan.json>` produce the
+`uv run maclolbins scan --vm <parallels vm>` and `uv run maclolbins render <scan.json>` produce the
 same report; the CLI scan only reaches Parallels VMs.
 
 ## Reference files

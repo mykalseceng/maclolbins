@@ -7,8 +7,8 @@ Its name, `<target>-<collected_at>`, is the scan ID that the MCP server hands ou
 import re
 from pathlib import Path
 
-from lolbins.scan import ScanFileError, ScanResult, save_scan
-from lolbins.site import render_site
+from maclolbins.scan import ScanFileError, ScanResult, save_scan
+from maclolbins.site import render_site
 
 SCAN_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
 

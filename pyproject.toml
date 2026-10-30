@@ -1,5 +1,5 @@
 [project]
-name = "lolbins"
+name = "maclolbins"
 version = "0.1.0"
 description = "Enumerate macOS living-off-the-land binaries, report on them and serve them over MCP."
 readme = "README.md"
@@ -9,7 +9,7 @@ dependencies = [
 ]
 
 [project.scripts]
-lolbins = "lolbins.cli:main"
+maclolbins = "maclolbins.cli:main"
 
 [build-system]
 requires = ["uv_build>=0.11.1,<0.12.0"]

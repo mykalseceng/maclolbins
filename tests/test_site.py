@@ -5,10 +5,10 @@ from pathlib import Path
 import pytest
 from conftest import APPLE_CODESIGN, ENTITLEMENTS_PLIST, SHIM_CODESIGN, b64, f_record, probe_text
 
-from lolbins.catalog import load_catalog
-from lolbins.probe import parse_output
-from lolbins.scan import build_scan
-from lolbins.site import render_site, site_data
+from maclolbins.catalog import load_catalog
+from maclolbins.probe import parse_output
+from maclolbins.scan import build_scan
+from maclolbins.site import render_site, site_data
 
 CATALOG = """
 [meta]

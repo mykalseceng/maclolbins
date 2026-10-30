@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from conftest import ENTITLEMENTS_PLIST, SHIM_CODESIGN, b64, f_record, probe_text
 
-from lolbins.probe import (
+from maclolbins.probe import (
     HEREDOC_DELIMITER,
     ProbeError,
     build_script,

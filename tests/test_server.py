@@ -7,13 +7,13 @@ from conftest import ENTITLEMENTS_PLIST, b64, f_record, probe_text
 from mcp import Client
 from parity import mismatches, report_data
 
-from lolbins import cli
-from lolbins import server as server_module
-from lolbins.catalog import load_catalog
-from lolbins.probe import ProbeError, parse_output
-from lolbins.reports import write_report
-from lolbins.scan import DEFAULT_SCAN_DIRS, build_scan
-from lolbins.server import build_server
+from maclolbins import cli
+from maclolbins import server as server_module
+from maclolbins.catalog import load_catalog
+from maclolbins.probe import ProbeError, parse_output
+from maclolbins.reports import write_report
+from maclolbins.scan import DEFAULT_SCAN_DIRS, build_scan
+from maclolbins.server import build_server
 
 TCC_GRANT = "T\tsystem\tkTCCServiceSystemPolicyAllFiles\t/usr/bin/osascript\t1\t2\tUNUSED"
 SIP = "-rwxr-xr-x\troot\twheel\t100\trestricted"

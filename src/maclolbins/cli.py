@@ -1,21 +1,21 @@
-"""Command-line entry point: `lolbins scan`, `lolbins render` and `lolbins mcp`."""
+"""Command-line entry point: `maclolbins scan`, `maclolbins render` and `maclolbins mcp`."""
 
 import argparse
 import sys
 from pathlib import Path
 
-from lolbins.catalog import CatalogError, load_catalog
-from lolbins.probe import ProbeError, parallels_command, run_probe
-from lolbins.reports import write_report
-from lolbins.scan import (
+from maclolbins.catalog import CatalogError, load_catalog
+from maclolbins.probe import ProbeError, parallels_command, run_probe
+from maclolbins.reports import write_report
+from maclolbins.scan import (
     DEFAULT_SCAN_DIRS,
     ScanFileError,
     build_scan,
     load_scan,
     rejoin_catalog,
 )
-from lolbins.server import build_server
-from lolbins.site import render_site
+from maclolbins.server import build_server
+from maclolbins.site import render_site
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -28,13 +28,14 @@ def main(argv: list[str] | None = None) -> int:
             return _mcp(args)
         return _render(args)
     except (CatalogError, ProbeError, ScanFileError) as exc:
-        print(f"lolbins: error: {exc}", file=sys.stderr)
+        print(f"maclolbins: error: {exc}", file=sys.stderr)
         return 1
 
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="lolbins", description="Enumerate living-off-the-land binaries on a macOS VM."
+        prog="maclolbins",
+        description="Enumerate Apple living-off-the-land binaries on a Mac or macOS VM.",
     )
     commands = parser.add_subparsers(dest="command", required=True)
 

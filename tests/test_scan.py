@@ -4,9 +4,9 @@ from pathlib import Path
 import pytest
 from conftest import APPLE_CODESIGN, ENTITLEMENTS_PLIST, SHIM_CODESIGN, f_record, probe_text
 
-from lolbins.catalog import load_catalog
-from lolbins.probe import parse_codesign, parse_output
-from lolbins.scan import (
+from maclolbins.catalog import load_catalog
+from maclolbins.probe import parse_codesign, parse_output
+from maclolbins.scan import (
     ScanFileError,
     build_scan,
     file_flags,

@@ -1,4 +1,4 @@
-# The lolbins report, its flags and statuses
+# The MacLOLBins report, its flags and statuses
 
 ## What the report contains
 

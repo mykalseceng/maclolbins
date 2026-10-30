@@ -103,7 +103,9 @@ class Explanation:
 @cache
 def _apple_docs() -> dict[str, dict[str, str]]:
     text = (
-        resources.files("lolbins").joinpath("apple_entitlements.json").read_text(encoding="utf-8")
+        resources.files("maclolbins")
+        .joinpath("apple_entitlements.json")
+        .read_text(encoding="utf-8")
     )
     docs: dict[str, dict[str, str]] = json.loads(text)
     return docs

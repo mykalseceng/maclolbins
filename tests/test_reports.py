@@ -3,10 +3,10 @@ from pathlib import Path
 import pytest
 from conftest import f_record, probe_text
 
-from lolbins.catalog import load_catalog
-from lolbins.probe import parse_output
-from lolbins.reports import safe_name, scan_ids, scan_path, write_report
-from lolbins.scan import DEFAULT_SCAN_DIRS, ScanFileError, build_scan, load_scan
+from maclolbins.catalog import load_catalog
+from maclolbins.probe import parse_output
+from maclolbins.reports import safe_name, scan_ids, scan_path, write_report
+from maclolbins.scan import DEFAULT_SCAN_DIRS, ScanFileError, build_scan, load_scan
 
 
 def make_scan(target: str):

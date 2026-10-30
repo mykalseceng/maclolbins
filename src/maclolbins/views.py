@@ -6,11 +6,11 @@ the report always agree on which binaries are shown and what is said about each 
 
 from typing import Any, TypedDict
 
-from lolbins.entitlements import RUNTIME_WEAKENERS, explain
-from lolbins.probe import Signing, TccGrant, XpcRegistration
-from lolbins.scan import ExampleRef, ScanResult
-from lolbins.site import site_data
-from lolbins.tcc import service_label
+from maclolbins.entitlements import RUNTIME_WEAKENERS, explain
+from maclolbins.probe import Signing, TccGrant, XpcRegistration
+from maclolbins.scan import ExampleRef, ScanResult
+from maclolbins.site import site_data
+from maclolbins.tcc import service_label
 
 TCC_ALLOW_PREFIX = "com.apple.private.tcc.allow"
 

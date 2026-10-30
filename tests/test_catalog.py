@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from lolbins.catalog import CatalogError, load_catalog
+from maclolbins.catalog import CatalogError, load_catalog
 
 TECHNIQUES = """
 [meta]

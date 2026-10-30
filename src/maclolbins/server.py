@@ -1,9 +1,9 @@
-"""MCP server over lolbins scans, speaking protocol revision 2026-07-28 (mcp SDK 2.x).
+"""MacLOLBins MCP server over saved scans, speaking protocol revision 2026-07-28 (mcp SDK 2.x).
 
 The server keeps no state between requests. A scan is named by the scan_id that scan_target or
 import_probe_output returns; it is the name of the scan's report directory, so scans written by
-`lolbins scan` are served too. Every answer about a binary comes from the same data the HTML
-report shows (see lolbins.views).
+`maclolbins scan` are served too. Every answer about a binary comes from the same data the HTML
+report shows (see maclolbins.views).
 
 The server never decides how to reach a target. scan_target pipes the probe into whatever argv
 the agent passes; discover_targets lists what this host can reach and suggests an argv for each.
@@ -21,10 +21,10 @@ from mcp.server.mcpserver.exceptions import ToolError
 from mcp.types import ToolAnnotations
 from pydantic import Field
 
-from lolbins.catalog import Catalog
-from lolbins.probe import ProbeError, TccSource, build_script, parse_output, run_probe
-from lolbins.reports import scan_ids, scan_path, write_report
-from lolbins.scan import (
+from maclolbins.catalog import Catalog
+from maclolbins.probe import ProbeError, TccSource, build_script, parse_output, run_probe
+from maclolbins.reports import scan_ids, scan_path, write_report
+from maclolbins.scan import (
     DEFAULT_SCAN_DIRS,
     ScanFileError,
     ScanResult,
@@ -32,9 +32,9 @@ from lolbins.scan import (
     load_scan,
     rejoin_catalog,
 )
-from lolbins.site import render_site
-from lolbins.targets import Discovery, discover
-from lolbins.views import (
+from maclolbins.site import render_site
+from maclolbins.targets import Discovery, discover
+from maclolbins.views import (
     EntitlementExplanation,
     LolbinDetail,
     LolbinRow,
@@ -200,7 +200,7 @@ class Tools:
         """Rebuild a saved scan's HTML report from its scan.json with the current catalog.
 
         Replaces the report's index.html and assets/data.js; scan.json is left alone. The result
-        is byte-identical to `lolbins render` on the same scan.json.
+        is byte-identical to `maclolbins render` on the same scan.json.
         """
         scan = self._load(scan_id)
         try:
@@ -279,12 +279,12 @@ class Tools:
 
 
 def build_server(reports_dir: Path, catalog: Catalog) -> MCPServer:
-    """Return the lolbins MCP server, serving scans saved under reports_dir."""
+    """Return the MacLOLBins MCP server, serving scans saved under reports_dir."""
     tools = Tools(reports_dir, catalog)
     server = MCPServer(
-        name="lolbins",
-        title="macOS LOLBins",
-        version=version("lolbins"),
+        name="maclolbins",
+        title="MacLOLBins",
+        version=version("maclolbins"),
         instructions=INSTRUCTIONS,
         cache_hints={"tools/list": CacheHint(ttl_ms=3_600_000, scope="public")},
     )

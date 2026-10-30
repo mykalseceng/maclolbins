@@ -1,4 +1,4 @@
-"""Refresh src/lolbins/apple_entitlements.json from Apple's developer documentation.
+"""Refresh src/maclolbins/apple_entitlements.json from Apple's developer documentation.
 
 Apple publishes its documentation as JSON. This walks the Entitlements index plus the
 collection pages it links to (Hardened Runtime, App Sandbox, ...) and records every
@@ -18,7 +18,7 @@ DOCS = "https://developer.apple.com"
 DATA = f"{DOCS}/tutorials/data"
 INDEX = "/documentation/bundleresources/entitlements"
 ENTITLEMENT_PREFIX = f"{INDEX}/"
-OUTPUT = Path(__file__).resolve().parent.parent / "src" / "lolbins" / "apple_entitlements.json"
+OUTPUT = Path(__file__).resolve().parent.parent / "src" / "maclolbins" / "apple_entitlements.json"
 
 
 def fetch(path: str) -> dict[str, Any]:

@@ -12,10 +12,10 @@ from importlib import resources
 from pathlib import Path
 from typing import Any
 
-from lolbins.entitlements import RUNTIME_WEAKENERS, explain
-from lolbins.probe import TccGrant
-from lolbins.scan import InventoryItem, ScanResult
-from lolbins.tcc import SERVICE_LABELS
+from maclolbins.entitlements import RUNTIME_WEAKENERS, explain
+from maclolbins.probe import TccGrant
+from maclolbins.scan import InventoryItem, ScanResult
+from maclolbins.tcc import SERVICE_LABELS
 
 # Pages written by earlier versions of this renderer, removed when re-rendering over them.
 _STALE = ("catalog.html", "inventory.html", "entitlements.html", "report.html")
@@ -34,7 +34,7 @@ def render_site(scan: ScanResult, out_dir: Path) -> Path:
     """
     index = out_dir / "index.html"
     index.write_text(
-        resources.files("lolbins").joinpath("browser.html").read_text(encoding="utf-8"),
+        resources.files("maclolbins").joinpath("browser.html").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
     assets = out_dir / "assets"

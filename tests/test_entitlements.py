@@ -1,4 +1,4 @@
-from lolbins.entitlements import explain
+from maclolbins.entitlements import explain
 
 
 def test_documented_key_links_to_apple():

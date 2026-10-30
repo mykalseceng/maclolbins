@@ -3,7 +3,7 @@
 # its own temp directory. Inputs are newline-separated variables set by the host preamble:
 #   LOLBINS_SCAN_DIRS    directories whose top-level executables are inventoried
 #   LOLBINS_EXTRA_PATHS  extra paths to probe (catalog entries outside the scan dirs)
-# Output is one tab-separated record per line; lolbins/probe.py documents and parses it.
+# Output is one tab-separated record per line; maclolbins/probe.py documents and parses it.
 set -euo pipefail
 
 : "${LOLBINS_SCAN_DIRS?set LOLBINS_SCAN_DIRS to newline-separated directories}"

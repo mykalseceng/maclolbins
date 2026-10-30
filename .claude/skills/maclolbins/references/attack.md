@@ -1,4 +1,4 @@
-# MITRE ATT&CK for the lolbins catalogue
+# MITRE ATT&CK for the MacLOLBins catalogue
 
 The catalogue maps each binary to ATT&CK Enterprise techniques; tactics are derived from them.
 The report and the MCP server show the catalogue's IDs and names. Link them as below, and add the

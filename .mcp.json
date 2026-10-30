@@ -1,9 +1,9 @@
 {
   "mcpServers": {
-    "lolbins": {
+    "maclolbins": {
       "type": "stdio",
       "command": "uv",
-      "args": ["run", "--quiet", "lolbins", "mcp", "--reports", "reports"]
+      "args": ["run", "--quiet", "maclolbins", "mcp", "--reports", "reports"]
     }
   }
 }

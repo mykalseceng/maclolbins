@@ -5,9 +5,9 @@ from importlib.metadata import version
 from pathlib import Path
 from typing import Literal, TypedDict
 
-from lolbins.catalog import Catalog, Entry
-from lolbins.entitlements import runtime_weakeners
-from lolbins.probe import FileRecord, ProbeOutput, TccGrant, TccSnapshot
+from maclolbins.catalog import Catalog, Entry
+from maclolbins.entitlements import runtime_weakeners
+from maclolbins.probe import FileRecord, ProbeOutput, TccGrant, TccSnapshot
 
 SCHEMA_VERSION = 5
 DEFAULT_SCAN_DIRS = ("/bin", "/sbin", "/usr/bin", "/usr/sbin", "/usr/libexec")
@@ -94,7 +94,7 @@ def build_scan(
     ]
     return ScanResult(
         schema=SCHEMA_VERSION,
-        tool_version=version("lolbins"),
+        tool_version=version("maclolbins"),
         catalog_version=catalog.version,
         target=target,
         scan_dirs=scan_dirs,
