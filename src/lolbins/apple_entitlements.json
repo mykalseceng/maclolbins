@@ -1,0 +1,1237 @@
+{
+ "aps-environment": {
+  "title": "APS Environment Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/aps-environment",
+  "abstract": "The environment for push notifications."
+ },
+ "com.apple.commcenter.fine-grained": {
+  "title": "com.apple.CommCenter.fine-grained",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.commcenter.fine-grained",
+  "abstract": "An entitlement that grants access to CoreTelephony services."
+ },
+ "com.apple.developer.accessibility.merchant-api-control": {
+  "title": "com.apple.developer.accessibility.merchant-api-control",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.accessibility.merchant-api-control",
+  "abstract": ""
+ },
+ "com.apple.developer.accessory-access.usb": {
+  "title": "Claim USB Accessory",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.accessory-access.usb",
+  "abstract": "An entitlement that enables an app to use the Accessory Access framework to manage access to USB devices in macOS."
+ },
+ "com.apple.developer.accessory-data-provider": {
+  "title": "com.apple.developer.accessory-data-provider",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.accessory-data-provider",
+  "abstract": "An entitlement that enables your app extension to receive data for an accessory."
+ },
+ "com.apple.developer.accessory-setup-discovery-extension": {
+  "title": "com.apple.developer.accessory-setup-discovery-extension",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.accessory-setup-discovery-extension",
+  "abstract": "An entitlement that lets an app extension discover and set up accessories."
+ },
+ "com.apple.developer.accessory-transport-extension": {
+  "title": "com.apple.developer.accessory-transport-extension",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.accessory-transport-extension",
+  "abstract": "An entitlement that enables your app extension to send sensitive data to an accessory."
+ },
+ "com.apple.developer.accessory-transport-security": {
+  "title": "com.apple.developer.accessory-transport-security",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.accessory-transport-security",
+  "abstract": "An entitlement that enables your app extension to exchange cryptographic keys with an accessory."
+ },
+ "com.apple.developer.app-compute-category": {
+  "title": "Increased performance headroom",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.app-compute-category",
+  "abstract": "An entitlement that allows an app to adjust thresholds that balance thermal dissipation and performance against fan noise and other factors."
+ },
+ "com.apple.developer.app-migration.data-container-access": {
+  "title": "com.apple.developer.app-migration.data-container-access",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.app-migration.data-container-access",
+  "abstract": "An entitlement required for app extensions to perform a one-time transfer of on-device data to or from another platform."
+ },
+ "com.apple.developer.applesignin": {
+  "title": "Sign in with Apple Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.applesignin",
+  "abstract": "An entitlement that lets your app use Sign in with Apple."
+ },
+ "com.apple.developer.aps-environment": {
+  "title": "APS Environment (macOS) Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.aps-environment",
+  "abstract": "The environment for push notifications in macOS apps."
+ },
+ "com.apple.developer.arkit.barcode-detection.allow": {
+  "title": "Spatial barcode and QR code scanning",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.arkit.barcode-detection.allow",
+  "abstract": "A Boolean value that indicates whether an app can use ARKit to detect, position, and decode barcode and QR codes."
+ },
+ "com.apple.developer.arkit.camera-region.allow": {
+  "title": "Camera Region access",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.arkit.camera-region.allow",
+  "abstract": "A Boolean value indicating whether your app may access the camera region."
+ },
+ "com.apple.developer.arkit.main-camera-access.allow": {
+  "title": "Main camera access",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.arkit.main-camera-access.allow",
+  "abstract": "A Boolean value that indicates whether an app can use ARKit to access the main cameras on Apple Vision Pro."
+ },
+ "com.apple.developer.arkit.object-tracking-parameter-adjustment.allow": {
+  "title": "Object-tracking parameter adjustment",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.arkit.object-tracking-parameter-adjustment.allow",
+  "abstract": "A Boolean value that allows an app to use ARKit to track more objects with a higher frequency."
+ },
+ "com.apple.developer.arkit.shared-coordinate-space.allow": {
+  "title": "Shared Coordinate Space access",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.arkit.shared-coordinate-space.allow",
+  "abstract": "A Boolean value indicating whether your app may use a shared coordinate space."
+ },
+ "com.apple.developer.arkit.visual-fidelity.allow": {
+  "title": "Visual Fidelity monitoring",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.arkit.visual-fidelity.allow",
+  "abstract": "A Boolean value that indicates whether your app can monitor visual fidelity."
+ },
+ "com.apple.developer.associated-appclip-app-identifiers": {
+  "title": "com.apple.developer.associated-appclip-app-identifiers",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.associated-appclip-app-identifiers",
+  "abstract": "A list of App Clip identifiers for an app with exactly one entry."
+ },
+ "com.apple.developer.associated-domains": {
+  "title": "Associated Domains Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.associated-domains",
+  "abstract": "The associated domains for specific services, such as shared web credentials, universal links, and App Clips."
+ },
+ "com.apple.developer.associated-domains.applinks.read-write": {
+  "title": "com.apple.developer.associated-domains.applinks.read-write",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.associated-domains.applinks.read-write",
+  "abstract": "A Boolean value that indicates whether the app can use universal links."
+ },
+ "com.apple.developer.authentication-services.account-creation-requires-phone-number": {
+  "title": "Account Creation Requires Phone Number",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.authentication-services.account-creation-requires-phone-number",
+  "abstract": "A Boolean value that indicates whether an app requires someone to provide a phone number to create an account."
+ },
+ "com.apple.developer.authentication-services.autofill-credential-provider": {
+  "title": "AutoFill Credential Provider Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.authentication-services.autofill-credential-provider",
+  "abstract": "A Boolean value that indicates whether the app may, with user permission, provide user names and passwords for AutoFill in Safari and other apps."
+ },
+ "com.apple.developer.automated-device-enrollment.add-devices": {
+  "title": "com.apple.developer.automated-device-enrollment.add-devices",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.automated-device-enrollment.add-devices",
+  "abstract": "A Boolean value that indicates whether an app may add a device to Automated Device Enrollment."
+ },
+ "com.apple.developer.automatic-assessment-configuration": {
+  "title": "com.apple.developer.automatic-assessment-configuration",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.automatic-assessment-configuration",
+  "abstract": "A Boolean value that indicates whether an app may create an assessment session."
+ },
+ "com.apple.developer.avfoundation.multitasking-camera-access": {
+  "title": "com.apple.developer.avfoundation.multitasking-camera-access",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.avfoundation.multitasking-camera-access",
+  "abstract": "A Boolean value that indicates whether an app may continue using the camera at the same time as another foreground app."
+ },
+ "com.apple.developer.avfoundation.uvc-device-access": {
+  "title": "UVC Device Access on visionOS",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.avfoundation.uvc-device-access",
+  "abstract": "A Boolean value that indicates whether the app can stream USB UVC devices connected to the Developer strap."
+ },
+ "com.apple.developer.background-tasks.continued-processing.gpu": {
+  "title": "Background GPU Access",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.background-tasks.continued-processing.gpu",
+  "abstract": "The entitlement the system requires for a continuous background task to use the GPU."
+ },
+ "com.apple.developer.background-tasks.continued-processing.inference": {
+  "title": "Background Inference",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.background-tasks.continued-processing.inference",
+  "abstract": "An entitlement that lets a background task run inference on the Neural Engine."
+ },
+ "com.apple.developer.browser.app-installation": {
+  "title": "com.apple.developer.browser.app-installation",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.browser.app-installation",
+  "abstract": "An entitlement that enables a browser to install alternative distribution apps from a website."
+ },
+ "com.apple.developer.calling-app": {
+  "title": "Default Calling App",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.calling-app",
+  "abstract": "A Boolean value that indicates whether an app can be the default calling app on someone\u2019s device."
+ },
+ "com.apple.developer.carplay-audio": {
+  "title": "CarPlay Audio App",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.carplay-audio",
+  "abstract": "A Boolean value that indicates whether the CarPlay app plays audio."
+ },
+ "com.apple.developer.carplay-charging": {
+  "title": "CarPlay EV Charging App",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.carplay-charging",
+  "abstract": "A Boolean value that indicates whether the CarPlay app provides details about nearby charging facilities."
+ },
+ "com.apple.developer.carplay-communication": {
+  "title": "CarPlay Communication App",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.carplay-communication",
+  "abstract": "A Boolean value that indicates whether the CarPlay app offers SiriKit messaging or VoIP calling services."
+ },
+ "com.apple.developer.carplay-driving-task": {
+  "title": "CarPlay Driving Task App",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.carplay-driving-task",
+  "abstract": "A Boolean value that indicates whether the CarPlay app helps people perform driving-related tasks."
+ },
+ "com.apple.developer.carplay-fueling": {
+  "title": "CarPlay Fueling App",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.carplay-fueling",
+  "abstract": "A Boolean value that indicates whether the CarPlay app provides details about nearby fueling stations."
+ },
+ "com.apple.developer.carplay-maps": {
+  "title": "CarPlay Navigation app",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.carplay-maps",
+  "abstract": "A Boolean value that indicates whether the CarPlay app provides turn-by-turn directions."
+ },
+ "com.apple.developer.carplay-messaging": {
+  "title": "com.apple.developer.carplay-messaging",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.carplay-messaging",
+  "abstract": ""
+ },
+ "com.apple.developer.carplay-parking": {
+  "title": "CarPlay Parking app",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.carplay-parking",
+  "abstract": "A Boolean value that indicates whether the CarPlay app provides details about nearby parking facilities."
+ },
+ "com.apple.developer.carplay-public-safety": {
+  "title": "CarPlay Public Safety App",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.carplay-public-safety",
+  "abstract": "A Boolean value that indicates whether the CarPlay app offers public safety information while driving."
+ },
+ "com.apple.developer.carplay-quick-ordering": {
+  "title": "CarPlay Quick Food Ordering App",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.carplay-quick-ordering",
+  "abstract": "A Boolean value that indicates whether the CarPlay app helps someone order food for pickup."
+ },
+ "com.apple.developer.carplay-video": {
+  "title": "CarPlay Video App",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.carplay-video",
+  "abstract": "A Boolean value that indicates whether the CarPlay app plays video content."
+ },
+ "com.apple.developer.carplay-voice-based-conversation": {
+  "title": "CarPlay Voice-Based Conversation App",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.carplay-voice-based-conversation",
+  "abstract": "A Boolean value that indicates whether the CarPlay app respond to questions or requests and perform actions."
+ },
+ "com.apple.developer.carrier-messaging-app": {
+  "title": "Default Carrier Messaging App",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.carrier-messaging-app",
+  "abstract": "A Boolean value that indicates whether the app can use the TelephonyMessagingKit framework to serve as the default carrier messaging app."
+ },
+ "com.apple.developer.classkit-environment": {
+  "title": "ClassKit Environment Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.classkit-environment",
+  "abstract": "The ClassKit development or production environment for an education app that works with the Schoolwork app."
+ },
+ "com.apple.developer.contacts.notes": {
+  "title": "com.apple.developer.contacts.notes",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.contacts.notes",
+  "abstract": "A Boolean value that indicates whether the app may access the notes in contact entries."
+ },
+ "com.apple.developer.conversation-accessibility": {
+  "title": "com.apple.developer.conversation-accessibility",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.conversation-accessibility",
+  "abstract": "A Boolean value that indicates whether the app can provide live assistance services, such as sign language interpreting or captioning, during FaceTime calls."
+ },
+ "com.apple.developer.coreml.neural-engine-access": {
+  "title": "Apple Neural Engine access",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.coreml.neural-engine-access",
+  "abstract": "A Boolean value that indicates whether an app can use the Apple Neural Engine to speed up CoreML."
+ },
+ "com.apple.developer.coremotion.head-pose": {
+  "title": "com.apple.developer.coremotion.head-pose",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.coremotion.head-pose",
+  "abstract": "An entitlement that enables someone\u2019s head movement to determine the orientation of spatialized sound output."
+ },
+ "com.apple.developer.declared-age-range": {
+  "title": "com.apple.developer.declared-age-range",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.declared-age-range",
+  "abstract": "A Boolean value indicating whether your app may request a person\u2019s age range."
+ },
+ "com.apple.developer.default-data-protection": {
+  "title": "Data Protection Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.default-data-protection",
+  "abstract": "The level of data protection for sensitive user data when an app accesses it on a device."
+ },
+ "com.apple.developer.device-information.user-assigned-device-name": {
+  "title": "com.apple.developer.device-information.user-assigned-device-name",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.device-information.user-assigned-device-name",
+  "abstract": "The entitlement for accessing the user-assigned device name instead of a generic device name."
+ },
+ "com.apple.developer.devicecheck.appattest-environment": {
+  "title": "App Attest Environment",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.devicecheck.appattest-environment",
+  "abstract": "The environment for an app that uses the App Attest service to validate itself."
+ },
+ "com.apple.developer.dialing-app": {
+  "title": "Default Dialer App",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.dialing-app",
+  "abstract": "A Boolean value that indicates whether an app can be the default dialer app on someone\u2019s device."
+ },
+ "com.apple.developer.driverkit": {
+  "title": "com.apple.developer.driverkit",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.driverkit",
+  "abstract": "A Boolean value that indicates whether your extension has permission to run as a user-space driver."
+ },
+ "com.apple.developer.driverkit.allow-any-userclient-access": {
+  "title": "com.apple.developer.driverkit.allow-any-userclient-access",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.driverkit.allow-any-userclient-access",
+  "abstract": "A Boolean value that determines whether a macOS driver accepts user client connections from any application."
+ },
+ "com.apple.developer.driverkit.allow-third-party-userclients": {
+  "title": "DriverKit Allow Third Party User Clients",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.driverkit.allow-third-party-userclients",
+  "abstract": "A Boolean value that indicates whether an iPadOS driver accepts calls from third-party user clients."
+ },
+ "com.apple.developer.driverkit.communicates-with-drivers": {
+  "title": "Communicates with Drivers",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.driverkit.communicates-with-drivers",
+  "abstract": "A Boolean value that indicates whether an iPadOS app can communicate with drivers."
+ },
+ "com.apple.developer.driverkit.family.audio": {
+  "title": "DriverKit Audio Family",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.driverkit.family.audio",
+  "abstract": "A Boolean value that indicates whether the device supports audio functionality."
+ },
+ "com.apple.developer.driverkit.family.block-storage-device": {
+  "title": "com.apple.developer.driverkit.family.block-storage-device",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.driverkit.family.block-storage-device",
+  "abstract": "A Boolean value that indicates whether to match the driver against block storage devices that use custom drivers."
+ },
+ "com.apple.developer.driverkit.family.hid.device": {
+  "title": "com.apple.developer.driverkit.family.hid.device",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.driverkit.family.hid.device",
+  "abstract": "A Boolean value that indicates whether the driver provides a HID-related service to the system."
+ },
+ "com.apple.developer.driverkit.family.hid.eventservice": {
+  "title": "com.apple.developer.driverkit.family.hid.eventservice",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.driverkit.family.hid.eventservice",
+  "abstract": "A Boolean value that indicates whether the driver provides a HID-related event service to the system."
+ },
+ "com.apple.developer.driverkit.family.hid.virtual.device": {
+  "title": "DriverKit Family virtual HID",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.driverkit.family.hid.virtual.device",
+  "abstract": "An entitlement that lets an app create and manage virtual HID devices."
+ },
+ "com.apple.developer.driverkit.family.midi": {
+  "title": "com.apple.developer.driverkit.family.midi",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.driverkit.family.midi",
+  "abstract": "A Boolean value that indicates whether to match the driver against devices that support MIDI."
+ },
+ "com.apple.developer.driverkit.family.networking": {
+  "title": "com.apple.developer.driverkit.family.networking",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.driverkit.family.networking",
+  "abstract": "A Boolean value that indicates whether to match the driver against devices that communicate using networking protocols."
+ },
+ "com.apple.developer.driverkit.family.scsicontroller": {
+  "title": "com.apple.developer.driverkit.family.scsicontroller",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.driverkit.family.scsicontroller",
+  "abstract": "A Boolean value that indicates whether to match the driver against devices with SCSI controllers."
+ },
+ "com.apple.developer.driverkit.family.serial": {
+  "title": "com.apple.developer.driverkit.family.serial",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.driverkit.family.serial",
+  "abstract": "A Boolean value that indicates whether to match the driver against devices with serial communication interfaces."
+ },
+ "com.apple.developer.driverkit.transport.hid": {
+  "title": "com.apple.developer.driverkit.transport.hid",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.driverkit.transport.hid",
+  "abstract": "A Boolean value that indicates whether the driver communicates with human interface devices."
+ },
+ "com.apple.developer.driverkit.transport.pci": {
+  "title": "com.apple.developer.driverkit.transport.pci",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.driverkit.transport.pci",
+  "abstract": "An array of PCI device descriptors that your custom driver supports."
+ },
+ "com.apple.developer.driverkit.transport.usb": {
+  "title": "com.apple.developer.driverkit.transport.usb",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.driverkit.transport.usb",
+  "abstract": "An array of dictionaries that identify the USB devices the driver supports."
+ },
+ "com.apple.developer.driverkit.userclient-access": {
+  "title": "com.apple.developer.driverkit.userclient-access",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.driverkit.userclient-access",
+  "abstract": "An array of strings that represent macOS driver extensions that may communicate with other DriverKit services."
+ },
+ "com.apple.developer.embedded-web-browser-engine": {
+  "title": "Embedded Browser Engine Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.embedded-web-browser-engine",
+  "abstract": "An entitlement that enables an app to embed an alternative browser engine."
+ },
+ "com.apple.developer.embedded-web-browser-engine.engine-association": {
+  "title": "Embedded Browser Engine Association Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.embedded-web-browser-engine.engine-association",
+  "abstract": "An entitlement that indicates whether you own the alternative browser engine that your app embeds."
+ },
+ "com.apple.developer.endpoint-security.client": {
+  "title": "com.apple.developer.endpoint-security.client",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.endpoint-security.client",
+  "abstract": "The entitlement required to monitor system events for potentially malicious activity."
+ },
+ "com.apple.developer.energykit": {
+  "title": "EnergyKit Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.energykit",
+  "abstract": "The entitlement the system requires for an app to use the EnergyKit framework."
+ },
+ "com.apple.developer.energykit.loadevents-experience": {
+  "title": "EnergyKit LoadEvents Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.energykit.loadevents-experience",
+  "abstract": "An entitlement that works with the EnergyKit framework to share energy data and usage insights in the Home app."
+ },
+ "com.apple.developer.enrollment-sso-capable": {
+  "title": "Enrollment Single Sign On",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.enrollment-sso-capable",
+  "abstract": "An entitlement that indicates the app participates in single sign-on (SSO) during enrollment into device management."
+ },
+ "com.apple.developer.exposure-notification": {
+  "title": "com.apple.developer.exposure-notification",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.exposure-notification",
+  "abstract": "A Boolean value that indicates whether the app may use exposure notification."
+ },
+ "com.apple.developer.family-controls": {
+  "title": "Family Controls",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.family-controls",
+  "abstract": "A Boolean value that indicates whether the app can request or revoke authorization to provide parental controls."
+ },
+ "com.apple.developer.family-controls.app-and-website-usage": {
+  "title": "Family Controls App and Website Usage",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.family-controls.app-and-website-usage",
+  "abstract": "A Boolean value that indicates whether the app may, with the person\u2019s permission, access app and website usage information from the current device."
+ },
+ "com.apple.developer.fileprovider.testing-mode": {
+  "title": "com.apple.developer.fileprovider.testing-mode",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.fileprovider.testing-mode",
+  "abstract": "A Boolean value that indicates whether you can place domains in testing mode."
+ },
+ "com.apple.developer.financekit": {
+  "title": "FinanceKit",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.financekit",
+  "abstract": "An entitlement that allows an app to access financial data in FinanceKit."
+ },
+ "com.apple.developer.foveated-streaming-provider": {
+  "title": "Foveated Streaming Provider",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.foveated-streaming-provider",
+  "abstract": "An entitlement that allows other apps to use privacy-sensitive foveation data for streaming from remote endpoints to Apple Vision Pro."
+ },
+ "com.apple.developer.foveated-streaming-session": {
+  "title": "Foveated Streaming Session",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.foveated-streaming-session",
+  "abstract": "An entitlement that allows a visionOS app to initiate real-time streaming of spatial content from a cloud streaming endpoint via the Foveated Streaming framework."
+ },
+ "com.apple.developer.fskit.fsmodule": {
+  "title": "com.apple.developer.fskit.fsmodule",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.fskit.fsmodule",
+  "abstract": "An entitlement that indicates an extension provides an FSKit filesystem."
+ },
+ "com.apple.developer.game-center": {
+  "title": "Game Center Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.game-center",
+  "abstract": "A Boolean value that indicates whether users of the app may see and compare achievements on a leaderboard, invite friends, and start multiplayer games."
+ },
+ "com.apple.developer.group-session": {
+  "title": "com.apple.developer.group-session",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.group-session",
+  "abstract": "A Boolean value that indicates whether the app may implement shared group experiences."
+ },
+ "com.apple.developer.health.fall-detection": {
+  "title": "Fall Detection Notifications",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.health.fall-detection",
+  "abstract": "An entitlement that permits an app to receive fall-detection notifications from Apple Watch."
+ },
+ "com.apple.developer.healthkit": {
+  "title": "HealthKit Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.healthkit",
+  "abstract": "A Boolean value that indicates whether the app may request user authorization to access health and activity data that appears in the Health app."
+ },
+ "com.apple.developer.healthkit.access": {
+  "title": "HealthKit Capabilities Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.healthkit.access",
+  "abstract": "Health data types that require additional permission."
+ },
+ "com.apple.developer.healthkit.background-delivery": {
+  "title": "com.apple.developer.healthkit.background-delivery",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.healthkit.background-delivery",
+  "abstract": "A Boolean value that indicates whether observer queries receive updates while running in the background."
+ },
+ "com.apple.developer.healthkit.recalibrate-estimates": {
+  "title": "com.apple.developer.healthkit.recalibrate-estimates",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.healthkit.recalibrate-estimates",
+  "abstract": "A Boolean value that determines whether your app can recalibrate the prediction algorithm used to calculate supported sample types."
+ },
+ "com.apple.developer.healthkit.research": {
+  "title": "com.apple.developer.healthkit.research",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.healthkit.research",
+  "abstract": "A Boolean value that indicates whether an approved health research app offers only Full Access when it requests HealthKit read access."
+ },
+ "com.apple.developer.hid.virtual.device": {
+  "title": "com.apple.developer.hid.virtual.device",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.hid.virtual.device",
+  "abstract": "A Boolean value that indicates whether the driver creates a virtual HID device."
+ },
+ "com.apple.developer.home": {
+  "title": "com.apple.developer.home",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.home",
+  "abstract": ""
+ },
+ "com.apple.developer.homekit": {
+  "title": "HomeKit Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.homekit",
+  "abstract": "A Boolean value that indicates whether users of the app may manage HomeKit-compatible accessories."
+ },
+ "com.apple.developer.icloud-container-development-container-identifiers": {
+  "title": "com.apple.developer.icloud-container-development-container-identifiers",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.icloud-container-development-container-identifiers",
+  "abstract": "The container identifiers for the iCloud development environment."
+ },
+ "com.apple.developer.icloud-container-environment": {
+  "title": "com.apple.developer.icloud-container-environment",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.icloud-container-environment",
+  "abstract": "The development or production environment to use for the iCloud containers."
+ },
+ "com.apple.developer.icloud-container-identifiers": {
+  "title": "iCloud Container Identifiers Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.icloud-container-identifiers",
+  "abstract": "The container identifiers for the iCloud production environment."
+ },
+ "com.apple.developer.icloud-extended-share-access": {
+  "title": "com.apple.developer.icloud-extended-share-access",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.icloud-extended-share-access",
+  "abstract": "An array of strings that represent the types of information an app can request about a CloudKit share."
+ },
+ "com.apple.developer.icloud-services": {
+  "title": "iCloud Services Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.icloud-services",
+  "abstract": "The iCloud services used by the app."
+ },
+ "com.apple.developer.identity-document-services.document-provider.mobile-document-types": {
+  "title": "Digital Credentials API - Mobile Document Provider",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.identity-document-services.document-provider.mobile-document-types",
+  "abstract": "An array of strings that represent the types of mobile documents (mdoc) that an identity document provider app can provide during an online web presentment."
+ },
+ "com.apple.developer.in-app-identity-presentment": {
+  "title": "com.apple.developer.in-app-identity-presentment",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.in-app-identity-presentment",
+  "abstract": "An entitlement that verifies age or identity."
+ },
+ "com.apple.developer.in-app-identity-presentment.merchant-identifiers": {
+  "title": "com.apple.developer.in-app-identity-presentment.merchant-identifiers",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.in-app-identity-presentment.merchant-identifiers",
+  "abstract": "An entitlement for the merchant identifier associated with the in-app identity presentment entitlement."
+ },
+ "com.apple.developer.in-app-payments": {
+  "title": "Merchant IDs Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.in-app-payments",
+  "abstract": "A list of merchant IDs your app uses for Apple Pay support."
+ },
+ "com.apple.developer.journal.allow": {
+  "title": "com.apple.developer.journal.allow",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.journal.allow",
+  "abstract": "An entitlement that enables an app to present the journaling suggestions picker."
+ },
+ "com.apple.developer.kernel.extended-virtual-addressing": {
+  "title": "Extended Virtual Addressing Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.kernel.extended-virtual-addressing",
+  "abstract": "A Boolean value that indicates whether the app may access an extended address space."
+ },
+ "com.apple.developer.kernel.increased-memory-limit": {
+  "title": "com.apple.developer.kernel.increased-memory-limit",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.kernel.increased-memory-limit",
+  "abstract": "A Boolean value that indicates whether core features of your app may perform better with a higher memory limit on supported devices."
+ },
+ "com.apple.developer.location.push": {
+  "title": "Location Push Service Extension",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.location.push",
+  "abstract": "An entitlement to enable a location-sharing app to query someone\u2019s location in response to a push notification."
+ },
+ "com.apple.developer.low-latency-streaming": {
+  "title": "Low-Latency Streaming",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.low-latency-streaming",
+  "abstract": "A Boolean value indicating whether your app may use low-latency wireless networking."
+ },
+ "com.apple.developer.mail-client": {
+  "title": "com.apple.developer.mail-client",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.mail-client",
+  "abstract": "A Boolean that indicates whether the app can act as a user\u2019s default email client."
+ },
+ "com.apple.developer.managed-app-distribution.install-ui": {
+  "title": "Managed App Installation UI",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.managed-app-distribution.install-ui",
+  "abstract": "An entitlement you enable so your app can use Managed App Distribution."
+ },
+ "com.apple.developer.maps": {
+  "title": "Maps Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.maps",
+  "abstract": "A Boolean value that indicates whether the app may provide directions beyond what Maps supports, such as subway routes, hiking trails, and bike paths."
+ },
+ "com.apple.developer.marketplace.app-installation": {
+  "title": "com.apple.developer.marketplace.app-installation",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.marketplace.app-installation",
+  "abstract": "An entitlement that enables an app to vend other apps as an alternative app marketplace."
+ },
+ "com.apple.developer.matter.allow-setup-payload": {
+  "title": "Matter Allow Setup Payload",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.matter.allow-setup-payload",
+  "abstract": "A Boolean value that allows an app to provide an optional Matter Setup payload while setting up a Matter device in an ecosystem."
+ },
+ "com.apple.developer.media-device-discovery-extension": {
+  "title": "Media Device Discovery Extension",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.media-device-discovery-extension",
+  "abstract": "An entitlement for an app extension that adds a specific third-party media receiver to a system device-picker UI."
+ },
+ "com.apple.developer.media-device-extension": {
+  "title": "com.apple.developer.media-device-extension",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.media-device-extension",
+  "abstract": "An array of media sharing protocol identifiers that an extension supports."
+ },
+ "com.apple.developer.memory.transfer_accept": {
+  "title": "com.apple.developer.memory.transfer_accept",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.memory.transfer_accept",
+  "abstract": "An entitlement that grants an alternative browser engine\u2019s web-content extension the ability to increase memory."
+ },
+ "com.apple.developer.memory.transfer_send": {
+  "title": "com.apple.developer.memory.transfer_send",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.memory.transfer_send",
+  "abstract": "An entitlement that grants an alternative browser engine\u2019s rendering extension the ability to transfer memory."
+ },
+ "com.apple.developer.messages.critical-messaging": {
+  "title": "Critical Messaging",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.messages.critical-messaging",
+  "abstract": "A Boolean value that indicates whether an app can use the Critical Messaging API to send SMS messages."
+ },
+ "com.apple.developer.messaging-app": {
+  "title": "Default Messaging App",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.messaging-app",
+  "abstract": "A Boolean value that indicates whether an app can be the default messaging app on someone\u2019s device."
+ },
+ "com.apple.developer.navigation-app": {
+  "title": "Default Navigation",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.navigation-app",
+  "abstract": "A Boolean value that indicates whether an app can be the default navigation app on someone\u2019s device."
+ },
+ "com.apple.developer.networking.carrier-constrained.app-optimized": {
+  "title": "com.apple.developer.networking.carrier-constrained.app-optimized",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.carrier-constrained.app-optimized",
+  "abstract": "A Boolean value that indicates whether your app is optimized for a carrier-provided satellite network."
+ },
+ "com.apple.developer.networking.carrier-constrained.appcategory": {
+  "title": "com.apple.developer.networking.carrier-constrained.appcategory",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.carrier-constrained.appcategory",
+  "abstract": "The key that defines an app\u2019s category for accessing a carrier-provided satellite network."
+ },
+ "com.apple.developer.networking.hotspotconfiguration": {
+  "title": "Hotspot Configuration Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.hotspotconfiguration",
+  "abstract": "A Boolean value indicating whether your app can use the hotspot manager to configure Wi-Fi networks."
+ },
+ "com.apple.developer.networking.hotspothelper": {
+  "title": "HotSpot Helper",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.hotspothelper",
+  "abstract": "An entitlement that permits an app to participate in navigating Wi-Fi network hotspots."
+ },
+ "com.apple.developer.networking.manage-thread-network-credentials": {
+  "title": "com.apple.developer.networking.manage-thread-network-credentials",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.manage-thread-network-credentials",
+  "abstract": "A Boolean value that indicates whether the app can use ThreadNetwork."
+ },
+ "com.apple.developer.networking.multicast": {
+  "title": "com.apple.developer.networking.multicast",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.multicast",
+  "abstract": "A Boolean value that indicates whether an app can send or receive IP multicast traffic."
+ },
+ "com.apple.developer.networking.multipath": {
+  "title": "Multipath Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.multipath",
+  "abstract": "A Boolean value indicating whether your app may use Multipath protocols to seamlessly transition between Wi-Fi and cellular networks."
+ },
+ "com.apple.developer.networking.networkextension": {
+  "title": "Network Extensions Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.networkextension",
+  "abstract": "The APIs an app can use to customize networking features."
+ },
+ "com.apple.developer.networking.slicing.appcategory": {
+  "title": "5G Network Slicing App Category",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.slicing.appcategory",
+  "abstract": "The key that defines the app category entitlement to enable Cellular Network Slicing."
+ },
+ "com.apple.developer.networking.slicing.trafficcategory": {
+  "title": "5G Network Slicing Traffic Category",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.slicing.trafficcategory",
+  "abstract": "The key that defines the traffic category entitlement to enable Cellular Network Slicing."
+ },
+ "com.apple.developer.networking.vmnet": {
+  "title": "com.apple.developer.networking.vmnet",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.vmnet",
+  "abstract": ""
+ },
+ "com.apple.developer.networking.vpn.api": {
+  "title": "Personal VPN Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.vpn.api",
+  "abstract": "The API an app can use to create and control a custom system VPN configuration."
+ },
+ "com.apple.developer.networking.wifi-info": {
+  "title": "Access Wi-Fi Information Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.networking.wifi-info",
+  "abstract": "A Boolean value indicating whether your app can access information about the connected Wi-Fi network."
+ },
+ "com.apple.developer.nfc.hce": {
+  "title": "com.apple.developer.nfc.hce",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.nfc.hce",
+  "abstract": "A Boolean value indicating whether your app can use the card session API."
+ },
+ "com.apple.developer.nfc.hce.default-contactless-app": {
+  "title": "com.apple.developer.nfc.hce.default-contactless-app",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.nfc.hce.default-contactless-app",
+  "abstract": "A Boolean value indicating whether your app can be a default app for contactless NFC with the card session API."
+ },
+ "com.apple.developer.nfc.hce.iso7816.select-identifier-prefixes": {
+  "title": "com.apple.developer.nfc.hce.iso7816.select-identifier-prefixes",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.nfc.hce.iso7816.select-identifier-prefixes",
+  "abstract": "An array of identifier strings the app handles with the card session API."
+ },
+ "com.apple.developer.nfc.readersession.felica.systemcodes": {
+  "title": "ISO18092 system codes for NFC Tag Reader Session",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.nfc.readersession.felica.systemcodes",
+  "abstract": "A list of FeliCa system codes that the app supports."
+ },
+ "com.apple.developer.nfc.readersession.formats": {
+  "title": "Near Field Communication Tag Reader Session Formats Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.nfc.readersession.formats",
+  "abstract": "The Near Field Communication data formats an app can read."
+ },
+ "com.apple.developer.nfc.readersession.iso7816.select-identifiers": {
+  "title": "ISO7816 application identifiers for NFC Tag Reader Session",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.nfc.readersession.iso7816.select-identifiers",
+  "abstract": "A list of application identifiers that the app supports."
+ },
+ "com.apple.developer.on-demand-install-capable": {
+  "title": "com.apple.developer.on-demand-install-capable",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.on-demand-install-capable",
+  "abstract": "A Boolean value that indicates whether a bundle represents an App Clip."
+ },
+ "com.apple.developer.parent-application-identifiers": {
+  "title": "Parent Application Identifiers Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.parent-application-identifiers",
+  "abstract": "A list of parent application identifiers for an App Clip with exactly one entry."
+ },
+ "com.apple.developer.pass-type-identifiers": {
+  "title": "Pass Type IDs Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.pass-type-identifiers",
+  "abstract": "A list of identifiers that specify pass types that your app can access in Wallet."
+ },
+ "com.apple.developer.passkit.pass-presentation-suppression": {
+  "title": "Pass Presentation Suppression",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.passkit.pass-presentation-suppression",
+  "abstract": "An entitlement that prevents the system from initiating Apple Pay while the app is in the foreground."
+ },
+ "com.apple.developer.persistent-content-capture": {
+  "title": "Persistent Content Capture",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.persistent-content-capture",
+  "abstract": "A Boolean value that indicates whether a Virtual Network Computing (VNC) app needs persistent access to screen capture."
+ },
+ "com.apple.developer.playable-content": {
+  "title": "com.apple.developer.playable-content",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.playable-content",
+  "abstract": ""
+ },
+ "com.apple.developer.private-cloud-compute": {
+  "title": "com.apple.developer.private-cloud-compute",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.private-cloud-compute",
+  "abstract": "A Boolean value that indicates whether the app can use Private Cloud Compute."
+ },
+ "com.apple.developer.protected-content": {
+  "title": "App-Protected Content",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.protected-content",
+  "abstract": "A Boolean value indicating whether the system prohibits capturing your app\u2019s content."
+ },
+ "com.apple.developer.proximity-reader.identity.display": {
+  "title": "ID Verifier - Display Only",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.proximity-reader.identity.display",
+  "abstract": ""
+ },
+ "com.apple.developer.proximity-reader.identity.read": {
+  "title": "ID Verifier - Data Transfer",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.proximity-reader.identity.read",
+  "abstract": ""
+ },
+ "com.apple.developer.push-to-talk": {
+  "title": "Push to Talk Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.push-to-talk",
+  "abstract": ""
+ },
+ "com.apple.developer.screen-capture.include-passthrough": {
+  "title": "Passthrough in screen capture",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.screen-capture.include-passthrough",
+  "abstract": "A Boolean value that indicates whether an app can include passthrough in screen capture."
+ },
+ "com.apple.developer.secure-element-credential": {
+  "title": "com.apple.developer.secure-element-credential",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.secure-element-credential",
+  "abstract": "A Boolean value that indicates whether your app can use the SecureElementCredential framework."
+ },
+ "com.apple.developer.secure-element-credential.default-contactless-app": {
+  "title": "com.apple.developer.secure-element-credential.default-contactless-app",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.secure-element-credential.default-contactless-app",
+  "abstract": "A Boolean value that indicates whether your app that uses the SecureElementCredential framework can become the default contactless app."
+ },
+ "com.apple.developer.security.privileged-file-operations": {
+  "title": "Privileged File Operations",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.security.privileged-file-operations",
+  "abstract": "An entitlement that permits apps to create symbolic links, replace files, and set file attributes."
+ },
+ "com.apple.developer.sensitivecontentanalysis.client": {
+  "title": "com.apple.developer.sensitivecontentanalysis.client",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.sensitivecontentanalysis.client",
+  "abstract": "A code-signing entitlement that enables an app to detect nudity in images and video."
+ },
+ "com.apple.developer.sensorkit.reader.allow": {
+  "title": "com.apple.developer.sensorkit.reader.allow",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.sensorkit.reader.allow",
+  "abstract": "The necessary entitlement to access sensor data that\u2019s required by your app\u2019s preapproved research study."
+ },
+ "com.apple.developer.severe-vehicular-crash-event": {
+  "title": "com.apple.developer.severe-vehicular-crash-event",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.severe-vehicular-crash-event",
+  "abstract": "The entitlement for accessing Crash Detection events."
+ },
+ "com.apple.developer.side-button-access.allow": {
+  "title": "Side Button Access",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.side-button-access.allow",
+  "abstract": "A Boolean value that indicates whether a person in Japan can configure the side button of iPhone to launch your voice-based conversational app."
+ },
+ "com.apple.developer.siri": {
+  "title": "Siri Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.siri",
+  "abstract": "A Boolean value that indicates whether the app handles Siri requests."
+ },
+ "com.apple.developer.spatial-audio.profile-access": {
+  "title": "com.apple.developer.spatial-audio.profile-access",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.spatial-audio.profile-access",
+  "abstract": "An entitlement that enables your app to use the personalized spatial audio profile."
+ },
+ "com.apple.developer.storekit.custom-purchase-link.allowed-regions": {
+  "title": "StoreKit external purchases or offers entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.storekit.custom-purchase-link.allowed-regions",
+  "abstract": "An entitlement that enables a qualifying app to offer external purchases within app or at a website, in specific regions."
+ },
+ "com.apple.developer.storekit.external-link.account": {
+  "title": "com.apple.developer.storekit.external-link.account",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.storekit.external-link.account",
+  "abstract": "A Boolean value that indicates whether your app can link to an external website for account creation or management."
+ },
+ "com.apple.developer.storekit.external-purchase": {
+  "title": "com.apple.developer.storekit.external-purchase",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.storekit.external-purchase",
+  "abstract": "A Boolean value that indicates whether your app can offer external purchases."
+ },
+ "com.apple.developer.storekit.external-purchase-link": {
+  "title": "com.apple.developer.storekit.external-purchase-link",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.storekit.external-purchase-link",
+  "abstract": "A Boolean value that indicates whether your app can include a link that directs people to a website to make an external purchase."
+ },
+ "com.apple.developer.storekit.external-purchase-link-streaming": {
+  "title": "com.apple.developer.storekit.external-purchase-link-streaming",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.storekit.external-purchase-link-streaming",
+  "abstract": "An entitlement that grants a qualifying music-streaming app the ability to communicate and promote offers."
+ },
+ "com.apple.developer.suggested-actions": {
+  "title": "Suggested Actions",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.suggested-actions",
+  "abstract": "A Boolean value that indicates whether a messaging app displays suggested actions for a message."
+ },
+ "com.apple.developer.superseded-application-identifiers": {
+  "title": "App Replacement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.superseded-application-identifiers",
+  "abstract": "An entitlement that allows an app to offer the ability to migrate settings and data from and replace an older app with a specified app identifier."
+ },
+ "com.apple.developer.sustained-execution": {
+  "title": "com.apple.developer.sustained-execution",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.sustained-execution",
+  "abstract": "A Boolean value that indicates whether your app performs consistently when the system\u00a0constrains it to\u00a0a sustainable performance level."
+ },
+ "com.apple.developer.system-extension.install": {
+  "title": "System Extension Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.system-extension.install",
+  "abstract": "A Boolean value that indicates whether your app has permission to activate or deactivate system extensions."
+ },
+ "com.apple.developer.system-extension.redistributable": {
+  "title": "System Extension Redistributable Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.system-extension.redistributable",
+  "abstract": "A Boolean value that indicates whether other development teams may distribute a system extension you create."
+ },
+ "com.apple.developer.translation-app": {
+  "title": "Translation",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.translation-app",
+  "abstract": "A Boolean value that indicates whether an app can be the default translation app on someone\u2019s device."
+ },
+ "com.apple.developer.trustinsights.base": {
+  "title": "Trust Insights",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.trustinsights.base",
+  "abstract": "A string that describes the insight suite an app should use with the TrustInsights framework."
+ },
+ "com.apple.developer.ubiquity-kvstore-identifier": {
+  "title": "iCloud Key-Value Store Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.ubiquity-kvstore-identifier",
+  "abstract": "The container identifier to use for iCloud key-value storage."
+ },
+ "com.apple.developer.upi-device-validation": {
+  "title": "com.apple.developer.upi-device-validation",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.upi-device-validation",
+  "abstract": "A Boolean value that indicates whether your app can use UPI device enrollment for NPCI financial transactions."
+ },
+ "com.apple.developer.user-management": {
+  "title": "User Management Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.user-management",
+  "abstract": "The entitlement for distinguishing between multiple user accounts on Apple TV."
+ },
+ "com.apple.developer.usernotifications.critical-alerts": {
+  "title": "Critical Alerts",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.usernotifications.critical-alerts",
+  "abstract": "An entitlement that permits an app to receive critical alert notifications."
+ },
+ "com.apple.developer.usernotifications.filtering": {
+  "title": "com.apple.developer.usernotifications.filtering",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.usernotifications.filtering",
+  "abstract": "Enable receiving notifications without displaying the notification to the user."
+ },
+ "com.apple.developer.video-subscriber-single-sign-on": {
+  "title": "com.apple.developer.video-subscriber-single-sign-on",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.video-subscriber-single-sign-on",
+  "abstract": "A Boolean value that indicates whether your app can use the TV Provider Authentication service."
+ },
+ "com.apple.developer.weatherkit": {
+  "title": "WeatherKit Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.weatherkit",
+  "abstract": "A Boolean value that indicates whether the app may use WeatherKit."
+ },
+ "com.apple.developer.web-browser": {
+  "title": "com.apple.developer.web-browser",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.web-browser",
+  "abstract": "An entitlement that indicates whether the app can act as the user\u2019s default web browser."
+ },
+ "com.apple.developer.web-browser-engine.host": {
+  "title": "Web Browser Engine Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.web-browser-engine.host",
+  "abstract": "An entitlement that enables your browser app to implement an alternative browser engine."
+ },
+ "com.apple.developer.web-browser-engine.networking": {
+  "title": "com.apple.developer.web-browser-engine.networking",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.web-browser-engine.networking",
+  "abstract": "An entitlement that grants an alternative browser engine\u2019s extension the ability to use the network."
+ },
+ "com.apple.developer.web-browser-engine.rendering": {
+  "title": "com.apple.developer.web-browser-engine.rendering",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.web-browser-engine.rendering",
+  "abstract": "An entitlement that grants an alternative browser engine\u2019s extension the ability to render web content."
+ },
+ "com.apple.developer.web-browser-engine.restrict.notifyd": {
+  "title": "com.apple.developer.web-browser-engine.restrict.notifyd",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.web-browser-engine.restrict.notifyd",
+  "abstract": "An entitlement that restricts access to system notifications to enhance the security of your browser app."
+ },
+ "com.apple.developer.web-browser-engine.webcontent": {
+  "title": "com.apple.developer.web-browser-engine.webcontent",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.web-browser-engine.webcontent",
+  "abstract": "An entitlement that grants an alternative browser engine\u2019s extension the ability to manage web content."
+ },
+ "com.apple.developer.web-browser.public-key-credential": {
+  "title": "com.apple.developer.web-browser.public-key-credential",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.web-browser.public-key-credential",
+  "abstract": "An entitlement that lets your app make registration and assertion requests for passkeys and security keys for any relying party identifier."
+ },
+ "com.apple.developer.wifi-aware": {
+  "title": "com.apple.developer.wifi-aware",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.wifi-aware",
+  "abstract": "The entitlement the system requires for an app to use the Wi-Fi Aware framework."
+ },
+ "com.apple.developer.wifi-infrastructure": {
+  "title": "com.apple.developer.wifi-infrastructure",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.wifi-infrastructure",
+  "abstract": "The entitlement the system requires for an app to use the Wi-Fi Infrastructure framework."
+ },
+ "com.apple.developer.window-body-follow": {
+  "title": "Window Follow Mode",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.window-body-follow",
+  "abstract": "A Boolean value indicating whether your app\u2019s windows will follow the person."
+ },
+ "com.apple.developer.wireless-insights.service-predictions": {
+  "title": "Wireless Insights Service Predictions",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.developer.wireless-insights.service-predictions",
+  "abstract": "A Boolean value that indicates whether the app can use the WirelessInsights framework to obtain wireless service predictions."
+ },
+ "com.apple.external-accessory.wireless-configuration": {
+  "title": "Wireless Accessory Configuration Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.external-accessory.wireless-configuration",
+  "abstract": "A Boolean value that indicates whether\u00a0your app may configure MFi Wi-Fi accessories."
+ },
+ "com.apple.security.app-sandbox": {
+  "title": "App Sandbox Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.app-sandbox",
+  "abstract": "A Boolean value that indicates whether\u00a0the app may use access control technology to contain damage to the system and user data if an app is compromised."
+ },
+ "com.apple.security.application-groups": {
+  "title": "App Groups Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.application-groups",
+  "abstract": "A list of identifiers specifying the groups your app belongs to."
+ },
+ "com.apple.security.assets.movies.read-only": {
+  "title": "com.apple.security.assets.movies.read-only",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.assets.movies.read-only",
+  "abstract": "A Boolean value that indicates whether the app may have read-only access to the Movies folder."
+ },
+ "com.apple.security.assets.movies.read-write": {
+  "title": "com.apple.security.assets.movies.read-write",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.assets.movies.read-write",
+  "abstract": "A Boolean value that indicates whether the app may have read-write access to the Movies folder."
+ },
+ "com.apple.security.assets.music.read-only": {
+  "title": "com.apple.security.assets.music.read-only",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.assets.music.read-only",
+  "abstract": "A Boolean value that indicates whether the app may have read-only access to the Music folder."
+ },
+ "com.apple.security.assets.music.read-write": {
+  "title": "com.apple.security.assets.music.read-write",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.assets.music.read-write",
+  "abstract": "A Boolean value that indicates whether the app may have read-write access to the Music folder."
+ },
+ "com.apple.security.assets.pictures.read-only": {
+  "title": "com.apple.security.assets.pictures.read-only",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.assets.pictures.read-only",
+  "abstract": "A Boolean value that indicates whether the app may have read-only access to the Pictures folder."
+ },
+ "com.apple.security.assets.pictures.read-write": {
+  "title": "com.apple.security.assets.pictures.read-write",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.assets.pictures.read-write",
+  "abstract": "A Boolean value that indicates whether the app may have read-write access to the Pictures folder."
+ },
+ "com.apple.security.automation.apple-events": {
+  "title": "Apple Events Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.automation.apple-events",
+  "abstract": "A Boolean value that indicates whether the app may prompt the user for permission to send Apple events to other apps."
+ },
+ "com.apple.security.cs.allow-dyld-environment-variables": {
+  "title": "Allow DYLD environment variables entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.allow-dyld-environment-variables",
+  "abstract": "A Boolean value that indicates whether the app may be affected by dynamic linker environment variables, which you can use to inject code into your app\u2019s process."
+ },
+ "com.apple.security.cs.allow-jit": {
+  "title": "Allow execution of JIT-compiled code entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.allow-jit",
+  "abstract": "A Boolean value that indicates whether the app may create writable and executable memory using the  flag."
+ },
+ "com.apple.security.cs.allow-unsigned-executable-memory": {
+  "title": "Allow Unsigned Executable Memory Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.allow-unsigned-executable-memory",
+  "abstract": "A Boolean value that indicates whether the app may create writable and executable memory without the restrictions imposed by using the  flag."
+ },
+ "com.apple.security.cs.debugger": {
+  "title": "Debugging tool entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.debugger",
+  "abstract": "A Boolean value that indicates whether the app is a debugger and may attach to other processes or get task ports."
+ },
+ "com.apple.security.cs.disable-executable-page-protection": {
+  "title": "Disable Executable Memory Protection Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.disable-executable-page-protection",
+  "abstract": "A Boolean value that indicates whether to disable all code signing protections while launching an app, and during its execution."
+ },
+ "com.apple.security.cs.disable-library-validation": {
+  "title": "Disable Library Validation Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.cs.disable-library-validation",
+  "abstract": "A Boolean value that indicates whether the app loads arbitrary plug-ins or frameworks, without requiring code signing."
+ },
+ "com.apple.security.device.audio-input": {
+  "title": "Audio Input Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.device.audio-input",
+  "abstract": "A Boolean value that indicates whether the app may record audio using the built-in microphone and access audio input using Core Audio."
+ },
+ "com.apple.security.device.bluetooth": {
+  "title": "com.apple.security.device.bluetooth",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.device.bluetooth",
+  "abstract": "A Boolean value indicating whether your app may interact with Bluetooth devices."
+ },
+ "com.apple.security.device.camera": {
+  "title": "Camera entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.device.camera",
+  "abstract": "A Boolean value that indicates whether the app may interact with the built-in and external cameras, and capture movies and still images."
+ },
+ "com.apple.security.device.microphone": {
+  "title": "com.apple.security.device.microphone",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.device.microphone",
+  "abstract": "A Boolean value that indicates whether\u00a0the app may use the microphone."
+ },
+ "com.apple.security.device.usb": {
+  "title": "com.apple.security.device.usb",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.device.usb",
+  "abstract": "A Boolean value indicating whether your app may interact with USB devices."
+ },
+ "com.apple.security.files.all": {
+  "title": "All files entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.files.all",
+  "abstract": "A Boolean value that indicates whether the app may have access to all files."
+ },
+ "com.apple.security.files.downloads.read-only": {
+  "title": "com.apple.security.files.downloads.read-only",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.files.downloads.read-only",
+  "abstract": "A Boolean value that indicates whether the app may have read-only access to the Downloads folder."
+ },
+ "com.apple.security.files.downloads.read-write": {
+  "title": "com.apple.security.files.downloads.read-write",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.files.downloads.read-write",
+  "abstract": "A Boolean value that indicates whether the app may have read-write access to the Downloads folder."
+ },
+ "com.apple.security.files.user-selected.read-only": {
+  "title": "com.apple.security.files.user-selected.read-only",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.files.user-selected.read-only",
+  "abstract": "A Boolean value that indicates whether the app may have read-only access to files the user has selected using an Open or Save dialog."
+ },
+ "com.apple.security.files.user-selected.read-write": {
+  "title": "com.apple.security.files.user-selected.read-write",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.files.user-selected.read-write",
+  "abstract": "A Boolean value that indicates whether the app may have read-write access to files the user has selected using an Open or Save dialog."
+ },
+ "com.apple.security.hardened-process": {
+  "title": "com.apple.security.hardened-process",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.hardened-process",
+  "abstract": "A Boolean value that indicates whether the executable opts in to additional security checks."
+ },
+ "com.apple.security.hardened-process.checked-allocations": {
+  "title": "com.apple.security.hardened-process.checked-allocations",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.hardened-process.checked-allocations",
+  "abstract": "A Boolean value that enables tagging of pointers and memory allocations."
+ },
+ "com.apple.security.hardened-process.checked-allocations.enable-pure-data": {
+  "title": "com.apple.security.hardened-process.checked-allocations.enable-pure-data",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.hardened-process.checked-allocations.enable-pure-data",
+  "abstract": "A Boolean value that indicates whether to tag memory that contains only data."
+ },
+ "com.apple.security.hardened-process.checked-allocations.enforce-checked-pointer-arithmetic-overflow": {
+  "title": "Check for Overflow of Pointer Arithmetic",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.hardened-process.checked-allocations.enforce-checked-pointer-arithmetic-overflow",
+  "abstract": "A Boolean value that enables checking pointers for arithmetic overflow."
+ },
+ "com.apple.security.hardened-process.checked-allocations.no-tagged-receive": {
+  "title": "com.apple.security.hardened-process.checked-allocations.no-tagged-receive",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.hardened-process.checked-allocations.no-tagged-receive",
+  "abstract": "A Boolean value that indicates whether to prevent receiving tagged memory from other processes."
+ },
+ "com.apple.security.hardened-process.checked-allocations.soft-mode": {
+  "title": "com.apple.security.hardened-process.checked-allocations.soft-mode",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.hardened-process.checked-allocations.soft-mode",
+  "abstract": "A Boolean value that indicates whether to log memory-tagging faults as a simulated crash, instead of terminating the process."
+ },
+ "com.apple.security.hardened-process.dyld-ro": {
+  "title": "com.apple.security.hardened-process.dyld-ro",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.hardened-process.dyld-ro",
+  "abstract": "An entitlement that marks memory used for internal platform state as read-only."
+ },
+ "com.apple.security.hardened-process.enhanced-security-version": {
+  "title": "com.apple.security.hardened-process.enhanced-security-version",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.hardened-process.enhanced-security-version",
+  "abstract": "The entitlement required for an executable to opt in to enhanced security protections."
+ },
+ "com.apple.security.hardened-process.enhanced-security-version-string": {
+  "title": "com.apple.security.hardened-process.enhanced-security-version-string",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.hardened-process.enhanced-security-version-string",
+  "abstract": "The entitlement required for an executable to opt in to enhanced security protections."
+ },
+ "com.apple.security.hardened-process.hardened-heap": {
+  "title": "com.apple.security.hardened-process.hardened-heap",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.hardened-process.hardened-heap",
+  "abstract": "A Boolean value that indicates whether your app or extension opts in to additional hardening for heap allocations."
+ },
+ "com.apple.security.hardened-process.no-guard-objects": {
+  "title": "com.apple.security.hardened-process.no-guard-objects",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.hardened-process.no-guard-objects",
+  "abstract": "A Boolean value that turns off guard objects for the process."
+ },
+ "com.apple.security.hardened-process.platform-restrictions": {
+  "title": "com.apple.security.hardened-process.platform-restrictions",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.hardened-process.platform-restrictions",
+  "abstract": "An integer value that indicates the level of additional runtime security protections your app or extension opts in to."
+ },
+ "com.apple.security.hardened-process.platform-restrictions-string": {
+  "title": "com.apple.security.hardened-process.platform-restrictions-string",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.hardened-process.platform-restrictions-string",
+  "abstract": "A string value that indicates the level of additional runtime security protections your app or extension opts in to."
+ },
+ "com.apple.security.hypervisor": {
+  "title": "com.apple.security.hypervisor",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.hypervisor",
+  "abstract": "A Boolean value that indicates whether the app creates and manages virtual machines."
+ },
+ "com.apple.security.network.client": {
+  "title": "com.apple.security.network.client",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.network.client",
+  "abstract": "A Boolean value indicating whether your app may open outgoing network connections."
+ },
+ "com.apple.security.network.server": {
+  "title": "com.apple.security.network.server",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.network.server",
+  "abstract": "A Boolean value indicating whether your app may listen for incoming network connections."
+ },
+ "com.apple.security.personal-information.addressbook": {
+  "title": "Address book entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.personal-information.addressbook",
+  "abstract": "A Boolean value that indicates whether the app may have read-write access to contacts in the user\u2019s address book."
+ },
+ "com.apple.security.personal-information.calendars": {
+  "title": "Calendars entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.personal-information.calendars",
+  "abstract": "A Boolean value that indicates whether the app may have read-write access to the user\u2019s calendar."
+ },
+ "com.apple.security.personal-information.location": {
+  "title": "Location entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.personal-information.location",
+  "abstract": "A Boolean value that indicates whether the app may access location information from Location Services."
+ },
+ "com.apple.security.personal-information.photos-library": {
+  "title": "Photos Library Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.personal-information.photos-library",
+  "abstract": "A Boolean value that indicates whether the app has read-write access to the user\u2019s Photos library."
+ },
+ "com.apple.security.print": {
+  "title": "com.apple.security.print",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.print",
+  "abstract": "A Boolean value indicating whether your app may print a document."
+ },
+ "com.apple.security.smartcard": {
+  "title": "com.apple.security.smartcard",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.smartcard",
+  "abstract": "A Boolean that indicates whether your app has access to smart card slots and smart cards."
+ },
+ "com.apple.security.virtualization": {
+  "title": "com.apple.security.virtualization",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.security.virtualization",
+  "abstract": "A Boolean value that indicates whether your app can use the Virtualization framework."
+ },
+ "com.apple.smoot.subscriptionservice": {
+  "title": "com.apple.smoot.subscriptionservice",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.smoot.subscriptionservice",
+  "abstract": "A Boolean value that indicates whether your app meets the requirements of the video-partner program."
+ },
+ "com.apple.vm.device-access": {
+  "title": "com.apple.vm.device-access",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.vm.device-access",
+  "abstract": "A Boolean value that indicates whether the app captures USB devices and uses them in the guest-operating system."
+ },
+ "com.apple.vm.hypervisor": {
+  "title": "com.apple.vm.hypervisor",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.vm.hypervisor",
+  "abstract": "A Boolean value that indicates whether the app creates and manages virtual machines."
+ },
+ "com.apple.vm.networking": {
+  "title": "com.apple.vm.networking",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/com.apple.vm.networking",
+  "abstract": "A Boolean that indicates whether the app manages virtual network interfaces without escalating privileges to the root user."
+ },
+ "inter-app-audio": {
+  "title": "Inter-App Audio Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/inter-app-audio",
+  "abstract": "A Boolean value that indicates whether the app may exchange audio with other Inter-App Audio-enabled apps."
+ },
+ "keychain-access-groups": {
+  "title": "Keychain Access Groups Entitlement",
+  "url": "https://developer.apple.com/documentation/bundleresources/entitlements/keychain-access-groups",
+  "abstract": "The identifiers for the keychain groups that the app may share items with."
+ }
+}

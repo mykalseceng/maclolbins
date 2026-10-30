@@ -1,0 +1,2337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LOLBins path browser</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox=%220 0 32 32%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cdefs%3E%3ClinearGradient id=%22g%22 x1=%220%22 y1=%220%22 x2=%220%22 y2=%221%22%3E%3Cstop offset=%220%22 stop-color=%22%23ff6a55%22/%3E%3Cstop offset=%221%22 stop-color=%22%23d4223f%22/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d=%22M16 8.6c0-2.1.6-4 2-5.4%22 fill=%22none%22 stroke=%22%235b3a29%22 stroke-width=%221.7%22 stroke-linecap=%22round%22/%3E%3Cpath d=%22M18.3 5.7c.8-2.5 3.2-3.8 6.1-3.4-.6 2.7-3 4.1-6.1 3.4Z%22 fill=%22%233fa34d%22/%3E%3Cpath d=%22M16 8.3C14.6 6.7 12.6 6 10.4 6H9.6C6 6 3 9 3 12.6v10.8C3 27 6 30 9.6 30h12.8c3.6 0 6.6-3 6.6-6.6V12.6C29 9 26 6 22.4 6h-.8c-2.2 0-4.2.7-5.6 2.3Z%22 fill=%22url%28%23g%29%22 stroke=%22rgba%28120,10,30,.35%29%22 stroke-width=%22.6%22/%3E%3Cpath d=%22M9.4 15.4l3.6 3.1-3.6 3.1%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%222.1%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3Cpath d=%22M15.4 22.2h6.4%22 fill=%22none%22 stroke=%22%23fff%22 stroke-width=%222.1%22 stroke-linecap=%22round%22/%3E%3C/svg%3E">
+<style>
+:root {
+  color-scheme: light dark;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Monaco, monospace;
+
+  --win: #ffffff;
+  --side: rgba(238, 238, 242, 0.86);
+  --side-edge: rgba(0, 0, 0, 0.07);
+  --side-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 6px 18px rgba(0, 0, 0, 0.06);
+  --text: rgba(0, 0, 0, 0.86);
+  --text2: rgba(0, 0, 0, 0.54);
+  --text3: rgba(0, 0, 0, 0.28);
+  --sep: rgba(0, 0, 0, 0.085);
+  --sep2: rgba(0, 0, 0, 0.16);
+  --hover: rgba(0, 0, 0, 0.045);
+  --fill: rgba(0, 0, 0, 0.05);
+  --fill2: rgba(0, 0, 0, 0.035);
+  --sel: #0a63de;
+  --sel-dim: rgba(0, 0, 0, 0.09);
+  --focus: rgba(0, 122, 255, 0.55);
+  --link: #0066d6;
+  --cap: rgba(255, 255, 255, 0.82);
+  --cap-edge: rgba(0, 0, 0, 0.09);
+  --cap-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 2px 10px rgba(0, 0, 0, 0.05);
+
+  --red: #d93025;
+  --orange: #d97200;
+  --amber: #a87800;
+  --purple: #9b3dcc;
+  --teal: #0b84a0;
+  --green: #1f9a3b;
+  --gray: #8a8a8f;
+  --blue: #0a6fe0;
+
+  --c-lol: var(--orange);
+  --c-suid: var(--red);
+  --c-sgid: var(--purple);
+  --c-ent: var(--teal);
+  --c-tcc: var(--blue);
+  --c-xpc: var(--purple);
+  --c-inj: var(--amber);
+  --c-unsigned: var(--amber);
+  --suid-solid: #d93025;
+  --sgid-solid: #9b3dcc;
+
+  --folder-back: #4c9ee8;
+  --folder-front: #74bcf6;
+  --exec-bg: #2b2b2f;
+  --exec-edge: rgba(0, 0, 0, 0.25);
+  --exec-ink: #d6d6db;
+  --doc-bg: #ffffff;
+  --doc-edge: rgba(0, 0, 0, 0.28);
+  --doc-ink: rgba(0, 0, 0, 0.32);
+  --disk-bg: #d9d9de;
+  --disk-edge: rgba(0, 0, 0, 0.28);
+
+  --on-bg: rgba(10, 111, 224, 0.11);
+  --on-ink: #0a5fc4;
+  --suid-bg: rgba(217, 48, 37, 0.1);
+  --sgid-bg: rgba(155, 61, 204, 0.1);
+  --warn-bg: rgba(217, 114, 0, 0.1);
+  --code-bg: rgba(0, 0, 0, 0.04);
+  --mark: rgba(255, 196, 0, 0.42);
+  --seal-fill: rgba(10, 111, 224, 0.1);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --win: #1e1e20;
+    --side: rgba(44, 44, 48, 0.9);
+    --side-edge: rgba(255, 255, 255, 0.08);
+    --side-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.6), 0 8px 24px rgba(0, 0, 0, 0.35);
+    --text: rgba(255, 255, 255, 0.88);
+    --text2: rgba(255, 255, 255, 0.56);
+    --text3: rgba(255, 255, 255, 0.26);
+    --sep: rgba(255, 255, 255, 0.085);
+    --sep2: rgba(255, 255, 255, 0.17);
+    --hover: rgba(255, 255, 255, 0.06);
+    --fill: rgba(255, 255, 255, 0.075);
+    --fill2: rgba(255, 255, 255, 0.045);
+    --sel: #0b5fd3;
+    --sel-dim: rgba(255, 255, 255, 0.12);
+    --focus: rgba(64, 156, 255, 0.7);
+    --link: #4aa3ff;
+    --cap: rgba(58, 58, 62, 0.78);
+    --cap-edge: rgba(255, 255, 255, 0.1);
+    --cap-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 12px rgba(0, 0, 0, 0.25);
+
+    --red: #ff6b5f;
+    --orange: #ffa23a;
+    --amber: #f0c53a;
+    --purple: #cf8bff;
+    --teal: #5cc9e2;
+    --green: #3ed160;
+    --gray: #98989d;
+    --blue: #4aa3ff;
+
+    --folder-back: #2f7fcf;
+    --folder-front: #4d9fe8;
+    --exec-bg: #141416;
+    --exec-edge: rgba(255, 255, 255, 0.22);
+    --exec-ink: #c9c9cf;
+    --doc-bg: #e9e9ec;
+    --doc-edge: rgba(0, 0, 0, 0.5);
+    --doc-ink: rgba(0, 0, 0, 0.36);
+    --disk-bg: #a9a9b0;
+    --disk-edge: rgba(0, 0, 0, 0.5);
+
+    --on-bg: rgba(74, 163, 255, 0.18);
+    --on-ink: #7cbcff;
+    --suid-bg: rgba(255, 107, 95, 0.16);
+    --sgid-bg: rgba(207, 139, 255, 0.16);
+    --warn-bg: rgba(255, 162, 58, 0.14);
+    --code-bg: rgba(255, 255, 255, 0.055);
+    --mark: rgba(255, 196, 0, 0.32);
+    --seal-fill: rgba(74, 163, 255, 0.16);
+    --suid-solid: #d8392e;
+    --sgid-solid: #9a4fd1;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font: 13px/1.38 var(--font);
+  color: var(--text);
+  background: var(--win);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+button, input { font: inherit; color: inherit; }
+button { cursor: default; }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; border-radius: 5px; }
+.mono { font-family: var(--mono); }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+[hidden] { display: none !important; }
+
+/* Window frame */
+.window {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  grid-template-rows: 52px minmax(0, 1fr) auto;
+  height: 100vh;
+  height: 100dvh;
+}
+.sidebar {
+  grid-row: 1 / -1;
+  margin: 8px 0 8px 8px;
+  border-radius: 16px;
+  background: var(--side);
+  box-shadow: var(--side-shadow);
+  border: 0.5px solid var(--side-edge);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  -webkit-backdrop-filter: blur(30px) saturate(1.6);
+  backdrop-filter: blur(30px) saturate(1.6);
+}
+.lights { display: flex; gap: 8px; padding: 14px 16px 6px; flex: none; }
+.lights i { width: 12px; height: 12px; border-radius: 50%; display: block; box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.18); }
+.lights i:nth-child(1) { background: #ff5f57; }
+.lights i:nth-child(2) { background: #febc2e; }
+.lights i:nth-child(3) { background: #28c840; }
+/* App identity in the sidebar header */
+.appid { display: flex; align-items: center; gap: 9px; margin: 4px 6px 0; padding: 6px 8px; flex: none; border-radius: 9px; color: inherit; text-decoration: none; }
+.appid:hover { background: var(--hover); text-decoration: none; }
+.appid svg { width: 32px; height: 32px; flex: none; filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.18)); }
+.appid strong { display: block; font-size: 15px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.15; }
+.appid span { display: block; font-size: 11px; color: var(--text2); line-height: 1.3; white-space: nowrap; }
+.side-scroll { flex: 1; overflow-y: auto; padding: 6px 10px 10px; min-height: 0; }
+.side-h { font-size: 11px; font-weight: 600; color: var(--text2); padding: 12px 8px 4px; margin: 0; }
+.side-list { list-style: none; margin: 0; padding: 0; }
+.side-item {
+  display: flex; align-items: center; gap: 7px; width: 100%;
+  height: 28px; padding: 0 8px; border: 0; border-radius: 7px; background: none;
+  text-align: left; font-size: 13px;
+}
+.side-item:hover { background: var(--hover); }
+.side-item[aria-current="true"] { background: var(--sel-dim); }
+.side-item .g { width: 15px; height: 15px; flex: none; }
+.side-item .lbl { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.side-item .n { font-size: 12px; color: var(--text2); font-variant-numeric: tabular-nums; }
+.g-loc { color: var(--blue); }
+/* Locations under Macintosh HD hang off a tree line from the disk icon. */
+#locs li.sub { position: relative; padding-left: 18px; }
+#locs li.sub::before, #locs li.sub::after { content: ""; position: absolute; left: 15px; border-color: var(--text3); }
+#locs li.sub::before { top: 0; bottom: 0; border-left: 1px solid; }
+#locs li.sub.last::before { bottom: 50%; }
+#locs li.sub::after { top: 50%; width: 9px; border-top: 1px solid; }
+.host {
+  flex: none; border-top: 0.5px solid var(--sep); padding: 10px 16px 14px;
+  font-size: 11.5px; color: var(--text2);
+}
+.host b { display: block; color: var(--text); font-size: 12.5px; font-weight: 600; margin-bottom: 4px; }
+.host dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 0; }
+.host dt { color: var(--text2); }
+.host dd { margin: 0; color: var(--text); overflow-wrap: anywhere; }
+.dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: 0; }
+.dot.ok { background: var(--green); }
+.dot.bad { background: var(--red); }
+
+/* Toolbar */
+.toolbar {
+  grid-column: 2; grid-row: 1;
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 12px 0 14px; min-width: 0;
+}
+.cap {
+  display: inline-flex; align-items: center; height: 32px; border-radius: 16px;
+  background: var(--cap); border: 0.5px solid var(--cap-edge); box-shadow: var(--cap-shadow);
+}
+.tbtn {
+  width: 34px; height: 32px; border: 0; background: none; border-radius: 16px;
+  display: grid; place-items: center; color: var(--text);
+}
+.tbtn:hover:not(:disabled) { background: var(--hover); }
+.tbtn:disabled { color: var(--text3); }
+.tbtn .g { width: 15px; height: 15px; }
+#side-toggle[aria-pressed="true"] { color: var(--link); }
+.nav .tbtn + .tbtn { margin-left: -4px; }
+.back-m { display: none; height: 32px; padding: 0 12px 0 8px; gap: 2px; border: 0; color: var(--link); border-radius: 16px; max-width: 46vw; }
+.back-m span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.back-m .g { width: 16px; height: 16px; flex: none; }
+.title { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.15; }
+.title strong { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.title span { font-size: 11px; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.search { width: min(260px, 34vw); padding: 0 10px; gap: 6px; }
+.search .g { width: 14px; height: 14px; color: var(--text2); flex: none; }
+.search input {
+  flex: 1; min-width: 0; border: 0; background: none; outline: none; height: 30px; font-size: 13px;
+}
+.search input::placeholder { color: var(--text2); }
+.search:focus-within { box-shadow: 0 0 0 3px var(--focus), var(--cap-shadow); }
+.search input::-webkit-search-cancel-button { -webkit-appearance: none; }
+.clear { border: 0; background: var(--text3); color: var(--win); width: 15px; height: 15px; border-radius: 50%; display: grid; place-items: center; padding: 0; }
+.clear .g { width: 9px; height: 9px; color: var(--win); }
+
+/* Main split */
+.main { grid-column: 2; grid-row: 2; display: flex; min-height: 0; min-width: 0; border-top: 0.5px solid var(--sep); position: relative; }
+/* A fade at the left edge says more columns sit off-screen to the left. */
+.main.cols-scrolled::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 14px; z-index: 3; pointer-events: none;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.14), transparent);
+}
+.browser { scroll-snap-type: x proximity; }
+.col { scroll-snap-align: start; }
+/* Hidden sidebar: the content takes the full window, as in Finder's View > Hide Sidebar. */
+.lights-t { display: none; padding: 0 6px 0 2px; }
+@media (min-width: 821px) {
+  body.side-off .window { grid-template-columns: 0 minmax(0, 1fr); }
+  body.side-off .sidebar { display: none; }
+  body.side-off .lights-t { display: flex; }
+}
+.browser { --col-w: 236px; flex: 0 1 auto; min-width: calc(var(--col-w) + 4px); display: flex; overflow-x: auto; overflow-y: hidden; position: relative; }
+.col {
+  flex: 0 0 var(--w, var(--col-w)); overflow-y: auto; overflow-x: hidden; position: relative;
+  border-right: 0.5px solid var(--sep); padding: 5px 0 12px; outline: none;
+}
+.col:focus-visible:not(:has(.sel)) { box-shadow: inset 0 0 0 2px var(--focus); }
+.row {
+  display: flex; align-items: center; gap: 6px; height: 22px;
+  margin: 0 6px; padding: 0 6px 0 5px; border-radius: 5px;
+  white-space: nowrap; user-select: none;
+}
+.row:hover { background: var(--hover); }
+.row .ic { width: 16px; height: 16px; flex: none; }
+.row .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.row .gl { display: inline-flex; gap: 3px; flex: none; }
+.row .ct { font-size: 11.5px; color: var(--text2); font-variant-numeric: tabular-nums; flex: none; }
+.row .chev { width: 10px; height: 10px; color: var(--text2); flex: none; }
+.row.sel { background: var(--sel-dim); }
+.col:focus .row.sel, .list-body:focus .lrow.sel { background: var(--sel); color: #fff; }
+.col:focus .row.sel .ct, .col:focus .row.sel .chev, .col:focus .row.sel .g,
+.list-body:focus .lrow.sel .g, .list-body:focus .lrow.sel .sub { color: #fff; }
+.g { width: 12px; height: 12px; display: inline-block; vertical-align: -1px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.g.f { fill: currentColor; stroke: none; }
+.c-lol { color: var(--c-lol); }
+.c-suid { color: var(--c-suid); }
+.c-sgid { color: var(--c-sgid); }
+.c-tcc { color: var(--c-tcc); }
+.c-xpc { color: var(--c-xpc); }
+.c-inj { color: var(--c-inj); }
+/* Privacy and code integrity section */
+.cap-list { list-style: none; margin: 4px 0 0; padding: 0; }
+.cap-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; padding: 6px 0; align-items: baseline; }
+.cap-list li + li { border-top: 0.5px solid var(--sep); }
+.cap-list .cap-name { font-weight: 500; }
+.cap-list .cap-how { grid-column: 1 / -1; color: var(--text2); font-size: 12px; }
+.cap-list .mono { font-size: 11.5px; overflow-wrap: anywhere; }
+.auth { font-size: 11px; padding: 1px 7px; border-radius: 6px; white-space: nowrap; background: var(--fill); color: var(--text2); }
+.auth.allowed, .auth.entitled { background: color-mix(in srgb, var(--c-tcc) 16%, transparent); color: var(--c-tcc); }
+.cap-how.pills { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+.auth.on { background: color-mix(in srgb, var(--green) 16%, transparent); color: var(--green); }
+.auth.weak { background: color-mix(in srgb, var(--c-inj) 18%, transparent); color: var(--c-inj); }
+.sub-h.first { margin-top: 0; }
+.c-ent { color: var(--c-ent); }
+.c-unsigned { color: var(--c-unsigned); }
+.c-muted { color: var(--gray); }
+.empty { color: var(--text2); text-align: center; margin: 24px 0; }
+
+.fb { fill: var(--folder-back); }
+.ff { fill: var(--folder-front); }
+.xb { fill: var(--exec-bg); stroke: var(--exec-edge); stroke-width: 0.6; }
+.xi { stroke: var(--exec-ink); fill: none; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
+.db { fill: var(--doc-bg); stroke: var(--doc-edge); stroke-width: 0.6; }
+.di { stroke: var(--doc-ink); stroke-width: 1; fill: none; stroke-linecap: round; }
+.kb { fill: var(--disk-bg); stroke: var(--disk-edge); stroke-width: 0.6; }
+.ki { fill: rgba(0, 0, 0, 0.35); }
+.icw { position: relative; display: inline-flex; flex: none; }
+.alias { position: absolute; left: -1px; bottom: -1px; width: 8px; height: 8px; }
+.alias rect { fill: #fff; stroke: rgba(0, 0, 0, 0.4); stroke-width: 0.8; }
+.alias path { fill: #000; }
+
+/* Flat list (smart folders, search) */
+.list { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.list-head { padding: 12px 18px 10px; border-bottom: 0.5px solid var(--sep); display: flex; gap: 10px; align-items: flex-start; }
+.list-head .g { width: 18px; height: 18px; margin-top: 1px; flex: none; }
+.list-head h2 { font-size: 13px; font-weight: 600; margin: 0; }
+.list-head p { margin: 2px 0 0; color: var(--text2); font-size: 12px; max-width: 70ch; }
+.lcols, .lrow {
+  display: grid; grid-template-columns: 16px minmax(0, 1.1fr) minmax(0, 1fr) 64px;
+  column-gap: 8px; align-items: center;
+}
+.list[data-kind="search"] .lcols, .list[data-kind="search"] .lrow {
+  grid-template-columns: 16px minmax(0, 0.9fr) minmax(0, 0.8fr) minmax(0, 1.3fr) 64px;
+}
+.lcols { padding: 4px 18px 4px 17px; font-size: 11.5px; color: var(--text2); border-bottom: 0.5px solid var(--sep); }
+.lcols span:first-child { grid-column: 2; }
+.list:not([data-kind="search"]) .lc-match { display: none; }
+.list-body { flex: 1; overflow-y: auto; position: relative; outline: none; padding: 4px 0 12px; }
+.list-body:focus-visible:not(:has(.sel)) { box-shadow: inset 0 0 0 2px var(--focus); }
+.lrow { height: 24px; margin: 0 8px; padding: 0 10px 0 9px; border-radius: 5px; user-select: none; }
+.lrow:nth-child(even) { background: var(--fill2); }
+.lrow:hover { background: var(--hover); }
+.lrow.sel { background: var(--sel-dim); }
+.lrow > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.lrow .sub { color: var(--text2); }
+.lrow .gl { display: inline-flex; gap: 3px; justify-content: flex-end; }
+.lrow .ic { width: 16px; height: 16px; }
+.lrow .c-match { display: none; }
+.list[data-kind="search"] .lrow .c-match { display: block; }
+mark { background: var(--mark); color: inherit; border-radius: 2px; padding: 0 1px; }
+.lrow.sel mark { background: rgba(255, 255, 255, 0.28); }
+
+/* Inspector */
+.inspector {
+  flex: 1 1 0; min-width: 320px; overflow-y: auto; padding: 0 0 28px;
+}
+/* Once the divider is dragged the inspector keeps that width and the last column fills the rest. */
+@media (min-width: 821px) {
+  .main.fixed .browser { flex: 1 1 0; }
+  .main.fixed .inspector { flex: 0 1 var(--insp-w); }
+  .main.fixed .col:last-child { flex-grow: 1; }
+}
+.browser.edge { cursor: col-resize; }
+/* Drag to set the inspector width; double-click returns to automatic sizing. */
+.splitter { flex: none; width: 1px; background: var(--sep); position: relative; cursor: col-resize; touch-action: none; outline: none; }
+.splitter::before { content: ""; position: absolute; inset: 0 -4px; }
+.splitter:hover, .splitter.drag, .splitter:focus-visible { background: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
+body:not([data-mode="browse"]) .splitter { display: none; }
+body.resizing, body.resizing * { cursor: col-resize !important; user-select: none; }
+
+/* Long folders get a pinned filter bar and sticky letter headings. */
+.colbar {
+  position: sticky; top: 0; z-index: 2; height: 66px; margin: -5px 0 2px;
+  display: grid; grid-template-rows: 24px 24px; gap: 6px; padding: 6px 8px;
+  background: var(--win); border-bottom: 0.5px solid var(--sep);
+}
+.colbar input, .colbar select {
+  font: inherit; font-size: 12px; height: 24px; min-width: 0; color: var(--text);
+  border: 0.5px solid var(--sep2); border-radius: 6px; background: var(--fill);
+}
+.colbar input { padding: 0 8px; }
+.colbar input:focus, .colbar select:focus { outline: none; box-shadow: 0 0 0 3px var(--focus); }
+.cf-row { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.cf-row select { flex: 1; padding: 0 4px; }
+.cf-n { font-size: 11px; color: var(--text2); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.lh {
+  position: sticky; top: 66px; z-index: 1; height: 20px; line-height: 20px; padding: 0 12px;
+  font-size: 11px; font-weight: 600; color: var(--text2); background: var(--win);
+}
+
+.ihead { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 18px 20px 14px; }
+.ihead .big { width: 56px; height: 56px; }
+.ihead h2 { margin: 0; font-size: 15px; font-weight: 600; overflow-wrap: anywhere; line-height: 1.25; }
+.ihead p { margin: 2px 0 0; color: var(--text2); font-size: 12px; }
+.ihead .sz { font-size: 12px; color: var(--text2); align-self: start; padding-top: 2px; white-space: nowrap; }
+.flagline { display: flex; flex-wrap: wrap; gap: 6px 12px; padding: 0 20px 12px; font-size: 12px; }
+.flagline span { display: inline-flex; align-items: center; gap: 5px; }
+.flagline .g { width: 13px; height: 13px; }
+.reveal { margin: 0 20px 12px; }
+.btn {
+  border: 0.5px solid var(--cap-edge); background: var(--cap); box-shadow: 0 0.5px 1px rgba(0, 0, 0, 0.08);
+  height: 24px; padding: 0 10px; border-radius: 12px; font-size: 12px;
+}
+.btn:hover { background: var(--fill); }
+.linkbtn { border: 0; background: none; padding: 0; color: var(--link); font: inherit; text-align: left; cursor: pointer; }
+.linkbtn:hover { text-decoration: underline; }
+
+details.sec { border-top: 0.5px solid var(--sep); }
+details.sec > summary {
+  list-style: none; display: flex; align-items: center; gap: 6px;
+  padding: 9px 20px 9px 14px; font-weight: 600; font-size: 13px; user-select: none;
+}
+details.sec > summary::-webkit-details-marker { display: none; }
+details.sec > summary::before {
+  content: ""; width: 0; height: 0; border-style: solid; border-width: 4.5px 0 4.5px 6.5px;
+  border-color: transparent transparent transparent var(--text2); transition: transform 0.15s ease;
+  margin: 0 3px 0 2px;
+}
+details.sec[open] > summary::before { transform: rotate(90deg); }
+details.sec > summary .cnt { font-weight: 400; color: var(--text2); }
+details.sec > summary:focus-visible { outline-offset: -2px; }
+.sb { padding: 0 20px 16px 28px; }
+.ihead, .flagline, .sb { max-width: 620px; }
+.inspector { container: insp / inline-size; }
+/* Wide inspectors show two stacks of sections split by a draggable divider. */
+.colgrip { display: none; }
+@container insp (min-width: 760px) {
+  .ihead, .flagline { max-width: none; }
+  .isecs {
+    display: grid; border-bottom: 0.5px solid var(--sep);
+    grid-template-columns: minmax(300px, var(--lf, 1fr)) 1px minmax(300px, var(--rf, 1fr));
+  }
+  .stack { min-width: 0; }
+  .colgrip { display: block; position: relative; background: var(--sep); cursor: col-resize; touch-action: none; outline: none; }
+  .colgrip::before { content: ""; position: absolute; inset: 0 -4px; }
+  .colgrip:hover, .colgrip.drag, .colgrip:focus-visible { background: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
+  .isecs > details.sec[data-k="ents"] { grid-column: 1 / -1; }
+  .isecs > details.sec[data-k="ents"] > .sb { max-width: none; columns: 2; column-gap: 28px; }
+  .isecs .ns { break-inside: avoid; }
+}
+@container insp (min-width: 1240px) {
+  .isecs > details.sec[data-k="ents"] > .sb { columns: 3; }
+}
+
+.kv { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 5px 10px; margin: 0; }
+.kv dt { text-align: right; color: var(--text2); white-space: nowrap; }
+.kv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.hash { font: 11.5px/1.5 var(--mono); display: flex; flex-wrap: wrap; gap: 0 6px; }
+.hash span:nth-child(4n) { margin-right: 6px; }
+.copy { border: 0; background: none; color: var(--link); padding: 0; font-size: 12px; margin-top: 2px; cursor: pointer; }
+.copy:hover { text-decoration: underline; }
+.lede { margin: 0 0 10px; font-size: 13px; }
+.muted { color: var(--text2); }
+.note { margin: 10px 0 0; color: var(--text2); font-size: 12px; }
+.tech { list-style: none; margin: 0; padding: 0; }
+.tech li { display: flex; gap: 8px; }
+.tech a { font-family: var(--mono); font-size: 12px; flex: none; min-width: 70px; }
+.chiplist { display: flex; flex-wrap: wrap; gap: 4px 10px; }
+
+/* Permission matrix */
+.perm {
+  display: grid;
+  grid-template-columns: auto minmax(72px, max-content) repeat(3, 42px) 36px;
+  justify-content: start; gap: 5px 6px; align-items: center; margin: 2px 0 0;
+}
+.perm .pr { display: contents; }
+.perm .pl { color: var(--text2); text-align: right; white-space: nowrap; }
+.perm .pp { font: 12px var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.perm .ph { font-size: 11px; color: var(--text2); text-align: center; padding-top: 4px; }
+.perm .ph.oct { font-size: 10.5px; }
+.cell {
+  height: 28px; border-radius: 7px; display: grid; place-items: center;
+  font: 600 12.5px var(--mono);
+}
+.cell.on { background: var(--on-bg); color: var(--on-ink); }
+.cell.off { border: 1px dashed var(--sep2); color: var(--text3); font-weight: 400; }
+.cell.suid { background: var(--suid-solid); color: #fff; box-shadow: 0 0 0 3px var(--suid-bg); }
+.cell.sgid { background: var(--sgid-solid); color: #fff; box-shadow: 0 0 0 3px var(--sgid-bg); }
+.cell.warn { background: var(--warn-bg); color: var(--orange); box-shadow: inset 0 0 0 1px var(--orange); }
+.cell.spc { font: 500 9.5px var(--font); letter-spacing: 0.01em; }
+.perm .od { font: 600 14px var(--mono); text-align: center; color: var(--text2); }
+.perm .od.hot-u { color: var(--c-suid); }
+.perm .od.hot-g { color: var(--c-sgid); }
+.perm .od.hot-u.hot-g { color: var(--c-suid); }
+.perm .rule { grid-column: 1 / -1; height: 0.5px; background: var(--sep); margin: 3px 0; }
+.modeline { display: flex; align-items: baseline; gap: 12px; margin: 12px 0 0; flex-wrap: wrap; }
+.modeline .oct { font: 600 22px var(--mono); letter-spacing: 0.04em; }
+.modeline .sym { font: 13px var(--mono); color: var(--text2); letter-spacing: 0.06em; }
+.hot-u { color: var(--c-suid); }
+.hot-g { color: var(--c-sgid); }
+.callout { display: flex; gap: 9px; margin: 12px 0 0; padding: 9px 11px; border-radius: 9px; font-size: 12.5px; }
+.callout .g { width: 15px; height: 15px; flex: none; margin-top: 1px; }
+.callout.suid { background: var(--suid-bg); }
+.callout.sgid { background: var(--sgid-bg); }
+.callout.warn { background: var(--warn-bg); }
+.callout p { margin: 0; }
+.runs { margin: 12px 0 0; }
+
+/* Signing chain */
+.chain { list-style: none; margin: 4px 0 14px; padding: 0; }
+.chain .cn { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; align-items: center; }
+.chain .cg { width: 34px; height: 34px; display: grid; place-items: center; }
+.chain .cg svg { width: 32px; height: 32px; }
+.chain .ct { font-weight: 600; overflow-wrap: anywhere; }
+.chain .cs { font-size: 11.5px; color: var(--text2); overflow-wrap: anywhere; }
+.chain .ce { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 10px; height: 24px; align-items: center; }
+.chain .ce i { justify-self: center; width: 2px; height: 100%; background: var(--blue); opacity: 0.55; border-radius: 1px; }
+.chain .ce.broken i { width: 0; background: none; border-left: 2px dashed var(--c-unsigned); opacity: 1; }
+.chain .ce span { font-size: 11px; color: var(--text2); }
+.seal path { fill: var(--seal-fill); stroke: var(--blue); stroke-width: 1.3; stroke-linejoin: round; }
+.seal circle { fill: none; stroke: var(--blue); stroke-width: 1.3; }
+.seal.root path { fill: var(--blue); }
+.seal.root .tick { stroke: #fff; stroke-width: 2.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.seal.none path { fill: none; stroke: var(--c-unsigned); stroke-dasharray: 2.4 2; }
+.seal.none line { stroke: var(--c-unsigned); stroke-width: 2; stroke-linecap: round; }
+.seal.lock rect { fill: var(--gray); }
+.seal.lock path { fill: none; stroke: var(--gray); stroke-width: 2.2; }
+.badges { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.badge { font-size: 11px; padding: 1px 7px; border-radius: 6px; background: var(--fill); color: var(--text2); white-space: nowrap; }
+
+/* Entitlements */
+.ns { margin: 0 0 14px; }
+.ns h4 { margin: 0; font-size: 12.5px; font-weight: 600; display: flex; gap: 6px; align-items: baseline; }
+.ns h4 span { font-weight: 400; color: var(--text2); }
+.ns > p { margin: 2px 0 6px; font-size: 12px; color: var(--text2); }
+.ekeys { list-style: none; margin: 0; padding: 0; border-radius: 9px; background: var(--fill2); }
+.ekeys li { padding: 6px 10px; }
+.ekeys li + li { border-top: 0.5px solid var(--sep); }
+.ek { font: 11.5px/1.4 var(--mono); overflow-wrap: anywhere; display: flex; gap: 8px; justify-content: space-between; }
+.ek em { font-style: normal; color: var(--text2); flex: none; }
+.ek a { color: var(--link); }
+.etag { font: 500 10.5px/1.5 var(--font); padding: 0 6px; margin-left: 6px; border-radius: 5px; white-space: nowrap; }
+.etag.doc { background: var(--on-bg); color: var(--on-ink); }
+.etag.undoc { background: var(--warn-bg); color: var(--orange); }
+.ev { font: 11px/1.45 var(--mono); color: var(--text2); overflow-wrap: anywhere; margin-top: 2px; }
+.ev.clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ev-list { list-style: none; margin: 3px 0 0; padding: 0; }
+.ev-list li { padding: 1px 0 1px 12px; position: relative; }
+.ev-list li::before { content: ""; position: absolute; left: 3px; top: 0.7em; width: 4px; height: 1px; background: var(--text3); }
+.ev-json { margin: 3px 0 0; white-space: pre-wrap; }
+.ev-list.clamp, .ev-json.clamp { display: block; max-height: 8.8em; overflow: hidden; -webkit-line-clamp: none;
+  -webkit-mask-image: linear-gradient(#000 65%, transparent); mask-image: linear-gradient(#000 65%, transparent); }
+.edoc { font-size: 12px; margin-top: 3px; }
+.edoc p { margin: 1px 0 0; color: var(--text2); }
+.more { border: 0; background: none; color: var(--link); padding: 0; font-size: 11.5px; cursor: pointer; }
+
+/* Commands */
+.cmd + .cmd { margin-top: 16px; }
+.cmd h4 { margin: 0 0 5px; font-size: 12.5px; font-weight: 600; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.cmd pre {
+  margin: 0; padding: 8px 10px; border-radius: 8px; background: var(--code-bg);
+  border: 0.5px solid var(--sep); font: 12px/1.5 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere;
+}
+.cmd p { margin: 5px 0 0; color: var(--text2); font-size: 12px; }
+.needs { font-size: 11px; font-weight: 500; color: var(--c-suid); }
+
+.stats { list-style: none; margin: 0; padding: 0; }
+.stats li { display: flex; align-items: center; gap: 8px; height: 26px; }
+.stats li + li { border-top: 0.5px solid var(--sep); }
+.stats .g { width: 14px; height: 14px; }
+.stats .lbl { flex: 1; }
+.stats .n { color: var(--text2); font-variant-numeric: tabular-nums; }
+.stats button.lbl { border: 0; background: none; padding: 0; text-align: left; color: var(--link); cursor: pointer; }
+.stats button.lbl:hover { text-decoration: underline; }
+.names { display: flex; flex-wrap: wrap; gap: 3px 10px; margin-top: 6px; font-size: 12.5px; }
+.names .linkbtn { font-family: var(--mono); font-size: 12px; }
+.sub-h { font-size: 12px; font-weight: 600; margin: 14px 0 2px; }
+
+/* Bottom bars */
+.bottom { grid-column: 2; grid-row: 3; border-top: 0.5px solid var(--sep); min-width: 0; }
+.pathbar {
+  display: flex; align-items: center; gap: 2px; height: 26px; padding: 0 12px;
+  overflow-x: auto; scrollbar-width: none; white-space: nowrap; font-size: 12px;
+}
+.pathbar::-webkit-scrollbar { display: none; }
+.pathbar button {
+  display: inline-flex; align-items: center; gap: 4px; border: 0; background: none; padding: 1px 5px; border-radius: 5px; font-size: 12px; flex: none;
+}
+.pathbar button:hover { background: var(--hover); }
+.pathbar .ic { width: 14px; height: 14px; }
+.pathbar .sepg { width: 8px; height: 8px; color: var(--text3); flex: none; }
+.pathbar button:last-child { font-weight: 500; }
+.status { height: 22px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text2); border-top: 0.5px solid var(--sep); }
+
+/* Legend popover */
+#legend {
+  position: fixed; inset: 56px 14px auto auto; margin: 0; width: 300px; max-width: calc(100vw - 28px);
+  padding: 12px 14px; border-radius: 14px; border: 0.5px solid var(--cap-edge);
+  background: var(--win); color: var(--text); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.22);
+}
+#legend h3 { font-size: 13px; margin: 0 0 8px; }
+#legend ul { list-style: none; margin: 0; padding: 0; }
+#legend li { display: grid; grid-template-columns: 18px 1fr; gap: 8px; padding: 4px 0; font-size: 12px; align-items: start; }
+#legend li .g, #legend li .ic { width: 14px; height: 14px; margin-top: 1px; }
+#legend li b { font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before { transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* Narrow: one pane at a time */
+@media (max-width: 820px) {
+  .window { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; }
+  .lights, .nav, .side-cap { display: none; }
+  .toolbar { grid-column: 1; flex-wrap: wrap; padding: 8px 12px; gap: 8px; }
+  .back-m { display: inline-flex; align-items: center; }
+  body[data-mpane="sidebar"] .back-m { display: none; }
+  .search { order: 5; width: 100%; }
+  .sidebar { grid-row: 2; grid-column: 1; margin: 0; border-radius: 0; border: 0; box-shadow: none; display: none; background: var(--win); }
+  body[data-mpane="sidebar"] .sidebar { display: flex; }
+  body[data-mpane="sidebar"] .main { display: none; }
+  .main { grid-column: 1; }
+  .bottom { grid-column: 1; }
+  .side-item { height: 40px; font-size: 15px; }
+  .side-h { font-size: 13px; }
+  .host { font-size: 12.5px; }
+  .browser { flex: 1 1 auto; overflow: hidden; }
+  .col { display: none; flex: 1 1 auto; width: 100%; border-right: 0; }
+  .col.m-show { display: block; }
+  .row { height: 38px; font-size: 15px; gap: 9px; }
+  .row .ic { width: 22px; height: 22px; }
+  .row .g { width: 13px; height: 13px; }
+  .inspector { display: none; flex: 1 1 auto; min-width: 0; border-left: 0; }
+  .splitter { display: none; }
+  body[data-mpane="inspector"] .inspector { display: block; }
+  body[data-mpane="inspector"] .browser, body[data-mpane="inspector"] .list { display: none; }
+  body[data-mpane="cols"] .list, body[data-mpane="list"] .browser { display: none; }
+  .lcols { display: none; }
+  .lrow, .list[data-kind="search"] .lrow {
+    grid-template-columns: 22px minmax(0, 1fr) auto; grid-template-areas: "ic nm gl" "ic wh gl";
+    height: auto; padding: 6px 10px; row-gap: 0;
+  }
+  .lrow .ic { grid-area: ic; width: 22px; height: 22px; }
+  .lrow .c-name { grid-area: nm; font-size: 15px; }
+  .lrow .c-where { grid-area: wh; font-size: 12px; }
+  .list[data-kind="search"] .lrow .c-where { display: none; }
+  .list[data-kind="search"] .lrow .c-match { grid-area: wh; font-size: 12px; }
+  .lrow .gl { grid-area: gl; }
+  .ihead { padding: 16px 16px 12px; }
+  .flagline { padding: 0 16px 12px; }
+  .sb { padding: 0 16px 16px 22px; }
+  details.sec > summary { padding: 11px 16px 11px 10px; }
+  .kv { grid-template-columns: 78px minmax(0, 1fr); }
+  .status { display: none; }
+}
+@media (max-width: 430px) {
+  .perm { grid-template-columns: auto minmax(0, 1fr) repeat(3, 38px) 32px; gap: 5px 4px; }
+  .ihead { grid-template-columns: auto minmax(0, 1fr); }
+  .ihead .sz { display: none; }
+}
+</style>
+</head>
+<body data-mpane="sidebar">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-folder" viewBox="0 0 20 16">
+      <path class="fb" d="M1.5 3.2c0-.9.7-1.7 1.7-1.7h4.3c.5 0 .9.2 1.2.5l1.3 1.3h6.8c.9 0 1.7.7 1.7 1.7v9.2c0 .9-.7 1.6-1.7 1.6H3.2c-.9 0-1.7-.7-1.7-1.6z"/>
+      <path class="ff" d="M1.5 6.4c0-.8.7-1.5 1.5-1.5h14c.8 0 1.5.7 1.5 1.5v7.6c0 .9-.7 1.6-1.6 1.6H3.1c-.9 0-1.6-.7-1.6-1.6z"/>
+    </symbol>
+    <symbol id="i-exec" viewBox="0 0 16 16">
+      <rect class="xb" x="1.5" y="1.8" width="13" height="12.4" rx="2.6"/>
+      <path class="xi" d="M4.4 5.6l2.1 1.8-2.1 1.8M7.9 10.4h3.6"/>
+    </symbol>
+    <symbol id="i-exec-lg" viewBox="0 0 64 64">
+      <rect class="xb" x="5" y="7" width="54" height="50" rx="9"/>
+      <path class="xi" d="M14 20l6 5-6 5" style="stroke-width:3"/>
+      <text x="32" y="47" text-anchor="middle" font-family="ui-monospace, SF Mono, Menlo, monospace" font-size="13" font-weight="600" fill="var(--exec-ink)">exec</text>
+    </symbol>
+    <symbol id="i-doc" viewBox="0 0 16 16">
+      <path class="db" d="M3.5 1.5h6l3 3v10h-9z"/>
+      <path class="di" d="M9.5 1.5v3h3M5.5 7.5h5M5.5 9.5h5M5.5 11.5h3.5"/>
+    </symbol>
+    <symbol id="i-doc-lg" viewBox="0 0 64 64">
+      <path class="db" d="M13 4h26l13 13v43H13z"/>
+      <path class="di" d="M39 4v13h13" style="stroke-width:1.2"/>
+      <text x="32" y="44" text-anchor="middle" font-family="ui-monospace, SF Mono, Menlo, monospace" font-size="14" font-weight="600" fill="var(--doc-ink)">#!</text>
+    </symbol>
+    <symbol id="i-disk" viewBox="0 0 16 16">
+      <rect class="kb" x="1.5" y="4" width="13" height="8.5" rx="2"/>
+      <rect class="ki" x="3.5" y="9.5" width="6" height="1" rx=".5"/>
+      <circle class="ki" cx="12" cy="10" r=".8"/>
+    </symbol>
+    <symbol id="i-disk-lg" viewBox="0 0 64 64">
+      <rect class="kb" x="5" y="17" width="54" height="32" rx="7"/>
+      <rect class="ki" x="12" y="38" width="22" height="3" rx="1.5"/>
+      <circle class="ki" cx="49" cy="39.5" r="2.4"/>
+    </symbol>
+    <symbol id="g-lol" viewBox="0 0 16 16"><path d="M4.6 1.6h6.8c.5 0 .8.3.8.8v12l-4.2-2.9-4.2 2.9v-12c0-.5.3-.8.8-.8z"/></symbol>
+    <symbol id="g-key" viewBox="0 0 16 16"><circle cx="5" cy="8" r="2.9"/><path d="M7.9 8h6.3M12.2 8v2.5M14.2 8v1.7"/></symbol>
+    <symbol id="g-shield" viewBox="0 0 16 16"><path d="M8 1.7l5.1 1.9v4c0 3.2-2.1 5.7-5.1 6.7-3-1-5.1-3.5-5.1-6.7v-4z"/></symbol>
+    <symbol id="g-code" viewBox="0 0 16 16"><path d="M5.2 4.4 2 8l3.2 3.6M10.8 4.4 14 8l-3.2 3.6M9.2 3 6.8 13"/></symbol>
+    <symbol id="g-shim" viewBox="0 0 16 16"><path d="M3 13.2V9c0-2 1.6-3.6 3.6-3.6H13M10 2.4l3 3-3 3"/></symbol>
+    <symbol id="g-unsigned" viewBox="0 0 16 16"><path d="M8 1.4L9.7 2.7L11.9 2.7L12.5 4.7L14.3 6L13.6 8L14.3 10L12.5 11.3L11.9 13.3L9.7 13.3L8 14.6L6.3 13.3L4.1 13.3L3.5 11.3L1.7 10L2.4 8L1.7 6L3.5 4.7L4.1 2.7L6.3 2.7Z"/><path d="M3.2 12.8 12.8 3.2"/></symbol>
+    <symbol id="g-privacy" viewBox="0 0 16 16"><path d="M1.6 8s2.4-4.4 6.4-4.4S14.4 8 14.4 8 12 12.4 8 12.4 1.6 8 1.6 8z"/><circle cx="8" cy="8" r="2"/></symbol>
+    <symbol id="g-inject" viewBox="0 0 16 16"><path d="M10.2 1.9l3.9 3.9M12.15 3.85 6 10l-2.4.4.4-2.4 6.15-6.15M7.9 5.9l2.2 2.2M3.8 12.2 2 14"/></symbol>
+    <symbol id="g-xpc" viewBox="0 0 16 16"><circle cx="3.2" cy="8" r="1.6"/><circle cx="12.8" cy="4" r="1.6"/><circle cx="12.8" cy="12" r="1.6"/><path d="M4.8 7.3 11.2 4.7M4.8 8.7l6.4 2.6"/></symbol>
+    <symbol id="g-sidebar" viewBox="0 0 16 16"><rect x="1.6" y="2.6" width="12.8" height="10.8" rx="2.2"/><path d="M6.2 2.6v10.8M3.4 5.4h1.2M3.4 7.4h1.2"/></symbol>
+    <symbol id="g-lock" viewBox="0 0 16 16"><rect x="3.4" y="7.2" width="9.2" height="6.8" rx="1.6"/><path d="M5.6 7.2V5.3a2.4 2.4 0 0 1 4.8 0v1.9"/></symbol>
+    <symbol id="g-chev" viewBox="0 0 16 16"><path d="M5.5 2.5 11 8l-5.5 5.5"/></symbol>
+    <symbol id="g-back" viewBox="0 0 16 16"><path d="M10.5 2.5 5 8l5.5 5.5"/></symbol>
+    <symbol id="g-search" viewBox="0 0 16 16"><circle cx="6.8" cy="6.8" r="4.6"/><path d="M10.3 10.3 14 14"/></symbol>
+    <symbol id="g-x" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" style="stroke-width:2.6"/></symbol>
+    <symbol id="g-legend" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.2"/><path d="M8 7.2v4.2"/><circle cx="8" cy="4.9" r=".4" style="stroke-width:1.4"/></symbol>
+    <symbol id="g-folder" viewBox="0 0 16 16"><path d="M1.8 4.3c0-.8.6-1.4 1.4-1.4h3.2l1.6 1.6h4.8c.8 0 1.4.6 1.4 1.4v6.3c0 .8-.6 1.4-1.4 1.4H3.2c-.8 0-1.4-.6-1.4-1.4z"/></symbol>
+    <symbol id="g-drive" viewBox="0 0 16 16"><rect x="1.8" y="4.4" width="12.4" height="7.4" rx="1.8"/><path d="M4.2 9.2h4"/><circle cx="11.6" cy="9.2" r=".3"/></symbol>
+    <symbol id="g-warn" viewBox="0 0 16 16"><path d="M8 2.2 14.3 13H1.7z"/><path d="M8 6.5v3"/><circle cx="8" cy="11.3" r=".3"/></symbol>
+  </defs>
+</svg>
+
+<div class="window">
+  <aside class="sidebar" aria-label="Sidebar">
+    <div class="lights" aria-hidden="true"><i></i><i></i><i></i></div>
+    <a class="appid" href="#/" data-go="/" title="Go to the Macintosh HD overview"><svg aria-hidden="true" focusable="false" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lolbins-body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6a55"/><stop offset="1" stop-color="#d4223f"/></linearGradient></defs><path d="M16 8.6c0-2.1.6-4 2-5.4" fill="none" stroke="#5b3a29" stroke-width="1.7" stroke-linecap="round"/><path d="M18.3 5.7c.8-2.5 3.2-3.8 6.1-3.4-.6 2.7-3 4.1-6.1 3.4Z" fill="#3fa34d"/><path d="M16 8.3C14.6 6.7 12.6 6 10.4 6H9.6C6 6 3 9 3 12.6v10.8C3 27 6 30 9.6 30h12.8c3.6 0 6.6-3 6.6-6.6V12.6C29 9 26 6 22.4 6h-.8c-2.2 0-4.2.7-5.6 2.3Z" fill="url(#lolbins-body)" stroke="rgba(120,10,30,.35)" stroke-width=".6"/><path d="M9.4 15.4l3.6 3.1-3.6 3.1" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.4 22.2h6.4" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/></svg><div><strong>LOLBins</strong><span>Living-off-the-land binaries</span></div></a>
+    <nav class="side-scroll" aria-label="Locations and smart folders">
+      <h2 class="side-h" id="loc-h">Locations</h2>
+      <ul class="side-list" id="locs" aria-labelledby="loc-h"></ul>
+      <h2 class="side-h" id="smart-h">Smart folders</h2>
+      <ul class="side-list" id="smarts" aria-labelledby="smart-h"></ul>
+    </nav>
+    <section class="host" id="host" aria-label="Scanned host"></section>
+  </aside>
+
+  <header class="toolbar">
+    <button class="back-m cap" id="mback" type="button"><svg class="g"><use href="#g-back"/></svg><span id="mback-l">Back</span></button>
+    <div class="lights lights-t" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="cap side-cap"><button class="tbtn" id="side-toggle" type="button" aria-pressed="false" aria-label="Hide sidebar" title="Hide sidebar (⌃⌘S)"><svg class="g"><use href="#g-sidebar"/></svg></button></div>
+    <div class="cap nav">
+      <button class="tbtn" id="hback" type="button" aria-label="Back" title="Back"><svg class="g"><use href="#g-back"/></svg></button>
+      <button class="tbtn" id="hfwd" type="button" aria-label="Forward" title="Forward"><svg class="g" style="transform:scaleX(-1)"><use href="#g-back"/></svg></button>
+    </div>
+    <div class="title"><strong id="t-main">Macintosh HD</strong><span id="t-sub"></span></div>
+    <div class="cap"><button class="tbtn" type="button" popovertarget="legend" aria-label="Glyph legend" title="Glyph legend"><svg class="g"><use href="#g-legend"/></svg></button></div>
+    <label class="cap search">
+      <svg class="g"><use href="#g-search"/></svg>
+      <span class="vh">Search names, paths, identifiers, entitlements and techniques</span>
+      <input id="q" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+      <button class="clear" id="qclear" type="button" aria-label="Clear search" hidden><svg class="g"><use href="#g-x"/></svg></button>
+    </label>
+  </header>
+
+  <main class="main">
+    <div class="browser" id="cols" aria-label="Column browser"></div>
+    <section class="list" id="list" hidden>
+      <div class="list-head" id="list-head"></div>
+      <div class="lcols" aria-hidden="true"><span>Name</span><span>Where</span><span class="lc-match">Matched on</span><span></span></div>
+      <div class="list-body" id="list-body" role="listbox" tabindex="0"></div>
+    </section>
+    <div class="splitter" id="split" role="separator" aria-orientation="vertical" aria-controls="insp" aria-label="Inspector width" tabindex="0" title="Drag to resize. Double-click to size automatically."></div>
+    <section class="inspector" id="insp" aria-label="Inspector" aria-live="off"></section>
+  </main>
+
+  <footer class="bottom">
+    <nav class="pathbar" id="pathbar" aria-label="Path"></nav>
+    <div class="status" id="status"></div>
+  </footer>
+</div>
+
+<div id="legend" popover>
+  <h3>What the glyphs mean</h3>
+  <ul>
+    <li><svg class="g f c-lol"><use href="#g-lol"/></svg><span><b>Catalogued LOLBin.</b> Listed in the catalogue with abuse notes and worked commands.</span></li>
+    <li><svg class="g c-suid"><use href="#g-key"/></svg><span><b>Setuid.</b> Runs as its owner (usually root) whoever starts it.</span></li>
+    <li><svg class="g c-sgid"><use href="#g-key"/></svg><span><b>Setgid.</b> Runs with its group's privileges.</span></li>
+    <li><svg class="g f c-ent"><use href="#g-shield"/></svg><span><b>Private entitlements.</b> Holds Apple-internal, TCC, SIP or task-port keys.</span></li>
+    <li><svg class="g c-ent"><use href="#g-shield"/></svg><span><b>Entitlements.</b> Holds only public entitlement keys.</span></li>
+    <li><svg class="g f c-tcc"><use href="#g-privacy"/></svg><span><b>TCC grant.</b> This Mac's privacy database allows it a protected service, such as Full Disk Access.</span></li>
+    <li><svg class="g c-tcc"><use href="#g-privacy"/></svg><span><b>TCC entitlements.</b> Reaches protected services by entitlement, without a prompt.</span></li>
+    <li><svg class="g c-inj"><use href="#g-inject"/></svg><span><b>Weakened runtime.</b> Holds an entitlement that lets other code be injected into it or attach to it.</span></li>
+    <li><svg class="g c-xpc"><use href="#g-xpc"/></svg><span><b>XPC server candidate.</b> launchd registers a Mach service for this executable and the scan found static listener evidence. Reachability and authorization are not tested.</span></li>
+    <li><svg class="g c-muted"><use href="#g-code"/></svg><span><b>Script.</b> Interpreted text; scripts carry no code signature.</span></li>
+    <li><svg class="g c-unsigned"><use href="#g-unsigned"/></svg><span><b>Unsigned.</b> Shown on rows only for unsigned files that aren't scripts.</span></li>
+    <li><svg class="g c-muted"><use href="#g-shim"/></svg><span><b>Developer tools shim.</b> Forwards to Xcode tools when they're installed.</span></li>
+    <li><svg class="g c-muted"><use href="#g-lock"/></svg><span><b>Unreadable.</b> The scan couldn't read the file, so its signature and hash are unknown.</span></li>
+    <li><span class="icw"><svg class="ic" style="width:14px;height:14px"><use href="#i-exec"/></svg><svg class="alias" viewBox="0 0 8 8"><rect x=".5" y=".5" width="7" height="7" rx="1"/><path d="M2 6.3V4.6c0-.9.7-1.6 1.6-1.6h1.2V1.9L6.6 3.6 4.8 5.3V4.2H3.7c-.4 0-.7.3-.7.7v1.4z"/></svg></span><span><b>Symbolic link.</b> The path points to a file elsewhere on disk.</span></li>
+  </ul>
+</div>
+
+<script src="assets/data.js"></script>
+<script>
+(() => {
+  'use strict';
+  const D = window.LOLBINS;
+  if (!D) {
+    document.body.textContent = 'data.js did not load. Keep it next to this folder at ../data.js.';
+    return;
+  }
+
+  const $ = (s) => document.querySelector(s);
+  const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ESC[c]);
+  const collator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' });
+  const narrow = () => matchMedia('(max-width: 820px)').matches;
+  const motionOK = () => !matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const ENT = D.entitlements;
+  const entryByName = new Map(D.entries.map((e) => [e.name, e]));
+  const PRIVATE_NS = new Set(['Private', 'Private security', 'Private TCC', 'SIP (rootless)', 'Task ports']);
+  const NS_ORDER = ['Task ports', 'Private TCC', 'SIP (rootless)', 'Private security', 'Hardened runtime',
+    'Private', 'App Sandbox / code signing', 'Developer capability', 'Other'];
+  const SEAL = 'M16 2L18.7 4.1L22.1 3.4L23.6 6.5L26.9 7.3L27 10.7L29.6 12.9L28.2 16L29.6 19.1L27 21.3L26.9 24.7L23.6 25.5L22.1 28.6L18.7 27.9L16 30L13.3 27.9L9.9 28.6L8.4 25.5L5.1 24.7L5 21.3L2.4 19.1L3.8 16L2.4 12.9L5 10.7L5.1 7.3L8.4 6.5L9.9 3.4L13.3 4.1Z';
+  const SIGN_FLAGS = {
+    runtime: 'Hardened runtime', 'library-validation': 'Library validation', kill: 'Kill on invalid page',
+    hard: 'Refuse invalid pages', enforcement: 'Enforcement',
+  };
+
+  /* ---------- Tree ---------- */
+  let nextId = 0;
+  const nodes = new Map();
+  const files = [];
+  const blankStats = () => ({ files: 0, lol: 0, setid: 0, priv: 0, script: 0, unsigned: 0, shim: 0, tcc: 0, weak: 0 });
+
+  function makeDir(path, name, parent) {
+    const n = { id: nextId++, path, name, parent, dir: true, kids: [], kidMap: new Map(), st: blankStats() };
+    nodes.set(path, n);
+    if (parent) { parent.kids.push(n); parent.kidMap.set(name, n); }
+    return n;
+  }
+
+  function traitsOf(f) {
+    const keys = Object.keys(f.entitlements || {});
+    const priv = keys.filter((k) => ENT[k] && PRIVATE_NS.has(ENT[k].namespace)).length;
+    return {
+      lol: !!f.entry,
+      suid: f.flags.includes('setuid'),
+      sgid: f.flags.includes('setgid'),
+      script: f.flags.includes('script'),
+      shim: f.flags.includes('dev-shim'),
+      unreadable: f.flags.includes('unreadable') || f.signing.state === 'unreadable',
+      unsigned: f.signing.state === 'unsigned',
+      ents: keys.length,
+      priv,
+      sip: f.bsd_flags.includes('restricted'),
+      statOk: f.perms != null,
+      weak: Object.keys(D.runtime_weakeners).filter((k) => f.entitlements[k] === true),
+      xpc: (f.xpc || []).length > 0,
+      tccEnt: keys.some((k) => k.startsWith('com.apple.private.tcc.')),
+      tccGrant: f.tcc.filter((g) => g.auth === 'allowed').length,
+    };
+  }
+
+  const root = makeDir('/', 'Macintosh HD', null);
+  for (const f of D.inventory) {
+    const parts = f.path.split('/').filter(Boolean);
+    let cur = root;
+    let p = '';
+    for (let i = 0; i < parts.length - 1; i++) {
+      p += '/' + parts[i];
+      cur = cur.kidMap.get(parts[i]) || makeDir(p, parts[i], cur);
+    }
+    const t = traitsOf(f);
+    const n = { id: nextId++, path: f.path, name: parts[parts.length - 1], parent: cur, dir: false, f, t };
+    cur.kids.push(n);
+    cur.kidMap.set(n.name, n);
+    nodes.set(f.path, n);
+    files.push(n);
+    for (let a = cur; a; a = a.parent) {
+      a.st.files++;
+      if (t.lol) a.st.lol++;
+      if (t.suid || t.sgid) a.st.setid++;
+      if (t.priv) a.st.priv++;
+      if (t.script) a.st.script++;
+      if (t.unsigned) a.st.unsigned++;
+      if (t.shim) a.st.shim++;
+      if (t.tccEnt || t.tccGrant) a.st.tcc++;
+      if (t.weak.length) a.st.weak++;
+    }
+  }
+  (function sortAll(n) {
+    n.kids.sort((a, b) => collator.compare(a.name, b.name));
+    n.kids.forEach((k) => k.dir && sortAll(k));
+  })(root);
+  const byName = (a, b) => collator.compare(a.name, b.name) || collator.compare(a.path, b.path);
+  files.sort(byName);
+
+  const chainOf = (n) => { const a = []; for (let x = n; x; x = x.parent) a.unshift(x); return a; };
+  const chainFrom = (n) => { const ch = chainOf(n); const i = ch.indexOf(state.base); return i >= 0 ? ch.slice(i) : ch; };
+  const depth = (n) => chainFrom(n).length - 1;
+
+  const SMART = [
+    { key: 'lolbins', label: 'Usable Apple LOLBins', glyph: 'lol', cls: 'c-lol', fill: true,
+      test: (t) => t.lol,
+      blurb: 'Files the catalogue lists as living-off-the-land binaries: shipped with macOS and useful to an attacker as they are.' },
+    { key: 'setid', label: 'Setuid or setgid', glyph: 'key', cls: 'c-suid',
+      test: (t) => t.suid || t.sgid,
+      blurb: "Run with the file owner's or group's privileges, whoever starts them. A bug or a helpful option in one of these is a privilege escalation." },
+    { key: 'unsigned', label: 'Unsigned', glyph: 'unsigned', cls: 'c-unsigned',
+      test: (t) => t.unsigned,
+      blurb: 'No code signature, so nothing vouches for the contents beyond file permissions and the protected system volume.' },
+    { key: 'private', label: 'Private entitlements', glyph: 'shield', cls: 'c-ent', fill: true,
+      test: (t) => t.priv > 0,
+      blurb: 'Hold entitlements reserved for Apple-signed code: private Apple keys, TCC, SIP (rootless) and task-port access.' },
+    { key: 'tcc', label: 'TCC access', glyph: 'privacy', cls: 'c-tcc', fill: true,
+      test: (t) => t.tccEnt || t.tccGrant > 0,
+      blurb: 'Reach privacy-protected services such as Full Disk Access or Automation, by entitlement or by a grant in this Mac\'s TCC database.' },
+    { key: 'weak', label: 'Weakened runtime', glyph: 'inject', cls: 'c-inj',
+      test: (t) => t.weak.length > 0,
+      blurb: 'Hold an entitlement that switches off a code-signing protection, so a library can be injected or a debugger can attach.' },
+    { key: 'scripts', label: 'Scripts', glyph: 'code', cls: 'c-muted',
+      test: (t) => t.script,
+      blurb: 'Interpreted text files rather than compiled binaries. They are run by whatever interpreter the first line names.' },
+  ];
+  const smartByKey = new Map(SMART.map((s) => [s.key, s]));
+  for (const s of SMART) s.items = files.filter((n) => s.test(n.t));
+
+  /* ---------- Small renderers ---------- */
+  const glyph = (name, cls, fill, label) =>
+    `<svg class="g${fill ? ' f' : ''} ${cls}"${label ? ` role="img" aria-label="${esc(label)}"` : ' aria-hidden="true"'}><use href="#g-${name}"/></svg>`;
+  const ALIAS = '<svg class="alias" viewBox="0 0 8 8" aria-hidden="true"><rect x=".5" y=".5" width="7" height="7" rx="1"/><path d="M2 6.3V4.6c0-.9.7-1.6 1.6-1.6h1.2V1.9L6.6 3.6 4.8 5.3V4.2H3.7c-.4 0-.7.3-.7.7v1.4z"/></svg>';
+
+  function iconFor(n, large) {
+    if (n === root) return `<svg class="ic${large ? ' big' : ''}" aria-hidden="true"><use href="#i-disk${large ? '-lg' : ''}"/></svg>`;
+    if (n.dir) return `<svg class="ic${large ? ' big' : ''}" aria-hidden="true"><use href="#i-folder"/></svg>`;
+    const sym = n.t.script ? 'i-doc' : 'i-exec';
+    const svg = `<svg class="ic${large ? ' big' : ''}" aria-hidden="true"><use href="#${sym}${large ? '-lg' : ''}"/></svg>`;
+    if (!n.f.link) return svg;
+    const sz = large ? 'style="width:18px;height:18px;left:2px;bottom:2px"' : '';
+    return `<span class="icw">${svg}${sz ? ALIAS.replace('class="alias"', `class="alias" ${sz}`) : ALIAS}</span>`;
+  }
+
+  function traitList(t) {
+    const out = [];
+    if (t.lol) out.push(['lol', 'c-lol', true, 'Catalogued LOLBin']);
+    if (t.suid) out.push(['key', 'c-suid', false, 'Setuid']);
+    if (t.sgid) out.push(['key', 'c-sgid', false, 'Setgid']);
+    if (t.priv) out.push(['shield', 'c-ent', true, 'Private entitlements']);
+    else if (t.ents) out.push(['shield', 'c-ent', false, 'Entitlements']);
+    if (t.tccGrant) out.push(['privacy', 'c-tcc', true, 'TCC grant']);
+    else if (t.tccEnt) out.push(['privacy', 'c-tcc', false, 'TCC entitlements']);
+    if (t.weak.length) out.push(['inject', 'c-inj', false, 'Weakened runtime']);
+    if (t.xpc) out.push(['xpc', 'c-xpc', false, 'XPC server candidate']);
+    if (t.script) out.push(['code', 'c-muted', false, 'Script']);
+    else if (t.unsigned) out.push(['unsigned', 'c-unsigned', false, 'Unsigned']);
+    if (t.shim) out.push(['shim', 'c-muted', false, 'Developer tools shim']);
+    if (t.unreadable) out.push(['lock', 'c-muted', false, 'Unreadable']);
+    return out;
+  }
+  const glyphsHtml = (t) => traitList(t).map(([g, c, f, l]) => `<span title="${l}">${glyph(g, c, f)}</span>`).join('');
+  const traitWords = (t) => traitList(t).map((x) => x[3]).join(', ');
+
+  function dirSummary(d) {
+    const bits = [`${d.st.files} LOLBin paths`];
+    if (d.st.lol) bits.push(`${d.st.lol} LOLBin paths`);
+    if (d.st.setid) bits.push(`${d.st.setid} setuid or setgid`);
+    return bits.join(', ');
+  }
+
+  function rowHtml(n) {
+    if (n.dir) {
+      const g = (n.st.lol ? `<span title="Contains ${n.st.lol} Apple LOLBin paths">${glyph('lol', 'c-lol', true)}</span>` : '') +
+        (n.st.setid ? `<span title="Contains ${n.st.setid} setuid or setgid files">${glyph('key', 'c-suid')}</span>` : '');
+      return `<div class="row" role="option" aria-selected="false" id="n${n.id}" data-id="${n.id}" aria-label="${esc(n.name)}, folder, ${dirSummary(n)}">` +
+        `${iconFor(n)}<span class="nm">${esc(n.name)}</span><span class="gl">${g}</span>` +
+        `<span class="ct">${n.st.files}</span><svg class="g chev" aria-hidden="true"><use href="#g-chev"/></svg></div>`;
+    }
+    const words = traitWords(n.t);
+    return `<div class="row" role="option" aria-selected="false" id="n${n.id}" data-id="${n.id}" title="${esc(n.name)}" aria-label="${esc(n.name)}${words ? ', ' + words : ''}">` +
+      `${iconFor(n)}<span class="nm">${esc(n.name)}</span><span class="gl">${glyphsHtml(n.t)}</span></div>`;
+  }
+
+  const fmtBytes = (b) => {
+    if (b == null) return 'Unknown';
+    if (b < 1000) return `${b} bytes`;
+    const units = ['KB', 'MB', 'GB'];
+    let v = b / 1000; let i = 0;
+    while (v >= 1000 && i < units.length - 1) { v /= 1000; i++; }
+    return `${v >= 100 || i === 0 ? Math.round(v) : v.toFixed(1)} ${units[i]}`;
+  };
+  const fmtNum = (n) => n.toLocaleString('en-US');
+  const scannedAt = (() => {
+    const d = new Date(D.facts.collected_at);
+    return Number.isNaN(d.getTime()) ? D.facts.collected_at
+      : d.toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC';
+  })();
+  const sipOn = /enabled/i.test(D.facts.sip || '');
+  const gkOn = /enabled/i.test(D.facts.gatekeeper || '');
+  const attackUrl = (id) => `https://attack.mitre.org/techniques/${id.replace('.', '/')}/`;
+
+  /* ---------- State ---------- */
+  const state = { mode: 'browse', sel: root, base: root, folder: null, query: '', mpane: 'sidebar', mcol: 0 };
+  let browseSel = root;
+  let lastCtx = '';
+  let histIdx = 0;
+  let histMax = 0;
+
+  const colsEl = $('#cols');
+  const listEl = $('#list');
+  const listBody = $('#list-body');
+  const inspEl = $('#insp');
+  const qEl = $('#q');
+
+  /* ---------- Sidebar ---------- */
+  const locPaths = ['/', ...D.scan_dirs, '/System/Library'].filter((p, i, a) => nodes.get(p)?.dir && a.indexOf(p) === i);
+  function buildSidebar() {
+    $('#locs').innerHTML = locPaths.map((p, i) => {
+      const n = nodes.get(p);
+      const label = p === '/' ? 'Macintosh HD' : p;
+      const cls = p === '/' ? '' : ` class="sub${i === locPaths.length - 1 ? ' last' : ''}"`;
+      return `<li${cls}><button class="side-item" type="button" data-loc="${esc(p)}">` +
+        `${glyph(p === '/' ? 'drive' : 'folder', 'g-loc')}<span class="lbl">${esc(label)}</span><span class="n">${n.st.files}</span></button></li>`;
+    }).join('');
+    $('#smarts').innerHTML = SMART.map((s) =>
+      `<li><button class="side-item" type="button" data-smart="${s.key}">${glyph(s.glyph, s.cls, s.fill)}` +
+      `<span class="lbl">${esc(s.label)}</span><span class="n">${s.items.length}</span></button></li>`).join('');
+    const F = D.facts;
+    $('#host').innerHTML = `<b>${esc(F.hostname)}</b><dl>` +
+      `<dt>macOS</dt><dd>${esc(F.product_version)} (${esc(F.build_version)})</dd>` +
+      `<dt>Chip</dt><dd>${esc(F.arch)}</dd>` +
+      `<dt>SIP</dt><dd><span class="dot ${sipOn ? 'ok' : 'bad'}"></span>${sipOn ? 'Enabled' : 'Disabled'}</dd>` +
+      `<dt>Gatekeeper</dt><dd><span class="dot ${gkOn ? 'ok' : 'bad'}"></span>${gkOn ? 'Enabled' : 'Disabled'}</dd>` +
+      `<dt>Scanned</dt><dd>${esc(scannedAt)}</dd></dl>`;
+  }
+
+  function renderSidebar() {
+    document.querySelectorAll('.side-item').forEach((b) => {
+      let cur = false;
+      if (b.dataset.smart) cur = state.mode === 'folder' && state.folder === b.dataset.smart;
+      else if (state.mode === 'browse') cur = state.base.path === b.dataset.loc;
+      b.setAttribute('aria-current', cur ? 'true' : 'false');
+    });
+  }
+
+  /* ---------- Columns ---------- */
+  const colCache = new Map();
+  function colFor(dir) {
+    let el = colCache.get(dir.path);
+    if (el) return el;
+    el = document.createElement('div');
+    el.className = 'col';
+    el.setAttribute('role', 'listbox');
+    el.setAttribute('aria-label', dir === root ? 'Macintosh HD' : dir.path);
+    el.tabIndex = -1;
+    el._dir = dir;
+    el._sel = null;
+    el.innerHTML = dir.kids.length > LONG ? longColHtml(dir) : dir.kids.length ? dir.kids.map(rowHtml).join('') : '<p class="empty">Empty folder</p>';
+    el._rows = new Map([...el.querySelectorAll('.row')].map((r) => [+r.dataset.id, r]));
+    el._bar = el.querySelector('.colbar');
+    if (colWidths.has(dir.path)) el.style.setProperty('--w', colWidths.get(dir.path) + 'px');
+    colCache.set(dir.path, el);
+    return el;
+  }
+
+  const LONG = 40;
+  const letterOf = (n) => { const c = n.name[0].toUpperCase(); return c >= 'A' && c <= 'Z' ? c : '#'; };
+  function longColHtml(dir) {
+    const files = dir.kids.filter((k) => !k.dir);
+    const opts = SMART.map((sm) => [sm, files.filter((f) => sm.test(f.t)).length]).filter(([, c]) => c);
+    let html = `<div class="colbar" role="group" aria-label="Filter ${esc(dir.path)}">` +
+      `<input class="cf-q" type="search" placeholder="Filter ${fmtNum(dir.kids.length)} items" aria-label="Filter items in ${esc(dir.path)}" autocomplete="off" spellcheck="false">` +
+      `<div class="cf-row"><select class="cf-s" aria-label="Show"><option value="">All items</option>` +
+      opts.map(([sm, c]) => `<option value="${sm.key}">${esc(sm.label)} (${c})</option>`).join('') +
+      `</select><span class="cf-n" aria-live="polite"></span></div></div>`;
+    let last = '';
+    for (const k of dir.kids) {
+      const l = letterOf(k);
+      if (l !== last) { html += `<div class="lh" role="presentation">${l}</div>`; last = l; }
+      html += rowHtml(k);
+    }
+    return html + '<p class="empty cf-empty" hidden>Nothing here matches. Clear the filter to see every item.</p>';
+  }
+
+  function applyColFilter(el) {
+    const q = el._bar.querySelector('.cf-q').value.trim().toLowerCase();
+    const key = el._bar.querySelector('.cf-s').value;
+    const test = key ? smartByKey.get(key).test : null;
+    let shown = 0;
+    let heading = null;
+    let headingHas = false;
+    for (const child of el.children) {
+      if (child.classList.contains('lh')) {
+        if (heading) heading.hidden = !headingHas;
+        heading = child; headingHas = false;
+      } else if (child.classList.contains('row')) {
+        const n = idIndex.get(+child.dataset.id);
+        const ok = (!q || n.name.toLowerCase().includes(q)) && (!test || (!n.dir && test(n.t)));
+        child.hidden = !ok;
+        if (ok) { shown++; headingHas = true; }
+      }
+    }
+    if (heading) heading.hidden = !headingHas;
+    el.querySelector('.cf-empty').hidden = shown > 0;
+    el._bar.querySelector('.cf-n').textContent = q || key ? `${fmtNum(shown)} of ${fmtNum(el._dir.kids.length)}` : '';
+    el.scrollTop = 0;
+  }
+
+  function visibleKids(dir) {
+    const el = colCache.get(dir.path);
+    if (!el || !el._bar) return dir.kids;
+    return dir.kids.filter((k) => !el._rows.get(k.id).hidden);
+  }
+
+  function revealIn(container, el, center) {
+    const top = el.offsetTop;
+    const h = el.offsetHeight;
+    const pad = container._bar ? container._bar.offsetHeight + 20 : 0;
+    const ch = container.clientHeight;
+    if (center) container.scrollTop = Math.max(0, top - ch / 2 + h / 2);
+    else if (top < container.scrollTop + pad + 4) container.scrollTop = top - pad - 4;
+    else if (top + h > container.scrollTop + ch - 4) container.scrollTop = top + h - ch + 4;
+  }
+
+  /* Show the deepest column in full and start the strip on a column boundary, never mid-column. */
+  function alignCols(smooth) {
+    const cols = [...colsEl.children];
+    for (const c of cols) c.style.removeProperty('min-width');
+    if (!cols.length || narrow()) return;
+    const last = cols[cols.length - 1];
+    const end = last.offsetLeft + last.offsetWidth;
+    const need = end - colsEl.clientWidth;
+    let left = 0;
+    if (need > 0) {
+      left = (cols.find((c) => c.offsetLeft >= need) || last).offsetLeft;
+      // Too little room to land on that boundary: widen the deepest column to fill the gap.
+      const shortBy = colsEl.clientWidth - (end - left);
+      if (shortBy > 0) last.style.minWidth = `${last.offsetWidth + shortBy}px`;
+    }
+    colsEl.scrollTo({ left, behavior: smooth && motionOK() ? 'smooth' : 'auto' });
+  }
+  colsEl.addEventListener('scroll', () => {
+    colsEl.parentElement.classList.toggle('cols-scrolled', colsEl.scrollLeft > 1);
+  }, { passive: true });
+
+  function renderCols() {
+    const ch = chainFrom(state.sel);
+    const dirs = state.sel.dir ? ch : ch.slice(0, -1);
+    const want = dirs.map(colFor);
+    const have = [...colsEl.children];
+    let i = 0;
+    while (i < have.length && have[i] === want[i]) i++;
+    for (let j = have.length - 1; j >= i; j--) have[j].remove();
+    const added = new Set(want.slice(i));
+    added.forEach((el) => colsEl.append(el));
+    const active = Math.max(0, ch.length - 2);
+    state.mcol = Math.min(Math.max(state.mcol, 0), want.length - 1);
+    want.forEach((el, k) => {
+      const selNode = ch[k + 1];
+      const row = selNode ? document.getElementById('n' + selNode.id) : null;
+      if (el._sel !== row) {
+        if (el._sel) { el._sel.classList.remove('sel'); el._sel.setAttribute('aria-selected', 'false'); }
+        if (row) { row.classList.add('sel'); row.setAttribute('aria-selected', 'true'); }
+        el._sel = row;
+      }
+      if (row) el.setAttribute('aria-activedescendant', row.id);
+      else el.removeAttribute('aria-activedescendant');
+      el.classList.toggle('active', k === active);
+      el.tabIndex = k === active ? 0 : -1;
+      el.classList.toggle('m-show', k === state.mcol);
+      if (row && (added.has(el) || k === active)) revealIn(el, row, added.has(el));
+    });
+    alignCols(added.size > 0);
+    return want[active];
+  }
+
+  /* ---------- Flat list ---------- */
+  let listKey = '';
+  let listItems = [];
+  let listSelRow = null;
+
+  function highlight(text, q) {
+    if (!q) return esc(text);
+    const i = text.toLowerCase().indexOf(q);
+    if (i < 0) return esc(text);
+    return esc(text.slice(0, i)) + '<mark>' + esc(text.slice(i, i + q.length)) + '</mark>' + esc(text.slice(i + q.length));
+  }
+
+  function matchFile(n, q) {
+    const f = n.f;
+    const name = n.name.toLowerCase();
+    if (name.includes(q)) return { rank: name.startsWith(q) ? 0 : 1, why: 'Name' };
+    if (f.path.toLowerCase().includes(q)) return { rank: 2, why: 'Path', text: f.path };
+    const e = f.entry ? entryByName.get(f.entry) : null;
+    if (e) {
+      if (e.name.toLowerCase().includes(q)) return { rank: 2, why: 'Catalogue', text: e.name };
+      const tac = e.tactics.find((x) => x.toLowerCase().includes(q));
+      if (tac) return { rank: 3, why: 'Tactic', text: tac };
+      const tech = e.techniques.find((x) => x.id.toLowerCase().includes(q) || x.name.toLowerCase().includes(q));
+      if (tech) return { rank: 3, why: 'Technique', text: `${tech.id} ${tech.name}` };
+    }
+    if (f.summary && f.summary.toLowerCase().includes(q)) return { rank: 3, why: 'Summary', text: f.summary };
+    if (f.signing.identifier && f.signing.identifier.toLowerCase().includes(q)) {
+      return { rank: 3, why: 'Identifier', text: f.signing.identifier };
+    }
+    for (const registration of (f.xpc || [])) {
+      const service = registration.mach_services.find((x) => x.name.toLowerCase().includes(q));
+      if (service) return { rank: 3, why: 'Mach service', text: service.name };
+      if (registration.label.toLowerCase().includes(q)) return { rank: 3, why: 'Launch label', text: registration.label };
+    }
+    const keys = Object.keys(f.entitlements || {}).filter((k) => k.toLowerCase().includes(q));
+    if (keys.length) return { rank: 4, why: 'Entitlement', text: keys[0].trim() + (keys.length > 1 ? ` and ${keys.length - 1} more` : '') };
+    return null;
+  }
+
+  function searchItems(q) {
+    const out = [];
+    for (const n of files) {
+      const m = matchFile(n, q);
+      if (m) out.push({ n, m });
+    }
+    out.sort((a, b) => a.m.rank - b.m.rank || byName(a.n, b.n));
+    return out;
+  }
+
+  function buildList() {
+    const q = state.query.toLowerCase();
+    let head;
+    if (state.mode === 'folder') {
+      const s = smartByKey.get(state.folder);
+      listItems = s.items.map((n) => ({ n, m: null }));
+      head = `${glyph(s.glyph, s.cls, s.fill)}<div><h2>${esc(s.label)} <span class="muted" style="font-weight:400">${s.items.length} items</span></h2><p>${esc(s.blurb)}</p></div>`;
+      listEl.dataset.kind = 'folder';
+    } else {
+      listItems = searchItems(q);
+      head = `${glyph('search', 'c-muted')}<div><h2>Searching “${esc(state.query)}” <span class="muted" style="font-weight:400">${listItems.length} ${listItems.length === 1 ? 'match' : 'matches'}</span></h2>` +
+        `<p>Matches names and paths first, then catalogue entries, tactics, ATT&amp;CK techniques, man summaries, signing identifiers and entitlement keys.</p></div>`;
+      listEl.dataset.kind = 'search';
+    }
+    $('#list-head').innerHTML = head;
+    listBody.setAttribute('aria-label', state.mode === 'folder' ? smartByKey.get(state.folder).label : `Search results for ${state.query}`);
+    listBody.innerHTML = listItems.length ? listItems.map(({ n, m }) => {
+      const where = n.parent.path;
+      const match = m && m.why !== 'Name'
+        ? `<span class="sub">${esc(m.why)}:</span> ${highlight(m.text, q)}` : '<span class="sub">Name</span>';
+      const words = traitWords(n.t);
+      return `<div class="lrow" role="option" aria-selected="false" id="l${n.id}" data-id="${n.id}" aria-label="${esc(n.path)}${words ? ', ' + words : ''}">` +
+        `${iconFor(n)}<span class="c-name">${m ? highlight(n.name, q) : esc(n.name)}</span>` +
+        `<span class="c-where sub" title="${esc(where)}">${esc(where)}</span>` +
+        `<span class="c-match" title="${esc(m && m.text ? m.text : '')}">${match}</span>` +
+        `<span class="gl">${glyphsHtml(n.t)}</span></div>`;
+    }).join('') : `<p class="empty">No files match “${esc(state.query)}”.</p>`;
+    listBody.scrollTop = 0;
+    listSelRow = null;
+  }
+
+  function renderList() {
+    const key = `${state.mode}|${state.folder}|${state.query}`;
+    if (key !== listKey) { buildList(); listKey = key; }
+    const row = state.sel ? document.getElementById('l' + state.sel.id) : null;
+    if (listSelRow !== row) {
+      if (listSelRow) { listSelRow.classList.remove('sel'); listSelRow.setAttribute('aria-selected', 'false'); }
+      if (row) { row.classList.add('sel'); row.setAttribute('aria-selected', 'true'); }
+      listSelRow = row;
+    }
+    if (row) { listBody.setAttribute('aria-activedescendant', row.id); revealIn(listBody, row, false); }
+    else listBody.removeAttribute('aria-activedescendant');
+  }
+
+  /* ---------- Inspector ---------- */
+  const openState = {};
+  const sec = (key, title, count, body, defOpen = true) => {
+    const open = key in openState ? openState[key] : defOpen;
+    return `<details class="sec" data-k="${key}"${open ? ' open' : ''}><summary>${esc(title)}` +
+      `${count != null ? ` <span class="cnt">${count}</span>` : ''}</summary><div class="sb">${body}</div></details>`;
+  };
+  const kv = (rows) => `<dl class="kv">${rows.filter(Boolean).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${v}</dd>`).join('')}</dl>`;
+  const goBtn = (path, label) => `<button class="linkbtn" type="button" data-go="${esc(path)}">${esc(label ?? path)}</button>`;
+
+  function kindOf(n) {
+    const f = n.f;
+    if (f.link) return 'Symbolic link';
+    if (n.t.script) return 'Script';
+    if (n.t.unreadable && !f.signing.format) return 'Executable';
+    if ((f.signing.format || '').startsWith('app bundle')) return 'Executable inside an app bundle';
+    if ((f.signing.format || '').startsWith('Mach-O')) return 'Unix executable';
+    return 'Executable';
+  }
+
+  function resolveLink(n) {
+    const target = n.f.link;
+    if (!target) return null;
+    const base = target.startsWith('/') ? [] : n.parent.path.split('/').filter(Boolean);
+    for (const part of target.split('/')) {
+      if (!part || part === '.') continue;
+      if (part === '..') base.pop(); else base.push(part);
+    }
+    return '/' + base.join('/');
+  }
+
+  const secs = (html) => `<div class="isecs">${html}</div>`;
+
+  function inspectHeader(n, kind, size, extra) {
+    return `<div class="ihead">${iconFor(n, true)}<div><h2>${esc(n === root ? D.facts.hostname : n.name)}</h2>` +
+      `<p>${esc(kind)}</p></div>${size ? `<div class="sz">${esc(size)}</div>` : ''}</div>${extra || ''}`;
+  }
+
+  function secGeneral(n) {
+    const f = n.f;
+    const fm = /^(.*?)\s*\((.*)\)$/.exec(f.signing.format || '');
+    const target = resolveLink(n);
+    const hash = f.sha256
+      ? `<div class="hash">${f.sha256.match(/.{8}/g).map((s) => `<span>${s}</span>`).join('')}</div>` +
+        `<button class="copy" type="button" data-copy="${f.sha256}">Copy hash</button>`
+      : `<span class="muted">Not computed: ${esc(f.signing.error || 'file unreadable')}</span>`;
+    return sec('general', 'General', null, kv([
+      ['Kind:', esc(kindOf(n))],
+      f.summary && ['Summary:', esc(f.summary)],
+      fm ? ['Format:', esc(fm[1])] : (f.signing.format && ['Format:', esc(f.signing.format)]),
+      fm && ['Architectures:', esc(fm[2].split(/\s+/).join(', '))],
+      ['Size:', f.size == null ? 'Unknown' : `${fmtBytes(f.size)} <span class="muted">(${fmtNum(f.size)} bytes)</span>`],
+      ['Where:', goBtn(n.parent.path)],
+      target && ['Points to:', nodes.has(target) ? goBtn(target) : `<span class="mono">${esc(f.link)}</span>`],
+      ['SIP:', !n.t.statOk ? '<span class="muted">Unknown: the scan couldn\'t stat this file</span>'
+        : n.t.sip ? '<span class="dot ok"></span>Protected <span class="muted">(restricted flag)</span>'
+          : '<span class="dot bad"></span>Not protected by SIP'],
+      ['File flags:', f.bsd_flags.length ? `<span class="mono">${esc(f.bsd_flags.join(', '))}</span>` : '<span class="muted">None</span>'],
+      ['SHA-256:', hash],
+    ]));
+  }
+
+  function secEntry(n, e) {
+    const others = e.paths.filter((p) => p.path !== n.path);
+    const statusNote = e.status === 'inactive-shim'
+      ? `<p class="callout warn">${glyph('shim', 'c-lol')}<span>This path is an inactive developer-tools shim. The developer directory on this host is “${esc(D.facts.developer_dir)}”, so running it prompts to install the tools rather than running ${esc(e.name)}.</span></p>`
+      : '';
+    const body = `<p class="lede">${esc(e.abuse)}</p>` +
+      (e.description && e.description !== n.f.summary ? `<p class="note" style="margin:-4px 0 10px">${esc(e.description)}</p>` : '') +
+      kv([
+        e.name !== n.name && ['Entry:', esc(e.name)],
+        ['Needs:', e.privilege === 'root' ? '<span class="needs">Root</span>' : 'Any user'],
+        ['Tactics:', esc(e.tactics.join(', '))],
+        ['Techniques:', `<ul class="tech">${e.techniques.map((t) =>
+          `<li><a href="${attackUrl(t.id)}" target="_blank" rel="noopener">${esc(t.id)}</a><span>${esc(t.name)}</span></li>`).join('')}</ul>`],
+        others.length && ['Also at:', `<div class="chiplist">${others.map((p) =>
+          nodes.has(p.path) ? goBtn(p.path) : `<span class="muted mono">${esc(p.path)} (${esc(p.status)})</span>`).join('')}</div>`],
+      ]) + statusNote;
+    return sec('entry', 'Why it matters', null, body);
+  }
+
+  function secXpc(n, e) {
+    const registrations = n.f.xpc || [];
+    if (!registrations.length) return '';
+    const services = registrations.flatMap((r) => r.mach_services);
+    const markers = [...new Set(registrations.flatMap((r) => r.listener_markers))];
+    const isNsxpc = markers.includes('NSXPCListener') || markers.includes('shouldAcceptNewConnection');
+    const serviceRows = registrations.map((r) => r.mach_services.map((service) => {
+      const p = service.properties;
+      const notes = [];
+      if (p === false) notes.push('Disabled in plist');
+      if (p && typeof p === 'object' && p.HideUntilCheckIn === true) notes.push('Hidden until check-in');
+      if (p && typeof p === 'object' && p.ResetAtClose === true) notes.push('Reset at close');
+      return `<li><span class="cap-name mono">${esc(service.name)}</span>` +
+        `<span class="auth entitled">${isNsxpc ? 'NSXPC candidate' : 'Mach service'}</span>` +
+        `<span class="cap-how">${esc(r.run_context === 'system' ? 'System LaunchDaemon' : 'User LaunchAgent')}` +
+        `${notes.length ? ` · ${esc(notes.join(', '))}` : ''}</span></li>`;
+    }).join('')).join('');
+    const registrationsHtml = registrations.map((r) => kv([
+      ['Launch label:', `<span class="mono">${esc(r.label)}</span>`],
+      ['Run context:', r.run_context === 'system' ? 'System launchd domain' : 'Per-user launchd domain'],
+      ['Plist:', `<span class="mono">${esc(r.plist_path)}</span>`],
+    ])).join('');
+    const functionality = e && e.xpc_functionality
+      ? `<h4 class="sub-h first">Known functionality</h4><p class="lede">${esc(e.xpc_functionality)}</p>`
+      : '<h4 class="sub-h first">Known functionality</h4><p class="muted">Not yet documented in the catalogue.</p>';
+    const evidence = `<h4 class="sub-h">Registered Mach services</h4><ul class="cap-list">${serviceRows}</ul>` +
+      `<h4 class="sub-h">Static evidence</h4>${registrationsHtml}` +
+      kv([['Listener markers:', markers.length ? `<span class="mono">${esc(markers.join(', '))}</span>` : '<span class="muted">No recognized marker found</span>']]);
+    const caveat = '<p class="note">Candidate identification only. No Mach lookup or XPC connection was attempted. The scan did not enumerate exported selectors or test the daemon’s admission and authorization checks.</p>';
+    return sec('xpc', 'XPC server candidate', `${services.length} ${services.length === 1 ? 'service' : 'services'}`, functionality + evidence + caveat);
+  }
+
+  function parseMode(p) {
+    const tri = (s, sp) => ({
+      r: s[0] === 'r', w: s[1] === 'w', x: s[2] === 'x' || s[2] === sp,
+      sp: s[2] === sp || s[2] === sp.toUpperCase(), ch: s[2],
+    });
+    const u = tri(p.slice(1, 4), 's');
+    const g = tri(p.slice(4, 7), 's');
+    const o = tri(p.slice(7, 10), 't');
+    const dig = (t) => (t.r ? 4 : 0) + (t.w ? 2 : 0) + (t.x ? 1 : 0);
+    const special = (u.sp ? 4 : 0) + (g.sp ? 2 : 0) + (o.sp ? 1 : 0);
+    return { u, g, o, special, digits: [dig(u), dig(g), dig(o)] };
+  }
+
+  function secPerm(n) {
+    const f = n.f;
+    if (!f.perms) {
+      return sec('perm', 'Permissions', null, `<p class="muted">The scan couldn't read this file's mode or owner (${esc(f.signing.error || 'permission denied')}).</p>`);
+    }
+    const [user, group] = (f.owner || '?:?').split(':');
+    const m = parseMode(f.perms);
+    const cell = (on, letter, label, special) => {
+      const cls = special ? special : on ? 'on' : 'off';
+      return `<span class="cell ${cls}" role="cell" aria-label="${esc(label)}: ${on ? 'yes' : 'no'}${special ? `, ${special === 'suid' ? 'set user ID' : 'set group ID'}` : ''}">${on || special ? letter : '–'}</span>`;
+    };
+    const row = (lbl, who, t, spec, warnW, digit) =>
+      `<div class="pr" role="row"><span class="pl" role="rowheader">${lbl}</span><span class="pp" title="${esc(who)}">${esc(who)}</span>` +
+      cell(t.r, 'r', `${lbl} read`) +
+      (warnW && t.w ? `<span class="cell warn" role="cell" aria-label="${lbl} write: yes, unusual">w</span>` : cell(t.w, 'w', `${lbl} write`)) +
+      cell(t.x || t.sp, t.sp ? t.ch : 'x', `${lbl} execute`, t.sp ? spec : '') +
+      `<span class="od${t.sp ? (spec === 'suid' ? ' hot-u' : ' hot-g') : ''}" role="cell">${digit}</span></div>`;
+    const spCell = (on, label, cls) =>
+      `<span class="cell spc ${on ? cls : 'off'}" role="cell" aria-label="${label}: ${on ? 'on' : 'off'}">${label}</span>`;
+    const spCls = (m.u.sp ? ' hot-u' : '') + (m.g.sp ? ' hot-g' : '');
+    const matrix = `<div class="perm" role="table" aria-label="Permission matrix">` +
+      `<div class="pr" role="row"><span class="pl" role="rowheader">Special</span><span class="pp"></span>` +
+      spCell(m.u.sp, 'setuid', 'suid') + spCell(m.g.sp, 'setgid', 'sgid') + spCell(m.o.sp, 'sticky', 'on') +
+      `<span class="od${spCls}" role="cell">${m.special}</span></div>` +
+      `<div class="rule" aria-hidden="true"></div>` +
+      `<div class="pr" role="row"><span></span><span></span><span class="ph" role="columnheader">Read</span><span class="ph" role="columnheader">Write</span><span class="ph" role="columnheader">Execute</span><span class="ph oct" role="columnheader">Octal</span></div>` +
+      row('Owner', user, m.u, 'suid', false, m.digits[0]) +
+      row('Group', group, m.g, 'sgid', true, m.digits[1]) +
+      row('Everyone', 'others', m.o, '', true, m.digits[2]) +
+      `</div>`;
+    const sym = [...f.perms].map((c, i) =>
+      (i === 3 && m.u.sp) ? `<span class="hot-u">${esc(c)}</span>` : (i === 6 && m.g.sp) ? `<span class="hot-g">${esc(c)}</span>` : esc(c)).join('');
+    const modeLine = `<div class="modeline"><span class="oct" aria-label="Octal mode ${m.special}${m.digits.join('')}">` +
+      `<span class="${m.special ? spCls.trim() : 'muted'}">${m.special}</span>${m.digits.join('')}</span><span class="sym">${sym}</span></div>`;
+    const callouts = [];
+    if (m.u.sp) {
+      callouts.push(`<div class="callout suid">${glyph('key', 'c-suid')}<p><b>Set user ID is on.</b> Whoever runs this file, it runs as <b>${esc(user)}</b>. An option that reads, writes or spawns on the caller's behalf becomes a way to act as ${esc(user)}.</p></div>`);
+    }
+    if (m.g.sp) {
+      callouts.push(`<div class="callout sgid">${glyph('key', 'c-sgid')}<p><b>Set group ID is on.</b> It runs with the privileges of group <b>${esc(group)}</b>, whoever starts it.</p></div>`);
+    }
+    if (m.g.w || m.o.w) {
+      callouts.push(`<div class="callout warn">${glyph('warn', 'c-lol')}<p><b>Writable by ${m.o.w ? 'everyone' : `group ${esc(group)}`}.</b> Someone other than the owner can replace this file's contents.</p></div>`);
+    }
+    const whoRuns = m.o.x ? 'Any user' : m.g.x ? `${esc(user)} and members of ${esc(group)}` : m.u.x ? `Only ${esc(user)}` : 'Nobody (no execute bit)';
+    const runsAs = m.u.sp ? `<b>${esc(user)}</b>` : 'The user who starts it';
+    const runs = `<div class="runs">${kv([['Who can run:', whoRuns], ['Runs as:', runsAs + (m.g.sp ? `, with group <b>${esc(group)}</b>` : '')]])}</div>`;
+    return sec('perm', 'Permissions', null, matrix + modeLine + callouts.join('') + runs);
+  }
+
+  function certNode(name, i, len) {
+    const isRoot = i === len - 1 && len > 1;
+    const role = i === 0 && len > 1 ? 'Leaf certificate. Signed this file.'
+      : isRoot ? 'Root certificate authority. macOS trusts it as an anchor.' : 'Intermediate certificate authority';
+    const inner = isRoot ? '<path class="tick" d="M11 16.3l3.4 3.4 6.6-7"/>' : '<circle cx="16" cy="16" r="5"/>';
+    return `<li class="ce"><i></i><span>${i === 0 ? 'signed by' : 'issued by'}</span></li>` +
+      `<li class="cn"><span class="cg"><svg class="seal${isRoot ? ' root' : ''}" viewBox="0 0 32 32" aria-hidden="true"><path d="${SEAL}"/>${inner}</svg></span>` +
+      `<div><div class="ct">${esc(name)}</div><div class="cs">${role}</div></div></li>`;
+  }
+
+  function secSign(n) {
+    const s = n.f.signing;
+    const badges = [];
+    if (s.platform_binary) badges.push('Platform binary');
+    for (const fl of s.flags || []) badges.push(SIGN_FLAGS[fl] || fl);
+    const fileNode = `<li class="cn"><span class="cg">${iconFor(n)}</span><div><div class="ct">${esc(n.name)}</div>` +
+      `<div class="cs mono">${esc(s.identifier || (s.state === 'signed' ? 'No identifier' : 'No signing identifier'))}</div>` +
+      (badges.length ? `<div class="badges">${badges.map((b) => `<span class="badge">${esc(b)}</span>`).join('')}</div>` : '') + `</div></li>`;
+    let tail;
+    let note = '';
+    if (s.state === 'signed' && s.authorities.length) {
+      tail = s.authorities.map((a, i) => certNode(a, i, s.authorities.length)).join('');
+    } else if (s.state === 'signed') {
+      tail = `<li class="ce"><i></i><span>signed</span></li><li class="cn"><span class="cg"><svg class="seal" viewBox="0 0 32 32" aria-hidden="true"><path d="${SEAL}"/><circle cx="16" cy="16" r="5"/></svg></span><div><div class="ct">Ad hoc signature</div><div class="cs">No certificate chain</div></div></li>`;
+    } else if (s.state === 'unsigned') {
+      tail = `<li class="ce broken"><i></i><span>no signature</span></li>` +
+        `<li class="cn"><span class="cg"><svg class="seal none" viewBox="0 0 32 32" aria-hidden="true"><path d="${SEAL}"/><line x1="9" y1="23" x2="23" y2="9"/></svg></span>` +
+        `<div><div class="ct">Not signed</div><div class="cs">${esc((s.error || '').replace(n.path + ': ', '') || 'No code signature found')}</div></div></li>`;
+      note = n.t.script
+        ? '<p class="note">Scripts aren\'t code-signed. The interpreter named on the first line is what macOS checks when this runs.</p>'
+        : '<p class="note">An unsigned Mach-O in a system folder is unusual and worth a closer look.</p>';
+    } else {
+      tail = `<li class="ce broken"><i></i><span>couldn't read</span></li>` +
+        `<li class="cn"><span class="cg"><svg class="seal lock" viewBox="0 0 32 32" aria-hidden="true"><rect x="8" y="14" width="16" height="12" rx="2.5"/><path d="M11.5 14v-3a4.5 4.5 0 0 1 9 0v3"/></svg></span>` +
+        `<div><div class="ct">Signature unknown</div><div class="cs">${esc((s.error || '').replace(n.path + ': ', '') || 'Unreadable')}</div></div></li>`;
+      note = '<p class="note">The scanning account couldn\'t read this file, so its signature, hash and entitlements weren\'t collected. Re-scan as root to fill them in.</p>';
+    }
+    const chain = `<ol class="chain" aria-label="Code signing chain, leaf to root">${fileNode}${tail}</ol>`;
+    const details = s.state === 'signed' ? kv([
+      ['Team ID:', s.team_id ? `<span class="mono">${esc(s.team_id)}</span>` : (s.platform_binary ? 'None, as for all Apple platform binaries' : 'None')],
+      s.format && ['Format:', esc(s.format)],
+    ]) : '';
+    const summary = s.state === 'signed' ? (s.authorities[0] ? 'Apple' : 'Ad hoc') : s.state === 'unsigned' ? 'Unsigned' : 'Unknown';
+    return sec('sign', 'Code signature', summary, chain + note + details);
+  }
+
+  const rawEnts = (f) => f.entitlements || {};
+  const MORE = (label) => `<button class="more" type="button" data-more>${label}</button>`;
+  /* Entitlement values exactly as signed: arrays one item per line, dictionaries as JSON. */
+  function entValueHtml(v) {
+    if (Array.isArray(v)) {
+      const long = v.length > 6;
+      const items = v.map((x) => `<li>${esc(typeof x === 'string' ? x : JSON.stringify(x))}</li>`).join('');
+      return `<ul class="ev ev-list${long ? ' clamp' : ''}">${items}</ul>${long ? MORE(`Show all ${v.length}`) : ''}`;
+    }
+    if (v && typeof v === 'object') {
+      const text = JSON.stringify(v, null, 2);
+      const long = text.split('\n').length > 8;
+      return `<pre class="ev ev-json${long ? ' clamp' : ''}">${esc(text)}</pre>${long ? MORE('Show all') : ''}`;
+    }
+    const text = String(v);
+    const long = text.length > 110;
+    return `<div class="ev${long ? ' clamp' : ''}">${esc(text)}</div>${long ? MORE('Show all') : ''}`;
+  }
+
+  function secEnts(n) {
+    const ents = n.f.entitlements || {};
+    const keys = Object.keys(ents);
+    if (!keys.length) {
+      const why = n.t.unreadable ? 'Not collected: the file couldn\'t be read.' : n.t.script ? 'Scripts don\'t carry entitlements.' : 'This binary claims no entitlements.';
+      return sec('ents', 'Entitlements', 'None', `<p class="muted" style="margin:0">${why}</p>`);
+    }
+    const groups = new Map();
+    for (const k of keys) {
+      const meta = ENT[k] || { namespace: 'Other', title: k, summary: '', documented: false };
+      if (!groups.has(meta.namespace)) groups.set(meta.namespace, []);
+      groups.get(meta.namespace).push([k, meta]);
+    }
+    const order = [...groups.keys()].sort((a, b) => (NS_ORDER.indexOf(a) + 99) % 99 - (NS_ORDER.indexOf(b) + 99) % 99);
+    const body = order.map((ns) => {
+      const items = groups.get(ns).sort((a, b) => collator.compare(a[0].trim(), b[0].trim()));
+      const shared = [...new Set(items.filter(([, m]) => !m.documented).map(([, m]) => m.summary))];
+      const lis = items.map(([k, m]) => {
+        const raw = rawEnts(n.f)[k];
+        const simple = typeof raw === 'boolean';
+        const name = m.documented && m.url
+          ? `<a href="${esc(m.url)}" target="_blank" rel="noopener" title="${esc(m.title.trim())} — Apple documentation">${esc(k.trim())}</a>`
+          : esc(k.trim());
+        const tag = m.documented
+          ? '<span class="etag doc">Apple-documented</span>'
+          : '<span class="etag undoc">undocumented</span>';
+        const doc = m.documented
+          ? `<div class="edoc">${m.title.trim() === k.trim() ? '' : esc(m.title)}<p>${esc(m.summary)}</p></div>`
+          : (shared.length > 1 && m.summary ? `<div class="edoc"><p>${esc(m.summary)}</p></div>` : '');
+        return `<li><div class="ek"><span>${name}${tag}</span>${simple ? `<em>${raw}</em>` : ''}</div>` +
+          (simple ? '' : entValueHtml(raw)) + doc + `</li>`;
+      }).join('');
+      const blurb = shared.length === 1 && shared[0] ? `<p>${esc(shared[0])}</p>` : '';
+      return `<div class="ns"><h4>${esc(ns)} <span>${items.length}</span></h4>${blurb}<ul class="ekeys">${lis}</ul></div>`;
+    }).join('');
+    const privNote = n.t.priv ? `${n.t.priv} private` : null;
+    return sec('ents', 'Entitlements', `${keys.length}${privNote ? `, ${privNote}` : ''}`, body);
+  }
+
+  function secCmds(e) {
+    const body = e.examples.map((x) =>
+      `<div class="cmd"><h4>${esc(x.title)}${x.privilege === 'root' ? '<span class="needs">Needs root</span>' : ''}</h4>` +
+      `<pre>${esc(x.command)}</pre><p>${esc(x.explanation)}</p>` +
+      `<button class="copy" type="button" data-copy="${esc(x.command)}">Copy command</button></div>`).join('');
+    return sec('cmds', 'Worked commands', e.examples.length, body);
+  }
+
+  const tccLabel = (svc) => D.tcc_labels[svc] || svc;
+  const AUTH_WORD = { allowed: 'Allowed', denied: 'Denied', limited: 'Limited', unknown: 'Not decided' };
+  const authWord = (g) => AUTH_WORD[g.auth] || `Code ${g.auth_value}`;
+
+  /* What this binary can reach in TCC, by entitlement and by grant, and how its runtime is hardened. */
+  function secPrivacy(n) {
+    const f = n.f;
+    const raw = rawEnts(f);
+    const tccKeys = Object.keys(raw).filter((k) => k.startsWith('com.apple.private.tcc.'));
+    const byEnt = [];
+    for (const k of tccKeys) {
+      const services = Array.isArray(raw[k]) ? raw[k] : [];
+      if (k.startsWith('com.apple.private.tcc.allow') && services.length) {
+        for (const svc of services) {
+          byEnt.push(`<li><span class="cap-name">${esc(tccLabel(svc))}</span><span class="auth entitled">By entitlement</span>` +
+            `<span class="cap-how">No prompt: <span class="mono">${esc(k)}</span> lists <span class="mono">${esc(svc)}</span></span></li>`);
+        }
+      } else {
+        byEnt.push(`<li><span class="cap-name mono">${esc(k)}</span><span class="auth entitled">By entitlement</span>` +
+          `<span class="cap-how">${esc((ENT[k] && ENT[k].summary) || 'A private TCC entitlement.')}</span></li>`);
+      }
+    }
+    const byGrant = f.tcc.map((g) => `<li><span class="cap-name">${esc(tccLabel(g.service))}${g.target ? ` <span class="muted">of</span> <span class="mono">${esc(g.target)}</span>` : ''}</span>` +
+      `<span class="auth ${g.auth}">${esc(authWord(g))}</span>` +
+      `<span class="cap-how">${g.scope === 'system' ? 'System' : 'User'} TCC database, matched by ${g.client_type === 'path' ? 'path' : 'signing identifier'}</span></li>`);
+    const tccBody = byEnt.length || byGrant.length
+      ? `<ul class="cap-list">${byGrant.join('')}${byEnt.join('')}</ul>`
+      : '<p class="muted" style="margin:4px 0 0">No TCC grants on this Mac and no TCC entitlements.</p>';
+
+    const s = f.signing;
+    const hardened = (s.flags || []).includes('runtime');
+    const weakRows = n.t.weak.map((k) => `<li><span class="cap-name mono">${esc(k)}</span><span class="auth weak">Weakens</span>` +
+      `<span class="cap-how">${esc(D.runtime_weakeners[k])}</span></li>`).join('');
+    const [runState, runCls, runHow] = s.state !== 'signed' ? ['Not applicable', '', 'Only signed code can opt into the hardened runtime.']
+      : hardened ? ['On', 'on', 'Library validation, DYLD variable stripping and memory protections apply.']
+        : s.platform_binary ? ['Off', '', n.t.weak.length
+          ? 'Apple platform binaries are protected by the system instead, but the entitlements below loosen that protection.'
+          : 'Apple platform binaries are protected by the system instead.']
+          : ['Off', 'weak', 'Without it, DYLD_INSERT_LIBRARIES and unsigned libraries can load into this binary.'];
+    const runtime = `<ul class="cap-list"><li><span class="cap-name">Hardened runtime</span><span class="auth ${runCls}">${runState}</span>` +
+      `<span class="cap-how">${runHow}</span></li>${weakRows}</ul>`;
+    const body = `<h4 class="sub-h first">TCC</h4>${tccBody}` +
+      `<h4 class="sub-h">Code integrity</h4>${runtime}` +
+      (weakRows ? '' : '<p class="muted" style="margin:4px 0 0">No entitlements that weaken code-signing protections.</p>');
+    const notes = [];
+    if (f.tcc.some((g) => g.auth === 'allowed') || tccKeys.length) notes.push('TCC');
+    if (n.t.weak.length) notes.push('weakened');
+    return sec('tcc', 'Privacy and code integrity', notes.join(', ') || null, body);
+  }
+
+  function inspectFile(n) {
+    const f = n.f;
+    const e = f.entry ? entryByName.get(f.entry) : null;
+    const flags = traitList(n.t).map(([g, c, fl, l]) => `<span>${glyph(g, c, fl)}${esc(l)}</span>`).join('');
+    const reveal = state.mode !== 'browse'
+      ? `<div class="reveal"><button class="btn" type="button" data-go="${esc(n.path)}">Show in enclosing folder</button></div>` : '';
+    return inspectHeader(n, f.summary || kindOf(n), f.size != null ? fmtBytes(f.size) : '',
+      (flags ? `<div class="flagline">${flags}</div>` : '') + reveal) +
+      secs(secGeneral(n) + (e ? secEntry(n, e) : '') + secXpc(n, e) + (e ? secCmds(e) : '') + secPerm(n) + secPrivacy(n) + secSign(n) + secEnts(n));
+  }
+
+  function statRows(st, clickable) {
+    const rows = [
+      ['lolbins', 'lol', 'c-lol', true, 'Usable LOLBin paths', st.lol],
+      ['setid', 'key', 'c-suid', false, 'Setuid or setgid', st.setid],
+      ['private', 'shield', 'c-ent', true, 'Private entitlements', st.priv],
+      ['tcc', 'privacy', 'c-tcc', true, 'TCC access', st.tcc],
+      ['weak', 'inject', 'c-inj', false, 'Weakened runtime', st.weak],
+      ['scripts', 'code', 'c-muted', false, 'Scripts (unsigned)', st.script],
+      [null, 'shim', 'c-muted', false, 'Developer tools shims', st.shim],
+    ];
+    return `<ul class="stats">${rows.map(([k, g, c, fl, l, v]) =>
+      `<li>${glyph(g, c, fl)}${clickable && k ? `<button class="lbl" type="button" data-smart="${k}">${l}</button>` : `<span class="lbl">${l}</span>`}<span class="n">${fmtNum(v)}</span></li>`).join('')}</ul>`;
+  }
+
+  function nameList(list) {
+    return `<div class="names">${list.map((n) => goBtn(n.path, n.name)).join('')}</div>`;
+  }
+
+  const POWERFUL = new Set(['kTCCServiceAll', 'kTCCServiceSystemPolicyAllFiles', 'kTCCServiceAppleEvents',
+    'kTCCServiceAccessibility', 'kTCCServicePostEvent', 'kTCCServiceListenEvent', 'kTCCServiceScreenCapture',
+    'kTCCServiceSystemPolicySysAdminFiles', 'kTCCServiceDeveloperTool', 'kTCCServiceEndpointSecurityClient',
+    'kTCCServiceSystemPolicyAppBundles', 'kTCCServiceSystemPolicyAppData']);
+  function secHostTcc() {
+    const T = D.tcc;
+    const sources = T.sources.map((src) => {
+      const n = T.grants.filter((g) => g.scope === src.scope).length;
+      const label = src.scope === 'system' ? 'System:' : 'User:';
+      return [label, src.status === 'ok' ? `<span class="dot ok"></span>Read, ${fmtNum(n)} ${n === 1 ? 'grant' : 'grants'}`
+        : `<span class="dot bad"></span>${src.status === 'missing' ? 'Not found' : 'Couldn\'t read'}: <span class="muted">${esc(src.detail)}</span>`];
+    });
+    const power = T.grants.filter((g) => g.auth === 'allowed' && POWERFUL.has(g.service));
+    const clientHtml = (g) => g.client_type === 'path'
+      ? (nodes.has(g.client) ? goBtn(g.client) : `<span class="mono">${esc(g.client)}</span>`)
+      : `<span class="mono">${esc(g.client)}</span>`;
+    const byClient = new Map();
+    for (const g of power) {
+      if (!byClient.has(g.client)) byClient.set(g.client, []);
+      byClient.get(g.client).push(g);
+    }
+    const rows = [...byClient.values()].map((gs) => `<li><span class="cap-name">${clientHtml(gs[0])}</span>` +
+      `<span class="cap-how pills">${gs.map((g) => `<span class="auth allowed">${esc(tccLabel(g.service))}` +
+        `${g.target ? ` of <span class="mono">${esc(g.target)}</span>` : ''}</span>`).join('')}</span></li>`).join('');
+    const denied = T.grants.filter((g) => g.auth === 'denied' && POWERFUL.has(g.service)).length;
+    const body = (sources.length ? kv(sources) : '<p class="muted" style="margin:0">The scan didn\'t collect TCC data.</p>') +
+      (power.length ? `<h4 class="sub-h">Who holds powerful grants</h4><ul class="cap-list">${rows}</ul>` +
+        '<p class="note">TCC charges a request to the responsible app, so anything one of these clients launches, a LOLBin included, inherits its access.</p>' : '') +
+      (denied ? `<p class="note">${denied} powerful ${denied === 1 ? 'request was' : 'requests were'} denied.</p>` : '');
+    return sec('hosttcc', 'Privacy grants on this Mac', power.length ? `${power.length} powerful` : null, body);
+  }
+
+  function inspectRoot() {
+    const F = D.facts;
+    const host = kv([
+      ['macOS:', `${esc(F.product_version)} (${esc(F.build_version)})`],
+      ['Kernel:', `Darwin ${esc(F.kernel)}`],
+      ['Chip:', esc(F.arch)],
+      ['SIP:', `<span class="dot ${sipOn ? 'ok' : 'bad'}"></span>${esc(F.sip)}`],
+      ['Gatekeeper:', `<span class="dot ${gkOn ? 'ok' : 'bad'}"></span>${esc(F.gatekeeper)}`],
+      ['Scanned:', esc(scannedAt)],
+      ['Scanned as:', `<span class="mono">${esc(F.user)}</span>`],
+      ['Dev tools:', F.developer_dir === 'none' ? 'Not installed' : `<span class="mono">${esc(F.developer_dir)}</span>`],
+    ]);
+    const scope = kv([
+      ['Folders:', `<div class="names">${D.scan_dirs.map((p) => goBtn(p)).join('')}</div>`],
+      ['Catalogue:', `${esc(D.catalog_version)}, ${D.entries.length} entries`],
+      ['Tool:', esc(D.tool_version)],
+    ]);
+    const usableEntries = D.entries.filter((e) => e.status === 'present').length;
+    return inspectHeader(root, 'Scanned host', `${fmtNum(files.length)} usable LOLBin paths`) +
+      secs(sec('host', 'Host', null, host) + secHostTcc() +
+      sec('found', 'Apple LOLBins on this Mac', `${fmtNum(usableEntries)} entries`, statRows(root.st, true)) +
+      sec('scope', 'Probe scope', null, scope));
+  }
+
+  function inspectDir(n) {
+    const direct = n.kids.filter((k) => !k.dir);
+    const sub = n.kids.filter((k) => k.dir);
+    const lol = direct.filter((k) => k.t.lol);
+    const setid = direct.filter((k) => k.t.suid || k.t.sgid);
+    const general = kv([
+      ['Kind:', 'Folder'],
+      ['Where:', n.parent === root ? goBtn('/', 'Macintosh HD') : goBtn(n.parent.path)],
+      ['Contains:', `${fmtNum(n.st.files)} LOLBin paths${sub.length ? ` in ${sub.length + (direct.length ? 1 : 0)} folders` : ''}`],
+    ]);
+    let notable = '';
+    if (lol.length) notable += `<h4 class="sub-h">Apple LOLBins here</h4>${nameList(lol)}`;
+    if (setid.length) notable += `<h4 class="sub-h">Setuid or setgid here</h4>${nameList(setid)}`;
+    return inspectHeader(n, n.path, `${fmtNum(n.st.files)} items`) +
+      secs(sec('general', 'General', null, general) +
+      sec('inside', 'Inside this folder', null, statRows(n.st, false) + notable));
+  }
+
+  function inspectSmart(s) {
+    const per = new Map();
+    for (const n of s.items) per.set(n.parent.path, (per.get(n.parent.path) || 0) + 1);
+    const rows = [...per.entries()].sort((a, b) => b[1] - a[1]);
+    const where = `<ul class="stats">${rows.map(([p, c]) =>
+      `<li>${glyph('folder', 'g-loc')}<button class="lbl" type="button" data-go="${esc(p)}">${esc(p)}</button><span class="n">${c}</span></li>`).join('')}</ul>`;
+    return `<div class="ihead"><svg class="ic big" aria-hidden="true"><use href="#i-folder"/></svg><div><h2>${esc(s.label)}</h2><p>Smart folder</p></div><div class="sz">${s.items.length} items</div></div>` +
+      `<div class="flagline" style="color:var(--text2)">${esc(s.blurb)}</div>` +
+      sec('where', 'Where they are', rows.length + (rows.length === 1 ? ' folder' : ' folders'), where) +
+      `<p class="note" style="padding:0 20px">Use ↑ and ↓ in the list to inspect each file.</p>`;
+  }
+
+  function inspectSearch() {
+    const per = new Map();
+    for (const { m } of listItems) per.set(m.why, (per.get(m.why) || 0) + 1);
+    const rows = `<ul class="stats">${[...per.entries()].map(([w, c]) => `<li><span class="lbl">${esc(w)}</span><span class="n">${c}</span></li>`).join('')}</ul>`;
+    return `<div class="ihead"><svg class="ic big" aria-hidden="true"><use href="#i-folder"/></svg><div><h2>Search results</h2><p>“${esc(state.query)}”</p></div><div class="sz">${listItems.length} matches</div></div>` +
+      (listItems.length ? sec('matched', 'Matched on', null, rows) : '');
+  }
+
+  let inspKey = '';
+  function renderInspector() {
+    const key = `${state.mode}|${state.folder}|${state.query}|${state.sel ? state.sel.id : '-'}`;
+    if (key === inspKey) return;
+    inspKey = key;
+    let html;
+    if (state.sel && !state.sel.dir) html = inspectFile(state.sel);
+    else if (state.mode === 'folder') html = inspectSmart(smartByKey.get(state.folder));
+    else if (state.mode === 'search') html = inspectSearch();
+    else if (state.sel === root) html = inspectRoot();
+    else html = inspectDir(state.sel);
+    inspEl.innerHTML = html;
+    inspEl.scrollTop = 0;
+    splitSecs();
+  }
+
+  const isWide = () => inspEl.clientWidth >= 760;
+  let splitWide = null;
+  /* Keep reading order: the first k sections go left, choosing k so both stacks are about as tall. */
+  function splitSecs() {
+    const box = inspEl.querySelector('.isecs');
+    if (!box) return;
+    let left = box.querySelector(':scope > .stack.l');
+    let right = box.querySelector(':scope > .stack.r');
+    if (!left) {
+      left = document.createElement('div');
+      left.className = 'stack l';
+      right = document.createElement('div');
+      right.className = 'stack r';
+      const grip = document.createElement('div');
+      grip.className = 'colgrip';
+      grip.tabIndex = 0;
+      grip.setAttribute('role', 'separator');
+      grip.setAttribute('aria-orientation', 'vertical');
+      grip.setAttribute('aria-label', 'Section column width');
+      grip.title = 'Drag to resize. Double-click to split evenly.';
+      const parts = [...box.querySelectorAll(':scope > details.sec:not([data-k="ents"])')];
+      box.prepend(left, grip, right);
+      left.append(...parts);
+    } else {
+      left.append(...right.children);
+    }
+    splitWide = isWide();
+    const parts = [...left.children];
+    if (parts.length < 2) return;
+    const heights = parts.map((el) => el.offsetHeight);
+    const total = heights.reduce((a, b) => a + b, 0);
+    let k = 1;
+    let run = heights[0];
+    let best = Math.abs(total / 2 - run);
+    for (let i = 1; i < parts.length - 1; i++) {
+      run += heights[i];
+      const gap = Math.abs(total / 2 - run);
+      if (gap < best) { best = gap; k = i + 1; }
+    }
+    right.append(...parts.slice(k));
+  }
+  new ResizeObserver(() => { if (splitWide !== null && isWide() !== splitWide) splitSecs(); }).observe(inspEl);
+
+  /* ---------- Path bar, title, status ---------- */
+  function renderChrome() {
+    const n = state.sel;
+    const pb = $('#pathbar');
+    if (n) {
+      const ch = chainOf(n);
+      pb.innerHTML = ch.map((x, i) =>
+        `${i ? '<svg class="g sepg" aria-hidden="true"><use href="#g-chev"/></svg>' : ''}<button type="button" data-go="${esc(x.path)}"${i === ch.length - 1 ? ' aria-current="location"' : ''}>${iconFor(x)}${esc(x.name)}</button>`).join('');
+      pb.scrollLeft = pb.scrollWidth;
+    } else {
+      pb.innerHTML = '';
+    }
+
+    let title;
+    let sub = '';
+    let status;
+    if (state.mode === 'browse') {
+      const dir = n.dir ? n : n.parent;
+      title = dir === root ? 'Macintosh HD' : dir.name;
+      sub = dir === root ? D.facts.hostname : dir.path;
+      const container = n === state.base ? n : n.parent;
+      status = `${fmtNum(container.kids.length)} ${container.kids.length === 1 ? 'item' : 'items'}` + (container.st.lol ? `, ${container.st.lol} LOLBin paths` : '') +
+        (container.st.setid ? `, ${container.st.setid} setuid or setgid` : '');
+    } else if (state.mode === 'folder') {
+      const s = smartByKey.get(state.folder);
+      title = s.label; sub = 'Smart folder'; status = `${s.items.length} ${s.items.length === 1 ? 'item' : 'items'}`;
+    } else {
+      title = `Searching “${state.query}”`; sub = 'All usable Apple LOLBins'; status = `${listItems.length} matches`;
+    }
+    if (narrow()) {
+      if (state.mpane === 'inspector' && n) { title = n === root ? D.facts.hostname : n.name; sub = n.path; }
+      else if (state.mpane === 'cols' && state.mode === 'browse') {
+        const d = chainFrom(n)[state.mcol] || state.base;
+        title = d === root ? 'Macintosh HD' : d.name; sub = d === root ? D.facts.hostname : d.path;
+      } else if (state.mpane === 'sidebar') { title = D.facts.hostname; sub = `macOS ${D.facts.product_version}`; }
+    }
+    $('#t-main').textContent = title;
+    $('#t-sub').textContent = sub;
+    $('#status').textContent = status;
+    document.title = `${n && n !== root && state.mode !== 'search' ? n.name : title}, LOLBins on ${D.facts.hostname}`;
+    $('#mback-l').textContent = backLabel();
+    $('#hback').disabled = histIdx <= 0;
+    $('#hfwd').disabled = histIdx >= histMax;
+    $('#qclear').hidden = !qEl.value;
+  }
+
+  function backLabel() {
+    if (state.mpane === 'inspector') {
+      if (state.mode === 'browse') return state.sel.parent ? (state.sel.parent === root ? 'Macintosh HD' : state.sel.parent.name) : 'Locations';
+      return state.mode === 'folder' ? smartByKey.get(state.folder).label : 'Results';
+    }
+    if (state.mpane === 'cols' && state.mcol > 0) {
+      const d = chainFrom(state.sel)[state.mcol - 1];
+      return d === root ? 'Macintosh HD' : d.name;
+    }
+    return 'Locations';
+  }
+
+  /* ---------- Render + routing ---------- */
+  function render() {
+    document.body.dataset.mpane = state.mpane;
+    document.body.dataset.mode = state.mode;
+    const browsing = state.mode === 'browse';
+    colsEl.hidden = !browsing;
+    listEl.hidden = browsing;
+    let focusTarget = null;
+    if (browsing) focusTarget = renderCols();
+    else { renderList(); focusTarget = listBody; }
+    renderInspector();
+    renderSidebar();
+    renderChrome();
+    return focusTarget;
+  }
+
+  function hashFor() {
+    const p = state.sel ? encodeURI(state.sel.path).replace(/#/g, '%23').replace(/\?/g, '%3F') : '';
+    if (state.mode === 'folder') return `#${p}?in=${state.folder}`;
+    if (state.mode === 'search') return `#${p}?q=${encodeURIComponent(state.query)}`;
+    return `#${p || '/'}`;
+  }
+  function ctxFor() {
+    if (state.mode === 'folder') return 'f:' + state.folder;
+    if (state.mode === 'search') return 's';
+    return 'b:' + (state.sel.dir ? state.sel : state.sel.parent).path;
+  }
+
+  function commit() {
+    const h = hashFor();
+    const ctx = ctxFor();
+    if (h !== location.hash) {
+      const push = ctx !== lastCtx;
+      try {
+        if (push) { histIdx++; histMax = histIdx; history.pushState({ idx: histIdx }, '', h); }
+        else history.replaceState({ idx: histIdx }, '', h);
+      } catch (_) {
+        location.replace(h);
+      }
+    }
+    lastCtx = ctx;
+  }
+
+  function update({ focus = false } = {}) {
+    const target = render();
+    commit();
+    if (focus && target && !narrow()) target.focus({ preventScroll: true });
+    else if (focus && target && narrow() && (state.mpane === 'cols' || state.mpane === 'list')) target.focus({ preventScroll: true });
+  }
+
+  function applyHash() {
+    const raw = location.hash.slice(1);
+    const qi = raw.indexOf('?');
+    const pathPart = qi >= 0 ? raw.slice(0, qi) : raw;
+    const params = new URLSearchParams(qi >= 0 ? raw.slice(qi + 1) : '');
+    let path = '';
+    try { path = decodeURI(pathPart).replace(/%23/g, '#').replace(/%3F/g, '?'); } catch (_) { path = pathPart; }
+    if (path.length > 1) path = path.replace(/\/+$/, '');
+    const node = nodes.get(path) || null;
+    const folder = params.get('in');
+    const query = params.get('q');
+    if (folder && smartByKey.has(folder)) {
+      state.mode = 'folder'; state.folder = folder; state.query = ''; qEl.value = '';
+      state.sel = node && !node.dir && smartByKey.get(folder).items.includes(node) ? node : null;
+      state.mpane = state.sel ? 'inspector' : 'list';
+    } else if (query) {
+      state.mode = 'search'; state.query = query; state.folder = null; qEl.value = query;
+      state.sel = node && !node.dir && matchFile(node, query.toLowerCase()) ? node : null;
+      state.mpane = state.sel ? 'inspector' : 'list';
+    } else {
+      state.mode = 'browse'; state.folder = null; state.query = ''; qEl.value = '';
+      state.sel = node || root;
+      if (locPaths.includes(state.sel.path)) state.base = state.sel;
+      else fitBase(state.sel);
+      browseSel = state.sel;
+      if (state.sel === root) { state.mpane = 'sidebar'; state.mcol = 0; }
+      else if (state.sel.dir) { state.mpane = 'cols'; state.mcol = depth(state.sel); }
+      else { state.mpane = 'inspector'; state.mcol = depth(state.sel) - 1; }
+    }
+    histIdx = history.state && typeof history.state.idx === 'number' ? history.state.idx : histIdx;
+    render();
+    lastCtx = ctxFor();
+  }
+
+  /* ---------- Actions ---------- */
+  function fitBase(n) {
+    if (chainOf(n).includes(state.base)) return;
+    const holders = locPaths.map((p) => nodes.get(p)).filter((loc) => chainOf(n).includes(loc));
+    state.base = holders.reduce((a, b) => (chainOf(b).length > chainOf(a).length ? b : a), root);
+  }
+
+  function goLocation(path) {
+    const n = nodes.get(path);
+    if (!n) return;
+    state.base = n;
+    goPath(path);
+  }
+
+  function selectNode(n, via) {
+    if (n && state.mode === 'browse') fitBase(n);
+    state.sel = n;
+    if (state.mode === 'browse') browseSel = n;
+    if (narrow()) {
+      if (state.mode === 'browse') {
+        if (via === 'tap') {
+          if (n.dir) { state.mpane = 'cols'; state.mcol = depth(n); }
+          else { state.mpane = 'inspector'; state.mcol = depth(n) - 1; }
+        } else { state.mpane = 'cols'; state.mcol = Math.max(0, depth(n) - 1); }
+      } else if (via === 'tap' && n) state.mpane = 'inspector';
+    }
+    update({ focus: via !== 'tap' || !narrow() });
+  }
+
+  function goPath(path) {
+    const n = nodes.get(path);
+    if (!n) return;
+    state.mode = 'browse'; state.folder = null; state.query = ''; qEl.value = '';
+    listKey = '';
+    selectNode(n, 'tap');
+    if (!narrow()) renderCols().focus({ preventScroll: true });
+  }
+
+  function openSmart(key) {
+    state.mode = 'folder'; state.folder = key; state.query = ''; qEl.value = '';
+    state.sel = null;
+    state.mpane = 'list';
+    update();
+    if (!narrow()) listBody.focus({ preventScroll: true });
+  }
+
+  function runSearch(q) {
+    if (!q.trim()) { exitSearch(); return; }
+    if (state.mode !== 'search') state.sel = null;
+    state.mode = 'search'; state.folder = null; state.query = q.trim();
+    if (state.sel && !matchFile(state.sel, state.query.toLowerCase())) state.sel = null;
+    state.mpane = 'list';
+    update();
+  }
+
+  function exitSearch() {
+    qEl.value = '';
+    if (state.mode !== 'search') { renderChrome(); return; }
+    state.mode = 'browse'; state.query = ''; state.sel = browseSel;
+    state.mpane = state.sel === root ? 'sidebar' : state.sel.dir ? 'cols' : 'inspector';
+    state.mcol = Math.max(0, depth(state.sel) - (state.sel.dir ? 0 : 1));
+    update({ focus: true });
+  }
+
+  function goBackPane() {
+    if (state.mpane === 'inspector') {
+      if (state.mode === 'browse') { state.mpane = 'cols'; state.mcol = Math.max(0, depth(state.sel) - 1); }
+      else state.mpane = 'list';
+    } else if (state.mpane === 'cols' && state.mcol > 0) state.mcol--;
+    else state.mpane = 'sidebar';
+    render();
+  }
+
+  /* ---------- Keyboard ---------- */
+  let typeBuf = '';
+  let typeTimer = 0;
+  function typeSelect(ch, items) {
+    clearTimeout(typeTimer);
+    typeBuf += ch.toLowerCase();
+    typeTimer = setTimeout(() => { typeBuf = ''; }, 900);
+    return items.find((n) => n.name.toLowerCase().startsWith(typeBuf)) || null;
+  }
+  const isTypeKey = (e) => e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey && e.key !== ' ';
+
+  colsEl.addEventListener('keydown', (e) => {
+    if (e.target.closest('.colbar')) { colBarKey(e); return; }
+    const n = state.sel;
+    const container = n === state.base ? n : n.parent;
+    const items = visibleKids(container);
+    const idx = n === state.base ? -1 : items.indexOf(n);
+    let next = null;
+    switch (e.key) {
+      case 'ArrowDown': next = items[Math.min(items.length - 1, idx + 1)]; break;
+      case 'ArrowUp': next = idx <= 0 ? items[0] : items[idx - 1]; break;
+      case 'Home': next = items[0]; break;
+      case 'End': next = items[items.length - 1]; break;
+      case 'PageDown': next = items[Math.min(items.length - 1, idx + 12)]; break;
+      case 'PageUp': next = items[Math.max(0, idx - 12)]; break;
+      case 'ArrowRight':
+      case 'Enter':
+        if (n.dir && visibleKids(n).length) next = visibleKids(n)[0];
+        else if (!n.dir && narrow() && e.key === 'Enter') { state.mpane = 'inspector'; render(); e.preventDefault(); return; }
+        break;
+      case 'ArrowLeft':
+        if (n !== state.base && n.parent !== state.base) next = n.parent;
+        break;
+      default:
+        if (isTypeKey(e)) next = typeSelect(e.key, items);
+        else return;
+    }
+    e.preventDefault();
+    if (next && next !== n) selectNode(next, 'key');
+  });
+
+  function colBarKey(e) {
+    const col = e.target.closest('.col');
+    if (e.key === 'ArrowDown' && e.target.matches('.cf-q')) {
+      const first = visibleKids(col._dir)[0];
+      e.preventDefault();
+      if (first) selectNode(first, 'key');
+    } else if (e.key === 'Escape') {
+      const q = col._bar.querySelector('.cf-q');
+      e.preventDefault();
+      e.stopPropagation();
+      if (q.value) { q.value = ''; applyColFilter(col); } else col.focus({ preventScroll: true });
+    }
+  }
+  colsEl.addEventListener('input', (e) => { const col = e.target.closest('.col'); if (col && col._bar) applyColFilter(col); });
+  colsEl.addEventListener('change', (e) => { const col = e.target.closest('.col'); if (col && col._bar) applyColFilter(col); });
+
+  /* ---------- Resizing: inspector divider and column edges ---------- */
+  const COL_MIN = 140;
+  const COL_MAX = 640;
+  const INSP_MIN = 320;
+  const PANE_MIN = 240;
+  const EDGE = 6;
+  const mainEl = $('.main');
+  const splitEl = $('#split');
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (_) { return null; } },
+    set(k, v) {
+      try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (_) { /* storage may be blocked */ }
+    },
+  };
+  const colWidths = new Map();
+  try {
+    for (const [path, w] of Object.entries(JSON.parse(store.get('pb.colWidths') || '{}'))) colWidths.set(path, w);
+  } catch (_) { /* a corrupt saved value just means default widths */ }
+  const saveColWidths = () => store.set('pb.colWidths', JSON.stringify(Object.fromEntries(colWidths)));
+
+  const keepActiveVisible = () => alignCols(false);
+  new ResizeObserver(keepActiveVisible).observe(colsEl);
+
+  function setInspW(w, save) {
+    if (w == null) {
+      mainEl.classList.remove('fixed');
+      mainEl.style.removeProperty('--insp-w');
+    } else {
+      const max = Math.max(INSP_MIN, mainEl.clientWidth - PANE_MIN - splitEl.offsetWidth);
+      const px = Math.round(Math.min(max, Math.max(INSP_MIN, w)));
+      mainEl.classList.add('fixed');
+      mainEl.style.setProperty('--insp-w', px + 'px');
+    }
+    splitEl.setAttribute('aria-valuemin', INSP_MIN);
+    splitEl.setAttribute('aria-valuenow', Math.round(inspEl.getBoundingClientRect().width));
+    if (save) store.set('pb.inspW', w == null ? null : String(Math.round(inspEl.getBoundingClientRect().width)));
+    keepActiveVisible();
+  }
+
+  function dragWith(e, target, onMove, onEnd) {
+    target.setPointerCapture(e.pointerId);
+    document.body.classList.add('resizing');
+    const move = (ev) => onMove(ev.clientX);
+    const end = () => {
+      document.body.classList.remove('resizing');
+      target.removeEventListener('pointermove', move);
+      onEnd();
+    };
+    target.addEventListener('pointermove', move);
+    target.addEventListener('pointerup', end, { once: true });
+    target.addEventListener('pointercancel', end, { once: true });
+    e.preventDefault();
+  }
+
+  splitEl.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    const startX = e.clientX;
+    const startW = inspEl.getBoundingClientRect().width;
+    splitEl.classList.add('drag');
+    dragWith(e, splitEl, (x) => setInspW(startW - (x - startX), false), () => {
+      splitEl.classList.remove('drag');
+      setInspW(inspEl.getBoundingClientRect().width, true);
+    });
+  });
+  splitEl.addEventListener('dblclick', () => setInspW(null, true));
+  splitEl.addEventListener('keydown', (e) => {
+    const step = { ArrowLeft: 16, ArrowRight: -16 }[e.key];
+    if (!step) return;
+    setInspW(inspEl.getBoundingClientRect().width + step, true);
+    e.preventDefault();
+  });
+
+  /* The left edge of a column is the grip for the column before it, as in Finder. */
+  function edgeCol(e) {
+    const col = e.target.closest && e.target.closest('.col');
+    if (!col || !col.previousElementSibling || narrow()) return null;
+    const x = e.clientX - col.getBoundingClientRect().left;
+    return x >= 0 && x < EDGE ? col.previousElementSibling : null;
+  }
+  function setColWidth(col, w) {
+    const px = Math.round(Math.min(COL_MAX, Math.max(COL_MIN, w)));
+    col.style.setProperty('--w', px + 'px');
+    colWidths.set(col._dir.path, px);
+  }
+  let colResizing = false;
+  let swallowClick = false;
+  colsEl.addEventListener('pointermove', (e) => { if (!colResizing) colsEl.classList.toggle('edge', !!edgeCol(e)); });
+  colsEl.addEventListener('pointerleave', () => { if (!colResizing) colsEl.classList.remove('edge'); });
+  colsEl.addEventListener('pointerdown', (e) => {
+    const col = e.button === 0 ? edgeCol(e) : null;
+    if (!col) return;
+    const startX = e.clientX;
+    const startW = col.getBoundingClientRect().width;
+    colResizing = true;
+    swallowClick = true;
+    dragWith(e, colsEl, (x) => setColWidth(col, startW + x - startX), () => {
+      colResizing = false;
+      setTimeout(() => { swallowClick = false; }, 0);
+      saveColWidths();
+    });
+  });
+  colsEl.addEventListener('click', (e) => {
+    if (swallowClick) { swallowClick = false; e.stopPropagation(); }
+  }, true);
+  colsEl.addEventListener('dblclick', (e) => {
+    const col = edgeCol(e);
+    if (!col) return;
+    col.style.removeProperty('--w');
+    colWidths.delete(col._dir.path);
+    saveColWidths();
+  });
+  function setSecSplit(f, save) {
+    if (f == null) {
+      inspEl.style.removeProperty('--lf');
+      inspEl.style.removeProperty('--rf');
+    } else {
+      // Scaled so each share stays at least 1fr; below that, grid leaves free space unused.
+      inspEl.style.setProperty('--lf', `${(f * 10).toFixed(3)}fr`);
+      inspEl.style.setProperty('--rf', `${((1 - f) * 10).toFixed(3)}fr`);
+    }
+    if (save) store.set('pb.secSplit', f == null ? null : f.toFixed(3));
+  }
+  const secFraction = () => {
+    const l = inspEl.querySelector('.stack.l');
+    const box = inspEl.querySelector('.isecs');
+    return l && box ? l.getBoundingClientRect().width / box.getBoundingClientRect().width : 0.5;
+  };
+  const clampSplit = (f, width) => {
+    const min = Math.min(0.5, 300 / Math.max(1, width));
+    return Math.min(1 - min, Math.max(min, f));
+  };
+  inspEl.addEventListener('pointerdown', (e) => {
+    const grip = e.button === 0 && e.target.closest('.colgrip');
+    if (!grip) return;
+    const rect = grip.parentElement.getBoundingClientRect();
+    grip.classList.add('drag');
+    dragWith(e, grip, (x) => setSecSplit(clampSplit((x - rect.left) / rect.width, rect.width), false), () => {
+      grip.classList.remove('drag');
+      setSecSplit(clampSplit(secFraction(), rect.width), true);
+    });
+  });
+  inspEl.addEventListener('dblclick', (e) => { if (e.target.closest('.colgrip')) setSecSplit(null, true); });
+  inspEl.addEventListener('keydown', (e) => {
+    if (!e.target.closest('.colgrip')) return;
+    const step = { ArrowLeft: -0.04, ArrowRight: 0.04 }[e.key];
+    if (!step) return;
+    const box = inspEl.querySelector('.isecs');
+    setSecSplit(clampSplit(secFraction() + step, box.getBoundingClientRect().width), true);
+    e.preventDefault();
+  });
+  const sideBtn = $('#side-toggle');
+  function setSidebar(hidden, save) {
+    document.body.classList.toggle('side-off', hidden);
+    sideBtn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
+    const label = hidden ? 'Show sidebar' : 'Hide sidebar';
+    sideBtn.setAttribute('aria-label', label);
+    sideBtn.title = `${label} (⌃⌘S)`;
+    if (save) store.set('pb.sideOff', hidden ? '1' : null);
+  }
+  sideBtn.addEventListener('click', () => setSidebar(!document.body.classList.contains('side-off'), true));
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.metaKey && e.key.toLowerCase() === 's' && !narrow()) {
+      setSidebar(!document.body.classList.contains('side-off'), true);
+      e.preventDefault();
+    }
+  });
+  setSidebar(store.get('pb.sideOff') === '1', false);
+  { const saved = Number(store.get('pb.secSplit')); if (saved) setSecSplit(saved, false); }
+  { const saved = Number(store.get('pb.inspW')); if (saved) setInspW(saved, false); }
+  store.set('pb.colW', null);
+
+  listBody.addEventListener('keydown', (e) => {
+    const items = listItems.map((x) => x.n);
+    if (!items.length) return;
+    const idx = state.sel ? items.indexOf(state.sel) : -1;
+    let next = null;
+    switch (e.key) {
+      case 'ArrowDown': next = items[Math.min(items.length - 1, idx + 1)]; break;
+      case 'ArrowUp': next = idx <= 0 ? items[0] : items[idx - 1]; break;
+      case 'Home': next = items[0]; break;
+      case 'End': next = items[items.length - 1]; break;
+      case 'PageDown': next = items[Math.min(items.length - 1, idx + 15)]; break;
+      case 'PageUp': next = items[Math.max(0, idx - 15)]; break;
+      case 'Enter':
+        if (state.sel) { if (narrow()) { state.mpane = 'inspector'; render(); } else goPath(state.sel.path); }
+        e.preventDefault();
+        return;
+      default:
+        if (isTypeKey(e)) next = typeSelect(e.key, items);
+        else return;
+    }
+    e.preventDefault();
+    if (next && next !== state.sel) selectNode(next, 'key');
+  });
+
+  qEl.addEventListener('input', () => {
+    clearTimeout(qEl._t);
+    $('#qclear').hidden = !qEl.value;
+    qEl._t = setTimeout(() => runSearch(qEl.value), 120);
+  });
+  qEl.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { e.preventDefault(); exitSearch(); }
+    else if (e.key === 'ArrowDown' || e.key === 'Enter') {
+      if (state.mode !== 'search') return;
+      e.preventDefault();
+      const first = listItems[0];
+      if (first && !state.sel) selectNode(first.n, 'key');
+      listBody.focus({ preventScroll: true });
+    }
+  });
+  $('#qclear').addEventListener('click', () => { exitSearch(); qEl.focus(); });
+
+  document.addEventListener('keydown', (e) => {
+    const typing = e.target instanceof HTMLInputElement;
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'f') { e.preventDefault(); qEl.focus(); qEl.select(); }
+    else if (e.key === '/' && !typing) { e.preventDefault(); qEl.focus(); qEl.select(); }
+    else if (e.key === 'Escape' && !typing && state.mode === 'search') exitSearch();
+  });
+
+  /* ---------- Pointer ---------- */
+  const idIndex = new Map([...nodes.values()].map((n) => [n.id, n]));
+  colsEl.addEventListener('click', (e) => {
+    const row = e.target.closest('.row');
+    if (!row) return;
+    const n = idIndex.get(+row.dataset.id);
+    if (!n) return;
+    selectNode(n, 'tap');
+    if (!narrow()) row.closest('.col').focus({ preventScroll: true });
+  });
+  listBody.addEventListener('click', (e) => {
+    const row = e.target.closest('.lrow');
+    if (!row) return;
+    const n = idIndex.get(+row.dataset.id);
+    selectNode(n, 'tap');
+    if (!narrow()) listBody.focus({ preventScroll: true });
+  });
+  listBody.addEventListener('dblclick', (e) => {
+    const row = e.target.closest('.lrow');
+    if (row) goPath(idIndex.get(+row.dataset.id).path);
+  });
+
+  document.addEventListener('click', (e) => {
+    const t = e.target.closest('[data-go],[data-smart],[data-loc],[data-copy],[data-more]');
+    if (!t) return;
+    if (t.tagName === 'A' && t.dataset.go) e.preventDefault();
+    if (t.dataset.loc) goLocation(t.dataset.loc);
+    else if (t.dataset.smart) openSmart(t.dataset.smart);
+    else if (t.dataset.go) goPath(t.dataset.go);
+    else if (t.dataset.copy != null) copyText(t.dataset.copy, t);
+    else if (t.hasAttribute('data-more')) {
+      const v = t.previousElementSibling;
+      const clamped = v.classList.toggle('clamp');
+      t.textContent = clamped ? 'Show all' : 'Show less';
+    }
+  });
+
+  inspEl.addEventListener('toggle', (e) => {
+    const d = e.target;
+    if (d.matches && d.matches('details.sec')) openState[d.dataset.k] = d.open;
+  }, true);
+
+  function copyText(text, btn) {
+    const done = () => {
+      const old = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(() => { btn.textContent = old; }, 1200);
+    };
+    const fallback = () => {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.append(ta); ta.select();
+      try { document.execCommand('copy'); done(); } finally { ta.remove(); }
+    };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback);
+    else fallback();
+  }
+
+  $('#hback').addEventListener('click', () => history.back());
+  $('#hfwd').addEventListener('click', () => history.forward());
+  $('#mback').addEventListener('click', goBackPane);
+  window.addEventListener('popstate', applyHash);
+  window.addEventListener('hashchange', applyHash);
+  matchMedia('(max-width: 820px)').addEventListener('change', () => render());
+
+  /* ---------- Boot ---------- */
+  buildSidebar();
+  try { history.replaceState({ idx: 0 }, '', location.hash || '#/'); } catch (_) { /* file:// may refuse; hash still works */ }
+  applyHash();
+  if (!narrow()) {
+    if (state.mode === 'browse') colsEl.querySelector('.col.active')?.focus({ preventScroll: true });
+    else listBody.focus({ preventScroll: true });
+  }
+})();
+</script>
+</body>
+</html>
