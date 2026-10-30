@@ -1,0 +1,64 @@
+{
+  "skill_name": "macos-lolbins",
+  "evals": [
+    {
+      "id": 1,
+      "name": "live-report-parallels",
+      "prompt": "Run a fresh LOLBins scan of my Parallels VM (it's called macOS) and give me the HTML report so I can browse it.",
+      "expected_output": "A new scan via scan_target with a prlctl exec command; the lolbins report (index.html + assets/data.js) exactly as lolbins renders it, and its path.",
+      "files": [],
+      "assertions": [
+        "Scanned the Parallels VM with scan_target using a prlctl exec command",
+        "Report index.html is byte-identical to lolbins' report page",
+        "Report data.js is byte-identical to `lolbins render` of the scan's scan.json",
+        "Report contains the same 116 binaries as the reference report for this VM",
+        "Answer gives the path to the report's index.html",
+        "No report files were written or edited by hand"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "rebuild-deleted-report",
+      "prompt": "I accidentally deleted the HTML report for my Oct 27 LOLBin scan (the scan.json is still there). Can you get the report back? No new scan please, the VM has changed since.",
+      "expected_output": "render_report on macOS-20261027T002354Z, no new scan; the rebuilt report is byte-identical to `lolbins render`.",
+      "files": [],
+      "assertions": [
+        "Did not run a new scan",
+        "Rebuilt index.html is byte-identical to lolbins' report page",
+        "Rebuilt data.js is byte-identical to `lolbins render` of the scan's scan.json",
+        "Answer gives the path to the rebuilt index.html",
+        "No report files were written or edited by hand"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "tcc-without-prompt-question",
+      "prompt": "Based on my latest LOLBin scan, which binaries on that VM can get at privacy-protected data without the user ever seeing a TCC prompt? For each one, explain how an attacker would use it and link the relevant MITRE ATT&CK techniques and tactics.",
+      "expected_output": "Uses the existing scan; names osascript, tccutil, socketfilterfw and screencapture; links techniques and tactics; notes ATT&CK v20 changes for revoked techniques; Apple links only for documented entitlements.",
+      "files": [],
+      "assertions": [
+        "Did not run a new scan",
+        "Names all four TCC-entitled binaries: osascript, tccutil, socketfilterfw, screencapture",
+        "Links the ATT&CK technique pages T1059.002, T1562.001, T1562.004 and T1113",
+        "Links at least one ATT&CK tactic page (attack.mitre.org/tactics/TA...)",
+        "Notes the ATT&CK v20 replacement for a revoked technique (T1685 or T1686)",
+        "Every developer.apple.com link is a documented-entitlement page lolbins knows (none invented)",
+        "Says which scan the answer is based on (scan_id or collection date)"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "vmware-fusion-guidance",
+      "prompt": "I also have a macOS Sonoma guest running in VMware Fusion on this Mac. How do I get the same LOLBin report for it? Walk me through it.",
+      "expected_output": "Explains that vmrun cannot pipe the probe to a macOS guest; gives the SSH route (Remote Login, BatchMode, guest IP via vmrun getGuestIPAddress) and the get_probe_script -> import_probe_output route; scans nothing.",
+      "files": [],
+      "assertions": [
+        "Did not scan any target",
+        "Explains that vmrun cannot pass the probe to the guest on stdin",
+        "Gives the SSH route with Remote Login and BatchMode",
+        "Gives the get_probe_script then import_probe_output route",
+        "Says how to find the guest's address (vmrun getGuestIPAddress)"
+      ]
+    }
+  ]
+}
