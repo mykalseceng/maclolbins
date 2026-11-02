@@ -1,6 +1,7 @@
 # MITRE ATT&CK for the MacLOLBins catalogue
 
-The catalogue maps each binary to ATT&CK Enterprise techniques; tactics are derived from them.
+The catalogue maps each capability rule and each note to ATT&CK Enterprise techniques; tactics
+are derived from them.
 The report and the MCP server show the catalogue's IDs and names. Link them as below, and add the
 v20 notes where they apply.
 
@@ -53,6 +54,7 @@ replacement.
 | T1564.001 Hide Artifacts: Hidden Files and Directories | Defense Evasion | tactic Stealth |
 | T1497.001 Virtualization/Sandbox Evasion: System Checks | Defense Evasion, Discovery | tactics Stealth, Discovery |
 | T1548.003 Abuse Elevation Control Mechanism: Sudo and Sudo Caching | Privilege Escalation, Defense Evasion | tactic Privilege Escalation only |
+| T1055 Process Injection | Defense Evasion, Privilege Escalation | tactics Stealth, Privilege Escalation |
 
 How to write it: catalogue ID and link first, because that is what the report shows, then the
 v20 equivalent. For example: "[T1562.001](https://attack.mitre.org/techniques/T1562/001/)

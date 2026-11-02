@@ -6,12 +6,12 @@ from conftest import f_record, probe_text
 from maclolbins.catalog import load_catalog
 from maclolbins.probe import parse_output
 from maclolbins.reports import safe_name, scan_ids, scan_path, write_report
-from maclolbins.scan import DEFAULT_SCAN_DIRS, ScanFileError, build_scan, load_scan
+from maclolbins.scan import ScanFileError, build_scan, load_scan
 
 
 def make_scan(target: str):
     probe = parse_output(probe_text(f_record("/usr/bin/curl")))
-    return build_scan(load_catalog(), probe, target, list(DEFAULT_SCAN_DIRS))
+    return build_scan(load_catalog(), probe, target)
 
 
 def test_write_report_names_the_directory_by_scan_id(tmp_path: Path):

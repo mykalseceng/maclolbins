@@ -1,15 +1,17 @@
 ---
 name: maclolbins
-description: Scan a Mac or macOS VM for living-off-the-land binaries (LOLBins) with the MacLOLBins MCP server, reproduce the MacLOLBins HTML report exactly, and answer questions about the binaries it finds — abuse, MITRE ATT&CK techniques and tactics with links, entitlements with Apple documentation links, code signing, SIP and TCC. Use this skill whenever the user mentions macOS LOLBins or LOOBins, a LOLBin report or scan, abusable or dual-use macOS system binaries, entitlements or TCC/SIP posture of Apple binaries, ATT&CK mapping for macOS tools, or scanning a Parallels, VMware Fusion, UTM, Tart or local Mac target, even if they don't name the MacLOLBins tools.
+description: Scan a Mac or macOS VM for living-off-the-land binaries (LOLBins) with the MacLOLBins MCP server, reproduce the MacLOLBins HTML report exactly, and answer questions about the binaries it finds — capabilities and the imports that show them, abuse, MITRE ATT&CK techniques and tactics with links, entitlements with Apple documentation links, code signing, SIP and TCC. Use this skill whenever the user mentions macOS LOLBins or LOOBins, a LOLBin report or scan, abusable or dual-use macOS system binaries, entitlements or TCC/SIP posture of Apple binaries, ATT&CK mapping for macOS tools, or scanning a Parallels, VMware Fusion, UTM, Tart or local Mac target, even if they don't name the MacLOLBins tools.
 ---
 
 # MacLOLBins
 
-The MacLOLBins MCP server (tools appear as `mcp__maclolbins__<tool>`) probes a Mac read-only, matches
-what it finds against a catalogue of abusable Apple binaries, and renders an HTML report.
+The MacLOLBins MCP server (tools appear as `mcp__maclolbins__<tool>`) probes a Mac read-only. It
+inventories every executable on the target's default PATH, keeps the Apple binaries, ranks them
+by evidence (capabilities from the symbols they import and libraries they link, and privilege
+signals), and renders an HTML report.
 This skill covers the two things people want from it, often in the same conversation:
 
-- **The report.** A browsable `index.html` showing every catalogued binary on the target. It
+- **The report.** A browsable `index.html` showing every reported binary on the target. It
   is produced by MacLOLBins itself, so reproducing it means running the right tools, not writing
   HTML.
 - **Answers.** Targeted questions such as "which of these can skip TCC prompts?" or "how is
@@ -56,42 +58,49 @@ if the user wants something different, that is an answer or a new artifact, name
   name; it becomes the `scan_id` prefix. Tell the user it takes a few minutes before starting.
 - **Out-of-band probe output:** `import_probe_output(output_path, target)`.
 - **Existing scan:** `render_report(scan_id)` rebuilds `index.html` and `data.js` with the
-  current catalogue. Use it when the report is missing, or the user asks to regenerate it.
+  current catalogue, so edited capability rules and notes reach an old scan. Use it when the
+  report is missing, or the user asks to regenerate it.
 
 Each returns a summary. Give the user:
 
 - the report as a clickable `file://<path>#/` link, and `open <path>` to open it; the page needs
   no network,
 - the target, macOS version and build, and when it was collected,
-- `lolbins_in_report`, plus `catalogued_present` out of the catalogue size and the names in
-  `catalogued_absent`,
+- `lolbins_in_report` out of `inventoried` executables, and the PATH that was scanned
+  (`path_dirs`),
 - whether both TCC databases were readable (`tcc_sources`); an unreadable one means TCC grants
   are missing from the report, usually for lack of Full Disk Access.
 
 The report deep-links to a binary with `index.html#/usr/bin/curl`, so `file://<path>#<binary
 path>` points the user straight at its inspector. Counts of the report and of the scan differ by
-design: the report shows only catalogued binaries that are Apple platform-signed or
-SIP-protected, excluding inactive developer shims (`references/report-and-flags.md`).
+design: the report keeps only Apple binaries and leaves out inactive developer shims
+(`references/report-and-flags.md`). A binary with score 0 is in the report with no capability
+or privilege evidence; say so rather than calling it dangerous.
 
 ## Answering questions
 
 Use `list_lolbins` to find binaries and `get_lolbin` for one binary's full record; both answer
-from the same data the report renders, so answers and report agree. `list_lolbins` filters
-(all must match):
+from the same data the report renders, so answers and report agree. `list_lolbins` returns rows
+strongest evidence first (`score`) and filters (all must match):
 
-- `query`: text in path, name, description, technique, signing identifier or entitlement keys
+- `query`: text in path, name, description, capability, technique, note, signing identifier or
+  entitlement keys
+- `capability`: a capability id, e.g. `fetches-urls`, `runs-programs`, `reads-keychain`
 - `tactic`: an ATT&CK tactic name as the catalogue spells it (e.g. `Persistence`)
-- `flag`: one flag, e.g. `setuid`, `tcc-entitled`, `tcc-granted`, `weakened-runtime`
+- `flag`: one flag, e.g. `setuid`, `private-entitled`, `tcc-entitled`, `weakened-runtime`
 - `entitlement`: a key or prefix, e.g. `com.apple.private.tcc.`
 
-`get_lolbin` takes a path, or a catalogue name when it maps to one path. `explain_entitlement`
+`get_lolbin` takes a path, or a file name when it maps to one path. `explain_entitlement`
 explains any key without a scan.
 
 When you write the answer:
 
 - **Ground it in the scan.** Name the `scan_id` and macOS version, and say what the data does
-  not show: XPC entries are candidates from launchd plists and strings, not tested
+  not show: a capability means the code imports an API, not that a caller can drive it from
+  the command line; XPC entries are candidates from launchd plists and strings, not tested
   connections; TCC grants exist only if the database was readable.
+- **Quote the evidence.** When you say a binary can do something, name the capability and the
+  `evidence` that shows it (`_curl_easy_perform`, `libcurl`), so the claim can be checked.
 - **Link ATT&CK.** Every technique has a `url`; use it. Link tactics by ID from
   `references/attack.md`. The catalogue predates ATT&CK v20 (October 2026): where a technique
   or tactic changed, give the catalogue's ID first (it matches the report) and the v20
@@ -100,19 +109,23 @@ When you write the answer:
 - **Link entitlements.** Use `apple_docs_url` when `documented` is true. An undocumented key
   has no Apple page; say it is undocumented and give its namespace meaning (`summary`),
   rather than guessing a URL.
-- **Separate how a binary reaches TCC data.** A `com.apple.private.tcc.allow` entitlement
-  (`tcc_services` names the services) works with no prompt on any Mac; a `tcc_grants` entry
-  is a decision recorded on this Mac. Say which applies.
+- **Separate how a binary reaches TCC data.** A `com.apple.private.tcc.allow` or
+  `.allow.overridable` entitlement (`tcc_services` names the services) works with no prompt on
+  any Mac; a `tcc_grants` entry is a decision recorded on this Mac. Say which applies. Other
+  `com.apple.private.tcc.*` keys, such as `allow-prompting`, have empty `tcc_services`: they
+  are not known to grant access, so explain them by `summary` and never as a grant.
 - **Explain flags in words.** `references/report-and-flags.md` says what each flag means and
   why it matters.
-- **Use worked commands as they are.** `examples` come from the catalogue, with their privilege
-  level; quote them for detection engineering and testing on systems the user is authorised to
-  use, without inventing variants that go further than the catalogue does.
+- **Use worked commands as they are.** `examples` come from hand-written catalogue notes, with
+  their privilege level, and only some binaries have them (`has_note`). Quote them for
+  detection engineering and testing on systems the user is authorised to use, without inventing
+  variants that go further than the catalogue does.
 
 A one-binary answer usually reads well in this order: what it is (description), why it matters
-(abuse, techniques with links, tactics), what this Mac shows (signing, hardened runtime, SIP,
-entitlements with links, TCC, XPC), then the worked commands and a deep link into the report.
-Lists of several binaries read better as a table with path, techniques and the relevant flags.
+(capabilities with evidence, the note's abuse text if any, techniques with links, tactics), what
+this Mac shows (signing, hardened runtime, SIP, entitlements with links, TCC, XPC), then any
+worked commands and a deep link into the report. Lists of several binaries read better as a
+table with path, score, capabilities and the relevant flags.
 
 ## When the tools are not connected
 
@@ -126,5 +139,6 @@ same report; the CLI scan only reaches Parallels VMs.
 
 - `references/attack.md`: tactic IDs and links, and the ATT&CK v20 changes that affect the
   catalogue. Read it whenever an answer names tactics or techniques.
-- `references/report-and-flags.md`: what the report shows and leaves out, every flag, signing
-  states and path statuses. Read it when explaining flags, counts or the report's contents.
+- `references/report-and-flags.md`: the PATH scope, what the report keeps and leaves out,
+  capabilities and the evidence score, notes, every flag and signing state. Read it when
+  explaining scope, counts, flags or the report's contents.

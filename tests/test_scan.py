@@ -2,15 +2,24 @@ import json
 from pathlib import Path
 
 import pytest
-from conftest import APPLE_CODESIGN, ENTITLEMENTS_PLIST, SHIM_CODESIGN, f_record, probe_text
+from conftest import (
+    APPLE_CODESIGN,
+    ENTITLEMENTS_PLIST,
+    SHIM_CODESIGN,
+    c_record,
+    f_record,
+    probe_text,
+)
 
 from maclolbins.catalog import load_catalog
 from maclolbins.probe import parse_codesign, parse_output
 from maclolbins.scan import (
+    SCHEMA_VERSION,
     ScanFileError,
     build_scan,
     file_flags,
     load_scan,
+    rejoin_catalog,
     save_scan,
 )
 
@@ -20,68 +29,105 @@ version = "test"
 
 [techniques]
 "T1059" = { name = "Command and Scripting Interpreter", tactics = ["Execution"] }
+"T1105" = { name = "Ingress Tool Transfer", tactics = ["Command and Control"] }
 
-[[binary]]
+[[capability]]
+id = "fetches-urls"
+title = "Makes HTTP requests"
+summary = "Uses libcurl."
+techniques = ["T1105"]
+symbols = ["_curl_easy_perform"]
+libraries = ["libcurl"]
+
+[[capability]]
+id = "runs-programs"
+title = "Starts other programs"
+summary = "Spawns processes."
+techniques = ["T1059"]
+symbols = ["_posix_spawn"]
+
+[[note]]
 name = "shells"
 paths = ["/bin/zsh", "/bin/ksh"]
-techniques = ["T1059"]
-privilege = "user"
-abuse = "n"
-
-[[binary]]
-name = "swift"
-paths = ["/usr/bin/swift"]
-techniques = ["T1059"]
-privilege = "user"
-abuse = "n"
-
-[[binary]]
-name = "gone"
-paths = ["/usr/bin/gone"]
 techniques = ["T1059"]
 privilege = "user"
 abuse = "n"
 """
 
 
-@pytest.fixture
-def catalog(tmp_path: Path):
+def load(tmp_path: Path, text: str):
     path = tmp_path / "catalog.toml"
-    path.write_text(CATALOG)
+    path.write_text(text)
     return load_catalog(path)
 
 
-def scan_for(catalog, developer_dir: str):
+@pytest.fixture
+def catalog(tmp_path: Path):
+    return load(tmp_path, CATALOG)
+
+
+def scan_for(catalog):
     probe = parse_output(
         probe_text(
             f_record("/bin/zsh"),
+            c_record("/bin/zsh", "_posix_spawn", "/usr/lib/libSystem.B.dylib"),
+            f_record("/usr/bin/curl"),
+            c_record("/usr/bin/curl", "_curl_easy_perform", "/usr/lib/libcurl.4.dylib"),
             f_record("/usr/bin/swift", codesign=SHIM_CODESIGN),
             f_record("/usr/libexec/helper", ents=ENTITLEMENTS_PLIST),
-            "M\t/bin/ksh",
-            "M\t/usr/bin/gone",
-            facts={"developer_dir": developer_dir},
+            facts={"developer_dir": "none", "path_dirs": "/usr/bin:/bin"},
         )
     )
-    return build_scan(catalog, probe, target="vm", scan_dirs=["/bin"])
+    return build_scan(catalog, probe, target="vm")
 
 
-def test_entry_status_uses_best_path_and_shim_activity(catalog):
-    without_tools = {e["name"]: e for e in scan_for(catalog, "none")["entries"]}
-    assert without_tools["shells"]["status"] == "present"
-    assert [p["status"] for p in without_tools["shells"]["paths"]] == ["present", "missing"]
-    assert without_tools["swift"]["status"] == "inactive-shim"
-    assert without_tools["gone"]["status"] == "missing"
-
-    with_tools = {e["name"]: e for e in scan_for(catalog, "/Library/Developer")["entries"]}
-    assert with_tools["swift"]["status"] == "present"
+def test_scan_dirs_come_from_the_targets_path(catalog):
+    assert scan_for(catalog)["scan_dirs"] == ["/usr/bin", "/bin"]
 
 
-def test_inventory_links_catalog_entries_and_entitlements(catalog):
-    inventory = {i["file"]["path"]: i for i in scan_for(catalog, "none")["inventory"]}
-    assert inventory["/bin/zsh"]["catalog_entry"] == "shells"
+def test_inventory_matches_capabilities_with_their_evidence(catalog):
+    inventory = {i["file"]["path"]: i for i in scan_for(catalog)["inventory"]}
+    assert inventory["/usr/bin/curl"]["capabilities"] == [
+        {"id": "fetches-urls", "evidence": ["/usr/lib/libcurl.4.dylib", "_curl_easy_perform"]}
+    ]
+    assert inventory["/bin/zsh"]["capabilities"] == [
+        {"id": "runs-programs", "evidence": ["_posix_spawn"]}
+    ]
+    assert inventory["/usr/bin/swift"]["capabilities"] == []
+
+
+def test_inventory_links_notes_by_path(catalog):
+    inventory = {i["file"]["path"]: i for i in scan_for(catalog)["inventory"]}
+    assert inventory["/bin/zsh"]["note"] == "shells"
     helper = inventory["/usr/libexec/helper"]
-    assert helper["catalog_entry"] is None
+    assert helper["note"] is None
     assert "com.apple.private.tcc.allow" in helper["file"]["entitlements"]
+
+
+def test_scan_copies_rule_and_note_definitions(catalog):
+    scan = scan_for(catalog)
+    fetches = next(c for c in scan["capabilities"] if c["id"] == "fetches-urls")
+    assert fetches["techniques"] == [{"id": "T1105", "name": "Ingress Tool Transfer"}]
+    assert fetches["tactics"] == ["Command and Control"]
+    (note,) = scan["notes"]
+    assert (note["name"], note["paths"], note["tactics"]) == (
+        "shells",
+        ["/bin/zsh", "/bin/ksh"],
+        ["Execution"],
+    )
+
+
+def test_rejoin_catalog_applies_edited_rules_to_a_saved_scan(catalog, tmp_path):
+    scan = scan_for(catalog)
+    edited = load(
+        tmp_path, CATALOG.replace('symbols = ["_posix_spawn"]', 'symbols = ["_curl_easy_perform"]')
+    )
+    rebuilt = {i["file"]["path"]: i for i in rejoin_catalog(scan, edited)["inventory"]}
+    assert [c["id"] for c in rebuilt["/usr/bin/curl"]["capabilities"]] == [
+        "fetches-urls",
+        "runs-programs",
+    ]
+    assert rebuilt["/bin/zsh"]["capabilities"] == []
 
 
 def record(perms: str | None, codesign: str = APPLE_CODESIGN, *, is_script: bool = False):
@@ -142,8 +188,13 @@ def test_file_flags_launchd_mach_service_as_xpc_candidate():
         ({"com.apple.security.cs.disable-library-validation": True}, ["weakened-runtime"]),
         ({"com.apple.security.get-task-allow": True}, ["weakened-runtime"]),
         ({"com.apple.security.cs.allow-dyld-environment-variables": False}, []),
-        ({"com.apple.private.tcc.allow": ["kTCCServiceAll"]}, ["tcc-entitled"]),
-        ({"com.apple.private.tcc.manager": True}, ["tcc-entitled"]),
+        (
+            {"com.apple.private.tcc.allow": ["kTCCServiceAll"]},
+            ["private-entitled", "tcc-entitled"],
+        ),
+        ({"com.apple.private.tcc.manager": True}, ["private-entitled", "tcc-entitled"]),
+        ({"com.apple.private.alf": True}, ["private-entitled"]),
+        ({"com.apple.rootless.install": True}, ["private-entitled"]),
         ({"com.apple.security.network.client": True}, []),
     ],
 )
@@ -166,7 +217,7 @@ def test_inventory_matches_tcc_grants_by_path_and_signing_identifier(catalog):
             "T\tsystem\tkTCCServiceCamera\t/somewhere/else\t1\t2\tUNUSED",
         )
     )
-    scan = build_scan(catalog, probe, target="vm", scan_dirs=["/bin"])
+    scan = build_scan(catalog, probe, target="vm")
     inventory = {i["file"]["path"]: i for i in scan["inventory"]}
     assert [g["service"] for g in inventory["/bin/zsh"]["tcc"]] == [
         "kTCCServiceSystemPolicyAllFiles"
@@ -187,30 +238,25 @@ def test_denied_grant_alone_does_not_flag_tcc_granted(catalog):
             "T\tsystem\tkTCCServiceSystemPolicyAllFiles\t/bin/zsh\t1\t0\tUNUSED",
         )
     )
-    item = build_scan(catalog, probe, target="vm", scan_dirs=["/bin"])["inventory"][0]
+    item = build_scan(catalog, probe, target="vm")["inventory"][0]
     assert item["tcc"][0]["auth"] == "denied"
     assert "tcc-granted" not in item["flags"]
 
 
 def test_scan_round_trips_through_json(catalog, tmp_path):
-    scan = scan_for(catalog, "none")
+    scan = scan_for(catalog)
     path = tmp_path / "scan.json"
     save_scan(scan, path)
     assert load_scan(path) == scan
 
 
-def test_load_scan_migrates_schema_four_without_xpc_evidence(catalog, tmp_path):
-    scan = scan_for(catalog, "none")
-    scan["schema"] = 4
-    for item in scan["inventory"]:
-        item["file"].pop("xpc")
-    path = tmp_path / "scan-v4.json"
+def test_load_scan_rejects_the_previous_schema(catalog, tmp_path):
+    scan = scan_for(catalog)
+    scan["schema"] = SCHEMA_VERSION - 1
+    path = tmp_path / "scan-old.json"
     path.write_text(json.dumps(scan))
-
-    migrated = load_scan(path)
-
-    assert migrated["schema"] == 5
-    assert all(item["file"]["xpc"] == [] for item in migrated["inventory"])
+    with pytest.raises(ScanFileError, match="re-run the scan"):
+        load_scan(path)
 
 
 @pytest.mark.parametrize(
@@ -231,18 +277,3 @@ def test_load_scan_rejects_bad_files(tmp_path, content, message):
 def test_load_scan_missing_file(tmp_path):
     with pytest.raises(ScanFileError, match="cannot read scan file"):
         load_scan(tmp_path / "absent.json")
-
-
-def test_entry_description_comes_from_first_path_with_a_summary(catalog):
-    probe = parse_output(
-        probe_text(
-            f_record("/bin/zsh"),
-            f_record("/bin/ksh"),
-            "W\tksh(1) - KornShell",
-            facts={"developer_dir": "none"},
-        )
-    )
-    entries = {e["name"]: e for e in build_scan(catalog, probe, "vm", ["/bin"])["entries"]}
-    assert entries["shells"]["description"] == "KornShell"
-    assert entries["shells"]["abuse"] == "n"
-    assert entries["gone"]["description"] is None

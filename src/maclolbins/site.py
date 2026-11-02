@@ -1,9 +1,9 @@
 """Render a scan result as a browsable Apple-LOLBin report.
 
 The page is `browser.html`, a self-contained column browser over the scanned filesystem. It
-reads `window.LOLBINS` from `assets/data.js`, which this module writes.  The probe keeps a broad
-executable inventory so the catalogue can be audited, but the user-facing report contains only
-usable catalogue paths that the scan identifies as part of the Apple-protected macOS install.
+reads `window.LOLBINS` from `assets/data.js`, which this module writes. The probe inventories
+every executable on the target's default PATH; the report keeps the Apple ones, ranked by how
+much capability and privilege evidence each carries.
 """
 
 import json
@@ -13,9 +13,22 @@ from pathlib import Path
 from typing import Any
 
 from maclolbins.entitlements import RUNTIME_WEAKENERS, explain
-from maclolbins.probe import TccGrant
-from maclolbins.scan import InventoryItem, ScanResult
+from maclolbins.probe import FileRecord, TccGrant
+from maclolbins.scan import InventoryItem, NoteRef, ScanResult, TechniqueRef
 from maclolbins.tcc import SERVICE_LABELS
+
+# Flags that say a binary runs with, or can reach, more than its caller could. Each counts
+# twice a capability in the evidence score.
+PRIVILEGE_SIGNALS = (
+    "setuid",
+    "setgid",
+    "private-entitled",
+    "tcc-entitled",
+    "tcc-granted",
+    "weakened-runtime",
+    "xpc-server-candidate",
+)
+SIGNAL_WEIGHT = 2
 
 # Pages written by earlier versions of this renderer, removed when re-rendering over them.
 _STALE = ("catalog.html", "inventory.html", "entitlements.html", "report.html")
@@ -53,14 +66,18 @@ def render_site(scan: ScanResult, out_dir: Path) -> Path:
 
 def site_data(scan: ScanResult) -> dict[str, Any]:
     """Return everything the page needs, as the `window.LOLBINS` object."""
-    inventory = [item for item in scan["inventory"] if _is_usable_apple_lolbin(item)]
+    inventory = [item for item in scan["inventory"] if in_report(item)]
+    notes = {note["name"]: note for note in scan["notes"]}
+    capabilities = {cap["id"]: cap for cap in scan["capabilities"]}
     return {
         "facts": scan["facts"],
         "scan_dirs": scan["scan_dirs"],
         "catalog_version": scan["catalog_version"],
         "tool_version": scan["tool_version"],
-        "entries": scan["entries"],
-        "inventory": [_file(item) for item in inventory],
+        "inventoried": len(scan["inventory"]),
+        "capabilities": capabilities,
+        "notes": notes,
+        "inventory": [_file(item, capabilities, notes) for item in inventory],
         "entitlements": _explanations(inventory),
         "tcc": _visible_tcc(scan, inventory),
         "tcc_labels": SERVICE_LABELS,
@@ -68,20 +85,23 @@ def site_data(scan: ScanResult) -> dict[str, Any]:
     }
 
 
-def _is_usable_apple_lolbin(item: InventoryItem) -> bool:
-    """Whether an inventory item belongs in the focused, user-facing report.
+def in_report(item: InventoryItem) -> bool:
+    """Whether an inventoried file belongs in the report.
 
-    Catalogue membership supplies the project's LOLBin decision.  A platform signature or SIP's
-    ``restricted`` flag supplies evidence that the path belongs to the stock Apple install; the
-    latter deliberately retains Apple system scripts, which are commonly unsigned.  Inactive
-    xcode-select shims are not usable binaries and therefore do not count as present LOLBins.
+    It must be part of the stock Apple install, shown by a platform signature or by SIP's
+    restricted flag (which keeps Apple's unsigned system scripts), and not an inactive
+    xcode-select shim. Evidence does not decide inclusion: a binary whose abuse is its normal
+    job (id, base64) imports nothing distinctive, so it is listed with a score of 0.
     """
     record = item["file"]
-    return bool(
-        item["catalog_entry"]
-        and not record["is_dev_shim"]
-        and (record["signing"]["platform_binary"] or "restricted" in record["bsd_flags"])
-    )
+    apple = record["signing"]["platform_binary"] or "restricted" in record["bsd_flags"]
+    return bool(apple and not record["is_dev_shim"])
+
+
+def evidence_score(item: InventoryItem) -> int:
+    """Return one point per capability plus SIGNAL_WEIGHT per privilege signal."""
+    signals = set(PRIVILEGE_SIGNALS) & set(item["flags"])
+    return len(item["capabilities"]) + SIGNAL_WEIGHT * len(signals)
 
 
 def _visible_tcc(scan: ScanResult, inventory: list[InventoryItem]) -> dict[str, Any]:
@@ -97,9 +117,22 @@ def _visible_tcc(scan: ScanResult, inventory: list[InventoryItem]) -> dict[str, 
     return {"sources": scan["tcc"]["sources"], "grants": grants}
 
 
-def _file(item: InventoryItem) -> dict[str, Any]:
-    """Flatten one inventory item; entitlement values stay exactly as the scan recorded them."""
+def _file(
+    item: InventoryItem, capabilities: dict[str, Any], notes: dict[str, NoteRef]
+) -> dict[str, Any]:
+    """Flatten one inventory item; entitlement values stay exactly as the scan recorded them.
+
+    Techniques and tactics combine the file's capabilities with its note, if it has one.
+    """
     record = item["file"]
+    note = notes.get(item["note"]) if item["note"] else None
+    techniques: dict[str, TechniqueRef] = {}
+    tactics: dict[str, None] = {}
+    for source in [capabilities[match["id"]] for match in item["capabilities"]] + (
+        [note] if note else []
+    ):
+        techniques.update({t["id"]: t for t in source["techniques"]})
+        tactics.update(dict.fromkeys(source["tactics"]))
     return {
         "path": record["path"],
         "summary": record["summary"],
@@ -114,8 +147,20 @@ def _file(item: InventoryItem) -> dict[str, Any]:
         "xpc": record["xpc"],
         "flags": item["flags"],
         "tcc": item["tcc"],
-        "entry": item["catalog_entry"],
+        "capabilities": item["capabilities"],
+        "libraries": record["libraries"],
+        "note": item["note"],
+        "techniques": list(techniques.values()),
+        "tactics": list(tactics),
+        "privilege": note["privilege"] if note else _privilege(record),
+        "score": evidence_score(item),
     }
+
+
+def _privilege(record: FileRecord) -> str:
+    """Who can run the file: "user" when others may execute it, else "root"."""
+    perms = record["perms"] or ""
+    return "user" if len(perms) > 9 and perms[9] in "xst" else "root"
 
 
 def _explanations(inventory: list[InventoryItem]) -> dict[str, dict[str, Any]]:

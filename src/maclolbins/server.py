@@ -25,7 +25,6 @@ from maclolbins.catalog import Catalog
 from maclolbins.probe import ProbeError, TccSource, build_script, parse_output, run_probe
 from maclolbins.reports import scan_ids, scan_path, write_report
 from maclolbins.scan import (
-    DEFAULT_SCAN_DIRS,
     ScanFileError,
     ScanResult,
     build_scan,
@@ -44,9 +43,13 @@ from maclolbins.views import (
 )
 
 INSTRUCTIONS = """\
-Enumerates macOS living-off-the-land binaries (LOLBins) on a Mac or macOS VM: what each one is,
-how it is abused (MITRE ATT&CK), its code signature, every entitlement with Apple's documentation
-link, SIP protection and TCC grants.
+Enumerates macOS living-off-the-land binaries (LOLBins) on a Mac or macOS VM. The probe
+inventories every executable on the target's default PATH; the report keeps every Apple binary on
+it, ranked by evidence: capabilities (from the symbols they import and libraries they link) and
+privilege signals (setuid, private or TCC entitlements, weakened runtime, XPC service). For each
+one: its capabilities and their evidence, MITRE ATT&CK techniques, code signature, every
+entitlement with Apple's documentation link, SIP protection and TCC grants, plus hand-written
+abuse notes and worked commands where the catalog has them.
 
 1. Work out where the binaries live. discover_targets lists this Mac, Parallels, Tart, VMware
    Fusion and UTM VMs and ssh hosts, each with a suggested command. Pick the target the user
@@ -82,9 +85,9 @@ class ScanSummary(TypedDict):
     product_version: str | None
     build_version: str | None
     report: str
+    path_dirs: list[str]
+    inventoried: int
     lolbins_in_report: int
-    catalogued_present: int
-    catalogued_absent: list[str]
     tcc_sources: list[TccSource]
 
 
@@ -143,26 +146,26 @@ class Tools:
     ) -> ScanSummary:
         """Run the read-only probe on a target and save the scan and its HTML report.
 
-        Runs `command` on this host and pipes the probe script into it. The probe reads file
-        metadata, code signatures, entitlements, man-page summaries, launchd plists and the TCC
-        databases; it writes nothing outside its own temp directory. A full scan takes one to
-        two minutes.
+        Runs `command` on this host and pipes the probe script into it. The probe reads the
+        target's default PATH from /etc/paths and /etc/paths.d, then each executable's metadata,
+        code signature, entitlements, imported symbols and linked libraries, plus man-page
+        summaries, launchd plists and the TCC databases; it writes nothing outside its own temp
+        directory. A full scan takes two to
+        three minutes.
         """
         await ctx.report_progress(0, 1, f"probing {target}")
-        probe_run = partial(
-            run_probe, command, DEFAULT_SCAN_DIRS, self.catalog.all_paths(), timeout_seconds
-        )
+        probe_run = partial(run_probe, command, self.catalog.all_symbols(), timeout_seconds)
         try:
             probe = await anyio.to_thread.run_sync(probe_run)
         except ProbeError as exc:
             raise ToolError(f"scan of {target} failed: {exc}") from exc
         await ctx.report_progress(1, 1, "saving report")
-        return self._save(build_scan(self.catalog, probe, target, list(DEFAULT_SCAN_DIRS)))
+        return self._save(build_scan(self.catalog, probe, target))
 
     def get_probe_script(self) -> ProbeScript:
         """Return the probe script, for targets that scan_target cannot pipe into."""
         return ProbeScript(
-            script=build_script(DEFAULT_SCAN_DIRS, self.catalog.all_paths()),
+            script=build_script(self.catalog.all_symbols()),
             usage="Save the script on the target and run `/bin/bash probe.sh > probe.out` as "
             "the user whose view of the system you want. Copy probe.out back to this host and "
             "call import_probe_output with its path.",
@@ -181,7 +184,7 @@ class Tools:
             raise ToolError(f"cannot read probe output {output_path}: {exc}") from exc
         except ProbeError as exc:
             raise ToolError(f"{output_path} is not complete probe output: {exc}") from exc
-        return self._save(build_scan(self.catalog, probe, target, list(DEFAULT_SCAN_DIRS)))
+        return self._save(build_scan(self.catalog, probe, target))
 
     def list_scans(self) -> ScanListing:
         """List saved scans, newest first, with the target, macOS version and report path."""
@@ -209,11 +212,13 @@ class Tools:
             raise ToolError(f"cannot write the report for {scan_id}: {exc}") from exc
         return self._summary(scan_id, scan)
 
-    def list_lolbins(
+    def list_lolbins(  # noqa: PLR0913 (MCP derives the tool's input schema from these parameters)
         self,
         scan_id: ScanId,
+        *,
         query: Annotated[
-            str, Field(description="Text in the path, name, description, technique or keys")
+            str,
+            Field(description="Text in the path, name, description, capability, technique or keys"),
         ] = "",
         tactic: Annotated[str, Field(description='ATT&CK tactic, e.g. "Persistence"')] = "",
         flag: Annotated[
@@ -223,20 +228,28 @@ class Tools:
         entitlement: Annotated[
             str, Field(description='Entitlement key or prefix, e.g. "com.apple.private.tcc."')
         ] = "",
+        capability: Annotated[
+            str, Field(description='Capability id, e.g. "fetches-urls" or "runs-programs"')
+        ] = "",
     ) -> list[LolbinRow]:
-        """List the LOLBins in a scan's report, optionally filtered; all filters must match."""
-        return ReportView(self._load(scan_id)).rows(query, tactic, flag, entitlement)
+        """List the LOLBins in a scan's report, strongest evidence first; all filters must match.
+
+        score is one point per capability plus two per privilege signal (setuid, setgid,
+        private-entitled, tcc-entitled, tcc-granted, weakened-runtime, xpc-server-candidate).
+        """
+        return ReportView(self._load(scan_id)).rows(query, tactic, flag, entitlement, capability)
 
     def get_lolbin(
         self,
         scan_id: ScanId,
-        binary: Annotated[str, Field(description="Path such as /usr/bin/curl, or catalogue name")],
+        binary: Annotated[str, Field(description="Path such as /usr/bin/curl, or file name")],
     ) -> LolbinDetail:
         """Return everything the report says about one binary.
 
-        Includes its description, abuse notes, ATT&CK techniques with links, worked commands,
-        file facts and SIP protection, code signature, every entitlement with its exact value
-        and Apple documentation link, TCC grants and XPC-service evidence.
+        Includes its capabilities with the imported symbols or linked libraries that show each,
+        ATT&CK techniques with links, any hand-written abuse note and worked commands, file
+        facts and SIP protection, code signature, every entitlement with its exact value and
+        Apple documentation link, TCC grants and XPC-service evidence.
         """
         try:
             return ReportView(self._load(scan_id)).detail(binary)
@@ -271,9 +284,9 @@ class Tools:
             product_version=facts.get("product_version"),
             build_version=facts.get("build_version"),
             report=str(self.reports_dir / scan_id / "index.html"),
+            path_dirs=scan["scan_dirs"],
+            inventoried=len(scan["inventory"]),
             lolbins_in_report=len(ReportView(scan).files),
-            catalogued_present=sum(1 for e in scan["entries"] if e["status"] == "present"),
-            catalogued_absent=[e["name"] for e in scan["entries"] if e["status"] != "present"],
             tcc_sources=scan["tcc"]["sources"],
         )
 

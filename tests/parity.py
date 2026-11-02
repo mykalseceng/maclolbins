@@ -11,6 +11,9 @@ from typing import Any
 from mcp import Client
 from mcp.server.mcpserver import MCPServer
 
+# Mirrors TCC_GRANT_KEYS in browser.html, independently of maclolbins.views.
+TCC_GRANT_KEYS = {"com.apple.private.tcc.allow", "com.apple.private.tcc.allow.overridable"}
+
 
 def report_data(report_dir: Path) -> dict[str, Any]:
     """Read window.LOLBINS from a rendered report."""
@@ -24,15 +27,18 @@ def report_data(report_dir: Path) -> dict[str, Any]:
 async def mismatches(server: MCPServer, scan_id: str, report_dir: Path) -> list[str]:
     """Return every difference between the server's answers and the report; empty means none."""
     data = report_data(report_dir)
-    entries = {entry["name"]: entry for entry in data["entries"]}
     problems: list[str] = []
     async with Client(server) as client:
         listed = await client.call_tool("list_lolbins", {"scan_id": scan_id})
         assert listed.structured_content is not None, listed.content
-        rows = {row["path"]: row for row in listed.structured_content["result"]}
+        listed_rows = listed.structured_content["result"]
+        rows = {row["path"]: row for row in listed_rows}
         report_paths = [file["path"] for file in data["inventory"]]
         if sorted(rows) != sorted(report_paths):
             problems.append(f"list_lolbins paths differ: {sorted(set(rows) ^ set(report_paths))}")
+        by_score = sorted(data["inventory"], key=lambda f: (-f["score"], f["path"]))
+        if [row["path"] for row in listed_rows] != [f["path"] for f in by_score]:
+            problems.append("list_lolbins is not in the report's evidence-score order")
         for file in data["inventory"]:
             result = await client.call_tool(
                 "get_lolbin", {"scan_id": scan_id, "binary": file["path"]}
@@ -41,38 +47,49 @@ async def mismatches(server: MCPServer, scan_id: str, report_dir: Path) -> list[
                 problems.append(f"{file['path']}: {result.content}")
                 continue
             detail = result.structured_content
-            expected = _expected_detail(file, entries[file["entry"]], data)
+            expected = _expected_detail(file, data)
             problems.extend(
                 f"{file['path']}: {key} is {detail.get(key)!r}, report has {value!r}"
                 for key, value in expected.items()
                 if detail.get(key) != value
             )
-            if file["path"] in rows and rows[file["path"]]["flags"] != file["flags"]:
-                problems.append(f"{file['path']}: list_lolbins flags differ from the report")
+            row = rows.get(file["path"])
+            if row and (row["flags"], row["score"]) != (file["flags"], file["score"]):
+                problems.append(f"{file['path']}: list_lolbins flags or score differ")
     return problems
 
 
-def _expected_detail(
-    file: dict[str, Any], entry: dict[str, Any], data: dict[str, Any]
-) -> dict[str, Any]:
+def _technique(t: dict[str, Any]) -> dict[str, Any]:
+    url = f"https://attack.mitre.org/techniques/{t['id'].replace('.', '/', 1)}/"
+    return {"id": t["id"], "name": t["name"], "url": url}
+
+
+def _expected_detail(file: dict[str, Any], data: dict[str, Any]) -> dict[str, Any]:
     explanations = data["entitlements"]
+    note = data["notes"][file["note"]] if file["note"] else None
     return {
         "path": file["path"],
-        "name": entry["name"],
-        "description": file["summary"] or entry["description"],
-        "abuse": entry["abuse"],
-        "privilege": entry["privilege"],
-        "tactics": entry["tactics"],
-        "techniques": [
+        "name": file["path"].rsplit("/", 1)[-1],
+        "description": file["summary"],
+        "score": file["score"],
+        "capabilities": [
             {
-                "id": t["id"],
-                "name": t["name"],
-                "url": f"https://attack.mitre.org/techniques/{t['id'].replace('.', '/', 1)}/",
+                "id": match["id"],
+                "title": data["capabilities"][match["id"]]["title"],
+                "summary": data["capabilities"][match["id"]]["summary"],
+                "evidence": match["evidence"],
+                "techniques": [
+                    _technique(t) for t in data["capabilities"][match["id"]]["techniques"]
+                ],
             }
-            for t in entry["techniques"]
+            for match in file["capabilities"]
         ],
-        "examples": entry["examples"],
-        "xpc_functionality": entry["xpc_functionality"],
+        "libraries": file["libraries"],
+        "abuse": note["abuse"] if note else None,
+        "privilege": file["privilege"],
+        "tactics": file["tactics"],
+        "techniques": [_technique(t) for t in file["techniques"]],
+        "examples": note["examples"] if note else [],
         "flags": file["flags"],
         "file": {
             "link_target": file["link"],
@@ -98,7 +115,7 @@ def _expected_detail(
                 "tcc_services": [
                     {"service": s, "label": data["tcc_labels"].get(s, s)}
                     for s in (value if isinstance(value, list) else [])
-                    if key.startswith("com.apple.private.tcc.allow") and isinstance(s, str)
+                    if key in TCC_GRANT_KEYS and isinstance(s, str)
                 ],
             }
             for key, value in sorted(file["entitlements"].items())

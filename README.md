@@ -1,10 +1,20 @@
 # MacLOLBins
 
-Finds the Apple living-off-the-land binaries (LOLBins) on a Mac or macOS VM and shows what each
-one can do there: how it is abused, with MITRE ATT&CK techniques and worked commands, its
-permissions and SIP protection, its code signature and hardened runtime, every entitlement with
-Apple's documentation, TCC access by entitlement and by grant, and the launchd services that run
-it. Each scan writes a single-page HTML report.
+Finds the Apple living-off-the-land binaries (LOLBins) on a Mac or macOS VM and shows what each one
+can do there. The scan reads the target's default PATH from `/etc/paths` and `/etc/paths.d`,
+inventories every executable on it, and reports every Apple binary there, ranked by evidence.
+Capabilities come from the symbols a binary imports and the libraries it links (for example
+`_curl_easy_perform` or `libcurl` for making HTTP requests); privilege signals are setuid/setgid,
+private or TCC entitlements, a weakened runtime and launchd XPC services. The tool derives all of
+it from the binaries themselves rather than a list of names, and a binary with no evidence is
+still listed, with a score of 0.
+
+For each binary the report shows its capabilities and the evidence behind them, MITRE ATT&CK
+techniques, permissions and SIP protection, its code signature and hardened runtime, every
+entitlement with Apple's documentation, TCC access by entitlement and by grant, and the launchd
+services that run it. Hand-written notes in `src/maclolbins/catalog.toml` add abuse text and worked
+commands for some paths; they never decide what is reported or how it ranks. Each scan writes a single-page HTML
+report.
 
 ## Usage
 

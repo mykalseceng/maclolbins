@@ -720,6 +720,8 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
       <ul class="side-list" id="locs" aria-labelledby="loc-h"></ul>
       <h2 class="side-h" id="smart-h">Smart folders</h2>
       <ul class="side-list" id="smarts" aria-labelledby="smart-h"></ul>
+      <h2 class="side-h" id="cap-h">Capabilities</h2>
+      <ul class="side-list" id="capfolders" aria-labelledby="cap-h"></ul>
     </nav>
     <section class="host" id="host" aria-label="Scanned host"></section>
   </aside>
@@ -762,13 +764,13 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
 <div id="legend" popover>
   <h3>What the glyphs mean</h3>
   <ul>
-    <li><svg class="g f c-lol"><use href="#g-lol"/></svg><span><b>Catalogued LOLBin.</b> Listed in the catalogue with abuse notes and worked commands.</span></li>
+    <li><svg class="g f c-lol"><use href="#g-lol"/></svg><span><b>Has worked commands.</b> The catalogue has hand-written abuse notes and worked commands for this path. Notes never decide what is in the report; evidence does.</span></li>
     <li><svg class="g c-suid"><use href="#g-key"/></svg><span><b>Setuid.</b> Runs as its owner (usually root) whoever starts it.</span></li>
     <li><svg class="g c-sgid"><use href="#g-key"/></svg><span><b>Setgid.</b> Runs with its group's privileges.</span></li>
     <li><svg class="g f c-ent"><use href="#g-shield"/></svg><span><b>Private entitlements.</b> Holds Apple-internal, TCC, SIP or task-port keys.</span></li>
     <li><svg class="g c-ent"><use href="#g-shield"/></svg><span><b>Entitlements.</b> Holds only public entitlement keys.</span></li>
     <li><svg class="g f c-tcc"><use href="#g-privacy"/></svg><span><b>TCC grant.</b> This Mac's privacy database allows it a protected service, such as Full Disk Access.</span></li>
-    <li><svg class="g c-tcc"><use href="#g-privacy"/></svg><span><b>TCC entitlements.</b> Reaches protected services by entitlement, without a prompt.</span></li>
+    <li><svg class="g c-tcc"><use href="#g-privacy"/></svg><span><b>TCC entitlements.</b> Holds a private TCC entitlement. Those that grant services skip the prompt.</span></li>
     <li><svg class="g c-inj"><use href="#g-inject"/></svg><span><b>Weakened runtime.</b> Holds an entitlement that lets other code be injected into it or attach to it.</span></li>
     <li><svg class="g c-xpc"><use href="#g-xpc"/></svg><span><b>XPC server candidate.</b> launchd registers a Mach service for this executable and the scan found static listener evidence. Reachability and authorization are not tested.</span></li>
     <li><svg class="g c-muted"><use href="#g-code"/></svg><span><b>Script.</b> Interpreted text; scripts carry no code signature.</span></li>
@@ -797,7 +799,8 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
   const motionOK = () => !matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const ENT = D.entitlements;
-  const entryByName = new Map(D.entries.map((e) => [e.name, e]));
+  const CAPS = D.capabilities;
+  const NOTES = D.notes;
   const PRIVATE_NS = new Set(['Private', 'Private security', 'Private TCC', 'SIP (rootless)', 'Task ports']);
   const NS_ORDER = ['Task ports', 'Private TCC', 'SIP (rootless)', 'Private security', 'Hardened runtime',
     'Private', 'App Sandbox / code signing', 'Developer capability', 'Other'];
@@ -811,7 +814,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
   let nextId = 0;
   const nodes = new Map();
   const files = [];
-  const blankStats = () => ({ files: 0, lol: 0, setid: 0, priv: 0, script: 0, unsigned: 0, shim: 0, tcc: 0, weak: 0 });
+  const blankStats = () => ({ files: 0, ev: 0, lol: 0, setid: 0, priv: 0, script: 0, unsigned: 0, shim: 0, tcc: 0, weak: 0 });
 
   function makeDir(path, name, parent) {
     const n = { id: nextId++, path, name, parent, dir: true, kids: [], kidMap: new Map(), st: blankStats() };
@@ -824,7 +827,9 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
     const keys = Object.keys(f.entitlements || {});
     const priv = keys.filter((k) => ENT[k] && PRIVATE_NS.has(ENT[k].namespace)).length;
     return {
-      lol: !!f.entry,
+      lol: !!f.note,
+      ev: f.score > 0,
+      caps: f.capabilities.map((c) => c.id),
       suid: f.flags.includes('setuid'),
       sgid: f.flags.includes('setgid'),
       script: f.flags.includes('script'),
@@ -859,6 +864,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
     files.push(n);
     for (let a = cur; a; a = a.parent) {
       a.st.files++;
+      if (t.ev) a.st.ev++;
       if (t.lol) a.st.lol++;
       if (t.suid || t.sgid) a.st.setid++;
       if (t.priv) a.st.priv++;
@@ -881,9 +887,12 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
   const depth = (n) => chainFrom(n).length - 1;
 
   const SMART = [
-    { key: 'lolbins', label: 'Usable Apple LOLBins', glyph: 'lol', cls: 'c-lol', fill: true,
+    { key: 'evidence', label: 'With evidence', glyph: 'code', cls: 'c-xpc',
+      test: (t) => t.ev,
+      blurb: 'Binaries with at least one capability or privilege signal, strongest evidence first. The rest of the report has an evidence score of 0.' },
+    { key: 'notes', label: 'With worked commands', glyph: 'lol', cls: 'c-lol', fill: true,
       test: (t) => t.lol,
-      blurb: 'Files the catalogue lists as living-off-the-land binaries: shipped with macOS and useful to an attacker as they are.' },
+      blurb: 'Binaries the catalogue has hand-written abuse notes and worked commands for.' },
     { key: 'setid', label: 'Setuid or setgid', glyph: 'key', cls: 'c-suid',
       test: (t) => t.suid || t.sgid,
       blurb: "Run with the file owner's or group's privileges, whoever starts them. A bug or a helpful option in one of these is a privilege escalation." },
@@ -903,8 +912,16 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
       test: (t) => t.script,
       blurb: 'Interpreted text files rather than compiled binaries. They are run by whatever interpreter the first line names.' },
   ];
-  const smartByKey = new Map(SMART.map((s) => [s.key, s]));
+  const byScore = (a, b) => b.f.score - a.f.score || byName(a, b);
   for (const s of SMART) s.items = files.filter((n) => s.test(n.t));
+  SMART.find((x) => x.key === 'evidence').items.sort(byScore);
+  /* One folder per capability rule that matched anything, strongest evidence first. */
+  const CAP_SMART = Object.values(CAPS).map((c) => ({
+    key: `cap:${c.id}`, label: c.title, glyph: 'code', cls: 'c-xpc',
+    blurb: `${c.summary} Sorted by evidence score.`,
+    items: files.filter((n) => n.t.caps.includes(c.id)).sort(byScore),
+  })).filter((s) => s.items.length).sort((a, b) => b.items.length - a.items.length || collator.compare(a.label, b.label));
+  const smartByKey = new Map([...SMART, ...CAP_SMART].map((s) => [s.key, s]));
 
   /* ---------- Small renderers ---------- */
   const glyph = (name, cls, fill, label) =>
@@ -923,7 +940,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
 
   function traitList(t) {
     const out = [];
-    if (t.lol) out.push(['lol', 'c-lol', true, 'Catalogued LOLBin']);
+    if (t.lol) out.push(['lol', 'c-lol', true, 'Has worked commands']);
     if (t.suid) out.push(['key', 'c-suid', false, 'Setuid']);
     if (t.sgid) out.push(['key', 'c-sgid', false, 'Setgid']);
     if (t.priv) out.push(['shield', 'c-ent', true, 'Private entitlements']);
@@ -942,15 +959,15 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
   const traitWords = (t) => traitList(t).map((x) => x[3]).join(', ');
 
   function dirSummary(d) {
-    const bits = [`${d.st.files} LOLBin paths`];
-    if (d.st.lol) bits.push(`${d.st.lol} LOLBin paths`);
+    const bits = [`${d.st.files} Apple binaries`];
+    if (d.st.lol) bits.push(`${d.st.lol} with worked commands`);
     if (d.st.setid) bits.push(`${d.st.setid} setuid or setgid`);
     return bits.join(', ');
   }
 
   function rowHtml(n) {
     if (n.dir) {
-      const g = (n.st.lol ? `<span title="Contains ${n.st.lol} Apple LOLBin paths">${glyph('lol', 'c-lol', true)}</span>` : '') +
+      const g = (n.st.lol ? `<span title="Contains ${n.st.lol} paths with worked commands">${glyph('lol', 'c-lol', true)}</span>` : '') +
         (n.st.setid ? `<span title="Contains ${n.st.setid} setuid or setgid files">${glyph('key', 'c-suid')}</span>` : '');
       return `<div class="row" role="option" aria-selected="false" id="n${n.id}" data-id="${n.id}" aria-label="${esc(n.name)}, folder, ${dirSummary(n)}">` +
         `${iconFor(n)}<span class="nm">${esc(n.name)}</span><span class="gl">${g}</span>` +
@@ -1004,6 +1021,9 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
     }).join('');
     $('#smarts').innerHTML = SMART.map((s) =>
       `<li><button class="side-item" type="button" data-smart="${s.key}">${glyph(s.glyph, s.cls, s.fill)}` +
+      `<span class="lbl">${esc(s.label)}</span><span class="n">${s.items.length}</span></button></li>`).join('');
+    $('#capfolders').innerHTML = CAP_SMART.map((s) =>
+      `<li><button class="side-item" type="button" data-smart="${esc(s.key)}">${glyph(s.glyph, s.cls, s.fill)}` +
       `<span class="lbl">${esc(s.label)}</span><span class="n">${s.items.length}</span></button></li>`).join('');
     const F = D.facts;
     $('#host').innerHTML = `<b>${esc(F.hostname)}</b><dl>` +
@@ -1171,14 +1191,13 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
     const name = n.name.toLowerCase();
     if (name.includes(q)) return { rank: name.startsWith(q) ? 0 : 1, why: 'Name' };
     if (f.path.toLowerCase().includes(q)) return { rank: 2, why: 'Path', text: f.path };
-    const e = f.entry ? entryByName.get(f.entry) : null;
-    if (e) {
-      if (e.name.toLowerCase().includes(q)) return { rank: 2, why: 'Catalogue', text: e.name };
-      const tac = e.tactics.find((x) => x.toLowerCase().includes(q));
-      if (tac) return { rank: 3, why: 'Tactic', text: tac };
-      const tech = e.techniques.find((x) => x.id.toLowerCase().includes(q) || x.name.toLowerCase().includes(q));
-      if (tech) return { rank: 3, why: 'Technique', text: `${tech.id} ${tech.name}` };
-    }
+    if (f.note && f.note.toLowerCase().includes(q)) return { rank: 2, why: 'Note', text: f.note };
+    const cap = f.capabilities.map((c) => CAPS[c.id]).find((c) => c.title.toLowerCase().includes(q) || c.id.includes(q));
+    if (cap) return { rank: 3, why: 'Capability', text: cap.title };
+    const tac = f.tactics.find((x) => x.toLowerCase().includes(q));
+    if (tac) return { rank: 3, why: 'Tactic', text: tac };
+    const tech = f.techniques.find((x) => x.id.toLowerCase().includes(q) || x.name.toLowerCase().includes(q));
+    if (tech) return { rank: 3, why: 'Technique', text: `${tech.id} ${tech.name}` };
     if (f.summary && f.summary.toLowerCase().includes(q)) return { rank: 3, why: 'Summary', text: f.summary };
     if (f.signing.identifier && f.signing.identifier.toLowerCase().includes(q)) {
       return { rank: 3, why: 'Identifier', text: f.signing.identifier };
@@ -1214,7 +1233,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
     } else {
       listItems = searchItems(q);
       head = `${glyph('search', 'c-muted')}<div><h2>Searching “${esc(state.query)}” <span class="muted" style="font-weight:400">${listItems.length} ${listItems.length === 1 ? 'match' : 'matches'}</span></h2>` +
-        `<p>Matches names and paths first, then catalogue entries, tactics, ATT&amp;CK techniques, man summaries, signing identifiers and entitlement keys.</p></div>`;
+        `<p>Matches names and paths first, then notes, capabilities, tactics, ATT&amp;CK techniques, man summaries, signing identifiers and entitlement keys.</p></div>`;
       listEl.dataset.kind = 'search';
     }
     $('#list-head').innerHTML = head;
@@ -1309,26 +1328,39 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
     ]));
   }
 
-  function secEntry(n, e) {
-    const others = e.paths.filter((p) => p.path !== n.path);
-    const statusNote = e.status === 'inactive-shim'
-      ? `<p class="callout warn">${glyph('shim', 'c-lol')}<span>This path is an inactive developer-tools shim. The developer directory on this host is “${esc(D.facts.developer_dir)}”, so running it prompts to install the tools rather than running ${esc(e.name)}.</span></p>`
-      : '';
-    const body = `<p class="lede">${esc(e.abuse)}</p>` +
-      (e.description && e.description !== n.f.summary ? `<p class="note" style="margin:-4px 0 10px">${esc(e.description)}</p>` : '') +
+  /* Library paths are long; show the library's own name, as the capability rules match it. */
+  const evidenceLabel = (token) => {
+    if (!token.startsWith('/')) return token;
+    const fw = token.match(/\/([^/]+)\.framework\//);
+    return `links ${fw ? `${fw[1]}.framework` : token.split('/').pop()}`;
+  };
+
+  function secWhy(n) {
+    const f = n.f;
+    const note = f.note ? NOTES[f.note] : null;
+    const others = note ? note.paths.filter((p) => p !== n.path) : [];
+    const caps = f.capabilities.length
+      ? `<ul class="cap-list">${f.capabilities.map((m) => {
+        const c = CAPS[m.id];
+        return `<li><span class="cap-name">${esc(c.title)}</span>` +
+          `<span class="cap-how">${esc(c.summary)} Evidence: <span class="mono">${esc(m.evidence.map(evidenceLabel).join(', '))}</span></span></li>`;
+      }).join('')}</ul>`
+      : '<p class="muted">No capability rule matched. It is in the report for its privilege signals.</p>';
+    const body = (note ? `<p class="lede">${esc(note.abuse)}</p>` : '') +
+      `<h4 class="sub-h first">Capabilities</h4>${caps}` +
       kv([
-        e.name !== n.name && ['Entry:', esc(e.name)],
-        ['Needs:', e.privilege === 'root' ? '<span class="needs">Root</span>' : 'Any user'],
-        ['Tactics:', esc(e.tactics.join(', '))],
-        ['Techniques:', `<ul class="tech">${e.techniques.map((t) =>
+        ['Needs:', f.privilege === 'root' ? '<span class="needs">Root</span>' : 'Any user'],
+        f.tactics.length && ['Tactics:', esc(f.tactics.join(', '))],
+        f.techniques.length && ['Techniques:', `<ul class="tech">${f.techniques.map((t) =>
           `<li><a href="${attackUrl(t.id)}" target="_blank" rel="noopener">${esc(t.id)}</a><span>${esc(t.name)}</span></li>`).join('')}</ul>`],
+        ['Evidence score:', `${f.score} <span class="muted">(1 per capability, 2 per privilege signal)</span>`],
         others.length && ['Also at:', `<div class="chiplist">${others.map((p) =>
-          nodes.has(p.path) ? goBtn(p.path) : `<span class="muted mono">${esc(p.path)} (${esc(p.status)})</span>`).join('')}</div>`],
-      ]) + statusNote;
+          nodes.has(p) ? goBtn(p) : `<span class="muted mono">${esc(p)}</span>`).join('')}</div>`],
+      ]);
     return sec('entry', 'Why it matters', null, body);
   }
 
-  function secXpc(n, e) {
+  function secXpc(n) {
     const registrations = n.f.xpc || [];
     if (!registrations.length) return '';
     const services = registrations.flatMap((r) => r.mach_services);
@@ -1350,14 +1382,11 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
       ['Run context:', r.run_context === 'system' ? 'System launchd domain' : 'Per-user launchd domain'],
       ['Plist:', `<span class="mono">${esc(r.plist_path)}</span>`],
     ])).join('');
-    const functionality = e && e.xpc_functionality
-      ? `<h4 class="sub-h first">Known functionality</h4><p class="lede">${esc(e.xpc_functionality)}</p>`
-      : '<h4 class="sub-h first">Known functionality</h4><p class="muted">Not yet documented in the catalogue.</p>';
-    const evidence = `<h4 class="sub-h">Registered Mach services</h4><ul class="cap-list">${serviceRows}</ul>` +
+    const evidence = `<h4 class="sub-h first">Registered Mach services</h4><ul class="cap-list">${serviceRows}</ul>` +
       `<h4 class="sub-h">Static evidence</h4>${registrationsHtml}` +
       kv([['Listener markers:', markers.length ? `<span class="mono">${esc(markers.join(', '))}</span>` : '<span class="muted">No recognized marker found</span>']]);
     const caveat = '<p class="note">Candidate identification only. No Mach lookup or XPC connection was attempted. The scan did not enumerate exported selectors or test the daemon’s admission and authorization checks.</p>';
-    return sec('xpc', 'XPC server candidate', `${services.length} ${services.length === 1 ? 'service' : 'services'}`, functionality + evidence + caveat);
+    return sec('xpc', 'XPC server candidate', `${services.length} ${services.length === 1 ? 'service' : 'services'}`, evidence + caveat);
   }
 
   function parseMode(p) {
@@ -1527,15 +1556,18 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
     return sec('ents', 'Entitlements', `${keys.length}${privNote ? `, ${privNote}` : ''}`, body);
   }
 
-  function secCmds(e) {
-    const body = e.examples.map((x) =>
+  function secCmds(note) {
+    const body = note.examples.map((x) =>
       `<div class="cmd"><h4>${esc(x.title)}${x.privilege === 'root' ? '<span class="needs">Needs root</span>' : ''}</h4>` +
       `<pre>${esc(x.command)}</pre><p>${esc(x.explanation)}</p>` +
       `<button class="copy" type="button" data-copy="${esc(x.command)}">Copy command</button></div>`).join('');
-    return sec('cmds', 'Worked commands', e.examples.length, body);
+    return sec('cmds', 'Worked commands', note.examples.length, body);
   }
 
   const tccLabel = (svc) => D.tcc_labels[svc] || svc;
+  /* Keys whose listed services are granted with no prompt. Other private TCC keys, such as
+     allow-prompting, are not known to grant access, so they are shown by summary instead. */
+  const TCC_GRANT_KEYS = new Set(['com.apple.private.tcc.allow', 'com.apple.private.tcc.allow.overridable']);
   const AUTH_WORD = { allowed: 'Allowed', denied: 'Denied', limited: 'Limited', unknown: 'Not decided' };
   const authWord = (g) => AUTH_WORD[g.auth] || `Code ${g.auth_value}`;
 
@@ -1547,7 +1579,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
     const byEnt = [];
     for (const k of tccKeys) {
       const services = Array.isArray(raw[k]) ? raw[k] : [];
-      if (k.startsWith('com.apple.private.tcc.allow') && services.length) {
+      if (TCC_GRANT_KEYS.has(k) && services.length) {
         for (const svc of services) {
           byEnt.push(`<li><span class="cap-name">${esc(tccLabel(svc))}</span><span class="auth entitled">By entitlement</span>` +
             `<span class="cap-how">No prompt: <span class="mono">${esc(k)}</span> lists <span class="mono">${esc(svc)}</span></span></li>`);
@@ -1587,18 +1619,19 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
 
   function inspectFile(n) {
     const f = n.f;
-    const e = f.entry ? entryByName.get(f.entry) : null;
+    const note = f.note ? NOTES[f.note] : null;
     const flags = traitList(n.t).map(([g, c, fl, l]) => `<span>${glyph(g, c, fl)}${esc(l)}</span>`).join('');
     const reveal = state.mode !== 'browse'
       ? `<div class="reveal"><button class="btn" type="button" data-go="${esc(n.path)}">Show in enclosing folder</button></div>` : '';
     return inspectHeader(n, f.summary || kindOf(n), f.size != null ? fmtBytes(f.size) : '',
       (flags ? `<div class="flagline">${flags}</div>` : '') + reveal) +
-      secs(secGeneral(n) + (e ? secEntry(n, e) : '') + secXpc(n, e) + (e ? secCmds(e) : '') + secPerm(n) + secPrivacy(n) + secSign(n) + secEnts(n));
+      secs(secGeneral(n) + secWhy(n) + secXpc(n) + (note && note.examples.length ? secCmds(note) : '') + secPerm(n) + secPrivacy(n) + secSign(n) + secEnts(n));
   }
 
   function statRows(st, clickable) {
     const rows = [
-      ['lolbins', 'lol', 'c-lol', true, 'Usable LOLBin paths', st.lol],
+      ['evidence', 'code', 'c-xpc', false, 'With evidence', st.ev],
+      ['notes', 'lol', 'c-lol', true, 'With worked commands', st.lol],
       ['setid', 'key', 'c-suid', false, 'Setuid or setgid', st.setid],
       ['private', 'shield', 'c-ent', true, 'Private entitlements', st.priv],
       ['tcc', 'privacy', 'c-tcc', true, 'TCC access', st.tcc],
@@ -1658,15 +1691,17 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
       ['Scanned as:', `<span class="mono">${esc(F.user)}</span>`],
       ['Dev tools:', F.developer_dir === 'none' ? 'Not installed' : `<span class="mono">${esc(F.developer_dir)}</span>`],
     ]);
-    const scope = kv([
-      ['Folders:', `<div class="names">${D.scan_dirs.map((p) => goBtn(p)).join('')}</div>`],
-      ['Catalogue:', `${esc(D.catalog_version)}, ${D.entries.length} entries`],
+    const scope = '<p class="note" style="margin-top:0">The probe inventories every executable on this Mac\'s default PATH, read from /etc/paths and /etc/paths.d. The report lists every Apple binary on it, ranked by evidence: capabilities (from the symbols they import and the libraries they link) and privilege signals.</p>' + kv([
+      ['PATH:', `<div class="names">${D.scan_dirs.map((p) => (nodes.has(p) ? goBtn(p) : `<span class="muted mono">${esc(p)}</span>`)).join('')}</div>`],
+      ['Inventoried:', `${fmtNum(D.inventoried)} executables, ${fmtNum(files.length)} in the report`],
+      ['Catalogue:', `${esc(D.catalog_version)}, ${Object.keys(CAPS).length} capability rules, ${Object.keys(NOTES).length} notes`],
       ['Tool:', esc(D.tool_version)],
     ]);
-    const usableEntries = D.entries.filter((e) => e.status === 'present').length;
-    return inspectHeader(root, 'Scanned host', `${fmtNum(files.length)} usable LOLBin paths`) +
+    const strongest = [...files].sort(byScore).slice(0, 15);
+    return inspectHeader(root, 'Scanned host', `${fmtNum(files.length)} Apple binaries on PATH`) +
       secs(sec('host', 'Host', null, host) + secHostTcc() +
-      sec('found', 'Apple LOLBins on this Mac', `${fmtNum(usableEntries)} entries`, statRows(root.st, true)) +
+      sec('found', 'Apple binaries on this Mac', `${fmtNum(files.length)} binaries`, statRows(root.st, true) +
+        `<h4 class="sub-h">Strongest evidence</h4>${nameList(strongest)}`) +
       sec('scope', 'Probe scope', null, scope));
   }
 
@@ -1678,10 +1713,10 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
     const general = kv([
       ['Kind:', 'Folder'],
       ['Where:', n.parent === root ? goBtn('/', 'Macintosh HD') : goBtn(n.parent.path)],
-      ['Contains:', `${fmtNum(n.st.files)} LOLBin paths${sub.length ? ` in ${sub.length + (direct.length ? 1 : 0)} folders` : ''}`],
+      ['Contains:', `${fmtNum(n.st.files)} Apple binaries${sub.length ? ` in ${sub.length + (direct.length ? 1 : 0)} folders` : ''}`],
     ]);
     let notable = '';
-    if (lol.length) notable += `<h4 class="sub-h">Apple LOLBins here</h4>${nameList(lol)}`;
+    if (lol.length) notable += `<h4 class="sub-h">With worked commands here</h4>${nameList(lol)}`;
     if (setid.length) notable += `<h4 class="sub-h">Setuid or setgid here</h4>${nameList(setid)}`;
     return inspectHeader(n, n.path, `${fmtNum(n.st.files)} items`) +
       secs(sec('general', 'General', null, general) +
@@ -1788,13 +1823,13 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
       title = dir === root ? 'Macintosh HD' : dir.name;
       sub = dir === root ? D.facts.hostname : dir.path;
       const container = n === state.base ? n : n.parent;
-      status = `${fmtNum(container.kids.length)} ${container.kids.length === 1 ? 'item' : 'items'}` + (container.st.lol ? `, ${container.st.lol} LOLBin paths` : '') +
+      status = `${fmtNum(container.kids.length)} ${container.kids.length === 1 ? 'item' : 'items'}` + (container.st.ev ? `, ${container.st.ev} with evidence` : '') +
         (container.st.setid ? `, ${container.st.setid} setuid or setgid` : '');
     } else if (state.mode === 'folder') {
       const s = smartByKey.get(state.folder);
       title = s.label; sub = 'Smart folder'; status = `${s.items.length} ${s.items.length === 1 ? 'item' : 'items'}`;
     } else {
-      title = `Searching “${state.query}”`; sub = 'All usable Apple LOLBins'; status = `${listItems.length} matches`;
+      title = `Searching “${state.query}”`; sub = 'All Apple binaries on PATH'; status = `${listItems.length} matches`;
     }
     if (narrow()) {
       if (state.mpane === 'inspector' && n) { title = n === root ? D.facts.hostname : n.name; sub = n.path; }

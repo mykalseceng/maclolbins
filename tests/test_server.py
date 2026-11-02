@@ -3,7 +3,7 @@ from typing import Any
 
 import anyio
 import pytest
-from conftest import ENTITLEMENTS_PLIST, b64, f_record, probe_text
+from conftest import ENTITLEMENTS_PLIST, b64, c_record, f_record, probe_text
 from mcp import Client
 from parity import mismatches, report_data
 
@@ -12,7 +12,7 @@ from maclolbins import server as server_module
 from maclolbins.catalog import load_catalog
 from maclolbins.probe import ProbeError, parse_output
 from maclolbins.reports import write_report
-from maclolbins.scan import DEFAULT_SCAN_DIRS, build_scan
+from maclolbins.scan import build_scan
 from maclolbins.server import build_server
 
 TCC_GRANT = "T\tsystem\tkTCCServiceSystemPolicyAllFiles\t/usr/bin/osascript\t1\t2\tUNUSED"
@@ -24,10 +24,16 @@ LIBRARY_VALIDATION_KEPT = (
 )
 PROBE = probe_text(
     f_record("/usr/bin/curl", ents=LIBRARY_VALIDATION_KEPT),
+    c_record("/usr/bin/curl", "_curl_easy_perform", "/usr/lib/libcurl.4.dylib"),
     f_record("/usr/bin/osascript", ents=ENTITLEMENTS_PLIST),
+    c_record("/usr/bin/osascript", "_AESendMessage"),
     f_record("/usr/bin/killall"),
+    c_record("/usr/bin/killall", "_proc_listpids"),
     f_record("/usr/bin/pkill"),
-    f_record("/usr/libexec/not-catalogued"),
+    c_record("/usr/bin/pkill", "_proc_listpids"),
+    f_record("/usr/sbin/killall"),
+    c_record("/usr/sbin/killall", "_proc_listpids"),
+    f_record("/usr/bin/no-evidence"),
     f"P\t{SIP}\t/usr/bin/curl",
     "W\tcurl(1) - transfer a URL",
     "W\tkillall(1) - kill processes by name",
@@ -44,6 +50,11 @@ PROBE = probe_text(
             b64("xpc_main\n"),
         ]
     ),
+    facts={
+        "collected_at": "2026-10-26T17:00:00Z",
+        "developer_dir": "none",
+        "path_dirs": "/usr/bin:/usr/sbin",
+    },
 )
 
 
@@ -58,7 +69,7 @@ def call(server, tool: str, arguments: dict[str, Any] | None = None):
 @pytest.fixture
 def reports(tmp_path: Path) -> Path:
     catalog = load_catalog()
-    scan = build_scan(catalog, parse_output(PROBE), "macOS", list(DEFAULT_SCAN_DIRS))
+    scan = build_scan(catalog, parse_output(PROBE), "macOS")
     write_report(scan, tmp_path)
     return tmp_path
 
@@ -73,7 +84,7 @@ SCAN_ID = "macOS-20261026T170000Z"
 
 def test_answers_match_the_rendered_report(server, reports: Path):
     assert anyio.run(mismatches, server, SCAN_ID, reports / SCAN_ID) == []
-    assert len(report_data(reports / SCAN_ID)["inventory"]) == 4
+    assert len(report_data(reports / SCAN_ID)["inventory"]) == 6
 
 
 def test_speaks_protocol_2026_07_28(server):
@@ -118,16 +129,43 @@ def test_get_lolbin_explains_entitlements_and_grants(server):
     assert "tcc-granted" in content["flags"]
 
 
+def test_get_lolbin_shows_capabilities_evidence_and_note(server):
+    content = call(server, "get_lolbin", {"scan_id": SCAN_ID, "binary": "curl"}).structured_content
+    (cap,) = content["capabilities"]
+    assert cap["id"] == "fetches-urls"
+    assert cap["evidence"] == ["/usr/lib/libcurl.4.dylib", "_curl_easy_perform"]
+    assert cap["techniques"][0]["url"] == "https://attack.mitre.org/techniques/T1105/"
+    assert content["abuse"]
+    assert content["examples"]
+    assert content["score"] == 1
+
+
+def test_get_lolbin_without_a_note_has_no_abuse_text(server):
+    content = call(
+        server, "get_lolbin", {"scan_id": SCAN_ID, "binary": "/usr/sbin/killall"}
+    ).structured_content
+    assert content["abuse"] is None
+    assert content["examples"] == []
+    assert [c["id"] for c in content["capabilities"]] == ["lists-processes"]
+
+
 def test_get_lolbin_by_ambiguous_name_lists_paths(server):
     result = call(server, "get_lolbin", {"scan_id": SCAN_ID, "binary": "killall"})
     assert result.is_error
-    assert "/usr/bin/killall, /usr/bin/pkill" in result.content[0].text
+    assert "/usr/bin/killall, /usr/sbin/killall" in result.content[0].text
+
+
+def test_binary_without_evidence_is_listed_last_with_score_zero(server):
+    rows = call(server, "list_lolbins", {"scan_id": SCAN_ID}).structured_content["result"]
+    assert (rows[-1]["path"], rows[-1]["score"], rows[-1]["capabilities"]) == (
+        "/usr/bin/no-evidence",
+        0,
+        [],
+    )
 
 
 def test_get_lolbin_rejects_binaries_outside_the_report(server):
-    result = call(
-        server, "get_lolbin", {"scan_id": SCAN_ID, "binary": "/usr/libexec/not-catalogued"}
-    )
+    result = call(server, "get_lolbin", {"scan_id": SCAN_ID, "binary": "/usr/bin/nothing-here"})
     assert result.is_error
     assert "list_lolbins" in result.content[0].text
 
@@ -135,8 +173,23 @@ def test_get_lolbin_rejects_binaries_outside_the_report(server):
 @pytest.mark.parametrize(
     ("filters", "expected"),
     [
-        ({}, ["/usr/bin/curl", "/usr/bin/killall", "/usr/bin/osascript", "/usr/bin/pkill"]),
+        (
+            {},
+            [
+                "/usr/bin/curl",
+                "/usr/bin/killall",
+                "/usr/bin/no-evidence",
+                "/usr/bin/osascript",
+                "/usr/bin/pkill",
+                "/usr/sbin/killall",
+            ],
+        ),
         ({"query": "TRANSFER A url"}, ["/usr/bin/curl"]),
+        (
+            {"capability": "lists-processes"},
+            ["/usr/bin/killall", "/usr/bin/pkill", "/usr/sbin/killall"],
+        ),
+        ({"query": "lists PROCESSES"}, ["/usr/bin/killall", "/usr/bin/pkill", "/usr/sbin/killall"]),
         ({"tactic": "execution"}, ["/usr/bin/osascript"]),
         ({"flag": "weakened-runtime"}, ["/usr/bin/osascript"]),
         ({"entitlement": "com.apple.private.tcc."}, ["/usr/bin/osascript"]),
@@ -146,6 +199,12 @@ def test_get_lolbin_rejects_binaries_outside_the_report(server):
 def test_list_lolbins_filters(server, filters, expected):
     result = call(server, "list_lolbins", {"scan_id": SCAN_ID, **filters})
     assert sorted(row["path"] for row in result.structured_content["result"]) == expected
+
+
+def test_list_lolbins_puts_the_strongest_evidence_first(server):
+    rows = call(server, "list_lolbins", {"scan_id": SCAN_ID}).structured_content["result"]
+    assert rows[0]["path"] == "/usr/bin/osascript"
+    assert [row["score"] for row in rows] == sorted((row["score"] for row in rows), reverse=True)
 
 
 @pytest.mark.parametrize("scan_id", ["../etc", "macOS-19990101T000000Z", ".hidden"])
@@ -160,17 +219,18 @@ def test_list_scans_reports_unreadable_scans(server, reports: Path):
     listing = call(server, "list_scans").structured_content
     assert [s["scan_id"] for s in listing["scans"]] == [SCAN_ID]
     summary = listing["scans"][0]
-    assert summary["lolbins_in_report"] == 4
+    assert summary["lolbins_in_report"] == 6
+    assert summary["inventoried"] == 6
+    assert summary["path_dirs"] == ["/usr/bin", "/usr/sbin"]
     assert summary["report"] == str(reports / SCAN_ID / "index.html")
-    assert "curl" not in summary["catalogued_absent"]
     assert listing["unreadable"][0]["scan_id"] == "broken-1"
 
 
 def test_scan_target_pipes_probe_into_command(tmp_path: Path, monkeypatch):
     seen = {}
 
-    def fake_run_probe(command, scan_dirs, extra_paths, timeout):
-        seen.update(command=command, timeout=timeout)
+    def fake_run_probe(command, symbols, timeout):
+        seen.update(command=command, timeout=timeout, asks_for_curl="_curl_easy_perform" in symbols)
         return parse_output(PROBE)
 
     monkeypatch.setattr(server_module, "run_probe", fake_run_probe)
@@ -179,7 +239,7 @@ def test_scan_target_pipes_probe_into_command(tmp_path: Path, monkeypatch):
     result = call(
         server, "scan_target", {"command": command, "target": "mac", "timeout_seconds": 60}
     )
-    assert seen == {"command": command, "timeout": 60}
+    assert seen == {"command": command, "timeout": 60, "asks_for_curl": True}
     scan_id = result.structured_content["scan_id"]
     assert scan_id == "mac-20261026T170000Z"
     assert (tmp_path / scan_id / "index.html").is_file()
@@ -207,8 +267,9 @@ def test_scan_target_rejects_empty_command(server):
 def test_probe_script_round_trips_through_import(tmp_path: Path):
     server = build_server(tmp_path, load_catalog())
     script = call(server, "get_probe_script").structured_content
-    assert "LOLBINS_SCAN_DIRS=" in script["script"]
-    assert "/usr/bin/osascript" in script["script"]
+    assert "LOLBINS_PATH_SOURCES=" in script["script"]
+    assert "/etc/paths.d" in script["script"]
+    assert "_curl_easy_perform" in script["script"]
     output = tmp_path / "probe.out"
     output.write_text(PROBE)
     result = call(server, "import_probe_output", {"output_path": str(output), "target": "fusion"})
