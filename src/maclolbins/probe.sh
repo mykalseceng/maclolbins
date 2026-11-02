@@ -1,13 +1,16 @@
 #!/bin/bash
 # Guest-side collector, run as /bin/bash -s on the target. Read-only: it never writes outside
-# its own temp directory. Inputs are newline-separated variables set by the host preamble:
-#   LOLBINS_SCAN_DIRS    directories whose top-level executables are inventoried
-#   LOLBINS_EXTRA_PATHS  extra paths to probe (catalog entries outside the scan dirs)
+# its own temp directory. It inventories the top-level executables of the target's default PATH,
+# built the way path_helper builds it. Inputs are newline-separated variables set by the host
+# preamble:
+#   LOLBINS_PATH_SOURCES  files listing PATH directories, or directories of such files read in
+#                         name order (normally /etc/paths and /etc/paths.d)
+#   LOLBINS_SYMBOLS       imported symbol names the capability rules look for
 # Output is one tab-separated record per line; maclolbins/probe.py documents and parses it.
 set -euo pipefail
 
-: "${LOLBINS_SCAN_DIRS?set LOLBINS_SCAN_DIRS to newline-separated directories}"
-: "${LOLBINS_EXTRA_PATHS:=}"
+: "${LOLBINS_PATH_SOURCES?set LOLBINS_PATH_SOURCES to newline-separated files or directories}"
+: "${LOLBINS_SYMBOLS?set LOLBINS_SYMBOLS to newline-separated symbol names}"
 
 oneline() { tr '\t\n' '  '; }
 b64() { base64 | tr -d '\n'; }
@@ -27,13 +30,38 @@ collect_facts() {
 	emit_fact developer_dir "$(xcode-select -p 2>/dev/null || echo none)"
 }
 
+# The default PATH: each source file's lines in order, each source directory's files in name
+# order, first occurrence of a directory wins; this is what path_helper does with /etc/paths.d.
+list_path_dirs() {
+	local source file
+	while IFS= read -r source; do
+		if [ -d "$source" ]; then
+			for file in "$source"/*; do
+				if [ -f "$file" ]; then grep -vE '^[[:space:]]*(#|$)' "$file" || true; fi
+			done
+		elif [ -f "$source" ]; then
+			grep -vE '^[[:space:]]*(#|$)' "$source" || true
+		fi
+	done <<<"$LOLBINS_PATH_SOURCES" | awk '!seen[$0]++'
+}
+
 list_candidates() {
 	local dir
 	while IFS= read -r dir; do
-		[ -n "$dir" ] && [ -d "$dir" ] || continue
+		[ -d "$dir" ] || continue
 		find "$dir" -maxdepth 1 \( -type f -o -type l \) -perm +111 -print 2>/dev/null || true
-	done <<<"$LOLBINS_SCAN_DIRS"
-	printf '%s\n' "$LOLBINS_EXTRA_PATHS"
+	done <"$WORK/path_dirs"
+}
+
+# Capability evidence for a compiled binary: the imported symbols the catalog asks about, plus the
+# library paths it links. Mach-O string tables keep both as NUL-separated tokens.
+emit_evidence() {
+	local path=$1 tokens
+	tokens=$(LC_ALL=C grep -aoE '[A-Za-z0-9_$./+-]{4,}' "$path" 2>/dev/null |
+		awk 'NR == FNR { want[$0] = 1; next }
+			($0 in want) || /^\/(usr\/lib|System\/Library)\/.*(\.dylib$|\.framework\/)/' \
+			"$WORK/symbols" - | sort -u || true)
+	printf 'C\t%s\t%s\n' "$path" "$(printf '%s' "$tokens" | b64)"
 }
 
 emit_stats() {
@@ -110,10 +138,8 @@ emit_xpc_registrations() {
 
 probe_file() {
 	local path=$1 link="" magic="" is_script=0 info ent
-	if [ ! -e "$path" ] && [ ! -L "$path" ]; then
-		printf 'M\t%s\n' "$path"
-		return
-	fi
+	# find listed it a moment ago; skip it if it has since gone.
+	if [ ! -e "$path" ] && [ ! -L "$path" ]; then return; fi
 	if [ -L "$path" ]; then link=$(readlink "$path"); fi
 	if [ -r "$path" ]; then
 		IFS= read -r -n 2 magic 2>/dev/null <"$path" || true
@@ -122,15 +148,23 @@ probe_file() {
 	ent=$(codesign -dv --verbose=2 --entitlements - --xml "$path" 2>"$WORK/codesign.err" | b64) || true
 	info=$(b64 <"$WORK/codesign.err")
 	printf 'F\t%s\t%s\t%s\t%s\t%s\n' "$path" "$link" "$is_script" "$info" "$ent"
+	if [ "$is_script" = 0 ] && [ -r "$path" ]; then emit_evidence "$path"; fi
 }
 
 main() {
 	WORK=$(mktemp -d)
-	trap 'rm -f "$WORK/paths" "$WORK/codesign.err" "$WORK/whatis" "$WORK/tcc.err"; rmdir "$WORK"' EXIT
+	trap 'rm -f "$WORK/paths" "$WORK/path_dirs" "$WORK/symbols" "$WORK/codesign.err" "$WORK/whatis" "$WORK/tcc.err"; rmdir "$WORK"' EXIT
+	# A sentinel keeps the symbols file non-empty, so awk's NR == FNR test always means "first file".
+	{
+		echo __lolbins_none__
+		printf '%s\n' "$LOLBINS_SYMBOLS"
+	} >"$WORK/symbols"
+	list_path_dirs >"$WORK/path_dirs"
 
 	collect_facts
+	emit_fact path_dirs "$(paste -sd : "$WORK/path_dirs")"
 	collect_tcc
-	list_candidates | { grep -v '^$' || true; } | sort -u >"$WORK/paths"
+	list_candidates | sort -u >"$WORK/paths"
 	# whatis is the slowest step, so it runs while the per-file loop below does.
 	emit_summaries "$WORK/paths" >"$WORK/whatis" &
 	local summaries_pid=$!

@@ -3,24 +3,15 @@
 import json
 from importlib.metadata import version
 from pathlib import Path
-from typing import Literal, TypedDict
+from typing import TypedDict
 
-from maclolbins.catalog import Catalog, Entry
+from maclolbins.catalog import Catalog, Note
 from maclolbins.entitlements import runtime_weakeners
 from maclolbins.probe import FileRecord, ProbeOutput, TccGrant, TccSnapshot
 
-SCHEMA_VERSION = 5
-DEFAULT_SCAN_DIRS = ("/bin", "/sbin", "/usr/bin", "/usr/sbin", "/usr/libexec")
-
-PathStatus = Literal["present", "inactive-shim", "missing"]
+SCHEMA_VERSION = 6
 TCC_ENTITLEMENT = "com.apple.private.tcc."
-
-
-class PathFinding(TypedDict):
-    """Whether one catalogued path exists on the target."""
-
-    path: str
-    status: PathStatus
+PRIVATE_ENTITLEMENTS = ("com.apple.private.", "com.apple.rootless.")
 
 
 class TechniqueRef(TypedDict):
@@ -30,8 +21,18 @@ class TechniqueRef(TypedDict):
     name: str
 
 
+class CapabilityRef(TypedDict):
+    """A capability rule's description, copied in so reports need no catalog."""
+
+    id: str
+    title: str
+    summary: str
+    techniques: list[TechniqueRef]
+    tactics: list[str]
+
+
 class ExampleRef(TypedDict):
-    """A worked command copied from the catalog, so reports need no catalog."""
+    """A worked command copied from a note, so reports need no catalog."""
 
     title: str
     command: str
@@ -39,26 +40,31 @@ class ExampleRef(TypedDict):
     privilege: str
 
 
-class EntryFinding(TypedDict):
-    """A catalog entry and its presence on the target (best status across its paths)."""
+class NoteRef(TypedDict):
+    """A hand-written note copied from the catalog, so reports need no catalog."""
 
     name: str
-    status: PathStatus
-    tactics: list[str]
+    paths: list[str]
     techniques: list[TechniqueRef]
+    tactics: list[str]
     privilege: str
     abuse: str
-    xpc_functionality: str | None
-    description: str | None
     examples: list[ExampleRef]
-    paths: list[PathFinding]
+
+
+class CapabilityMatch(TypedDict):
+    """A capability one file shows, and the imports or libraries that show it."""
+
+    id: str
+    evidence: list[str]
 
 
 class InventoryItem(TypedDict):
-    """One probed file with its attention flags and the TCC grants naming it."""
+    """One probed file with its capabilities, attention flags and the TCC grants naming it."""
 
     file: FileRecord
-    catalog_entry: str | None
+    capabilities: list[CapabilityMatch]
+    note: str | None
     flags: list[str]
     tcc: list[TccGrant]
 
@@ -73,7 +79,8 @@ class ScanResult(TypedDict):
     scan_dirs: list[str]
     facts: dict[str, str]
     tcc: TccSnapshot
-    entries: list[EntryFinding]
+    capabilities: list[CapabilityRef]
+    notes: list[NoteRef]
     inventory: list[InventoryItem]
 
 
@@ -81,26 +88,36 @@ class ScanFileError(ValueError):
     """A saved scan file cannot be read."""
 
 
-def build_scan(
-    catalog: Catalog, probe: ProbeOutput, target: str, scan_dirs: list[str]
-) -> ScanResult:
-    """Match probe output against the catalog and annotate every inventoried file."""
-    shims_active = probe["facts"].get("developer_dir", "none") != "none"
-    owner_by_path = {path: entry.name for entry in catalog.entries for path in entry.paths}
-    entries = [_entry_finding(catalog, entry, probe, shims_active) for entry in catalog.entries]
+def build_scan(catalog: Catalog, probe: ProbeOutput, target: str) -> ScanResult:
+    """Match every inventoried file against the catalog's capability rules and notes.
+
+    The scanned folders are the target's default PATH, which the probe reports as the
+    path_dirs fact.
+    """
+    path_dirs = probe["facts"].get("path_dirs", "")
     inventory = [
-        _inventory_item(record, owner_by_path.get(path), probe["tcc"]["grants"])
-        for path, record in sorted(probe["files"].items())
+        _inventory_item(catalog, record, probe["tcc"]["grants"])
+        for _, record in sorted(probe["files"].items())
     ]
     return ScanResult(
         schema=SCHEMA_VERSION,
         tool_version=version("maclolbins"),
         catalog_version=catalog.version,
         target=target,
-        scan_dirs=scan_dirs,
+        scan_dirs=[d for d in path_dirs.split(":") if d],
         facts=probe["facts"],
         tcc=probe["tcc"],
-        entries=entries,
+        capabilities=[
+            CapabilityRef(
+                id=cap.id,
+                title=cap.title,
+                summary=cap.summary,
+                techniques=_technique_refs(catalog, cap.techniques),
+                tactics=catalog.tactics_for(cap.techniques),
+            )
+            for cap in catalog.capabilities
+        ],
+        notes=[_note_ref(catalog, note) for note in catalog.notes],
         inventory=inventory,
     )
 
@@ -108,9 +125,8 @@ def build_scan(
 def rejoin_catalog(scan: ScanResult, catalog: Catalog) -> ScanResult:
     """Return the scan with its catalog-derived parts rebuilt from `catalog`.
 
-    The probe records what is on the host; the catalog records what each binary is good for.
-    Re-joining them at render time means catalog edits (new examples, reworded abuse) reach a
-    report without re-running the scan.
+    The probe records what is on the host; the catalog says what that evidence means. Re-joining
+    them at render time means rule and note edits reach a report without re-running the scan.
 
     Args:
         scan: A scan loaded from disk.
@@ -122,10 +138,9 @@ def rejoin_catalog(scan: ScanResult, catalog: Catalog) -> ScanResult:
     probe = ProbeOutput(
         facts=scan["facts"],
         files={item["file"]["path"]: item["file"] for item in scan["inventory"]},
-        missing=[],
         tcc=scan["tcc"],
     )
-    rebuilt = build_scan(catalog, probe, target=scan["target"], scan_dirs=scan["scan_dirs"])
+    rebuilt = build_scan(catalog, probe, target=scan["target"])
     rebuilt["tool_version"] = scan["tool_version"]
     return rebuilt
 
@@ -135,6 +150,7 @@ def file_flags(record: FileRecord) -> list[str]:
     perms = record["perms"] or ""
     stat_ok = record["perms"] is not None
     signing = record["signing"]
+    keys = record["entitlements"]
     checks = [
         ("setuid", len(perms) > 3 and perms[3] in "sS"),
         ("setgid", len(perms) > 6 and perms[6] in "sS"),
@@ -148,8 +164,9 @@ def file_flags(record: FileRecord) -> list[str]:
         ("third-party", signing["state"] == "signed" and signing["team_id"] is not None),
         # SIP marks the files it protects with the restricted flag; no stat means no verdict.
         ("sip-unprotected", stat_ok and "restricted" not in record["bsd_flags"]),
-        ("weakened-runtime", bool(runtime_weakeners(record["entitlements"]))),
-        ("tcc-entitled", any(key.startswith(TCC_ENTITLEMENT) for key in record["entitlements"])),
+        ("private-entitled", any(key.startswith(PRIVATE_ENTITLEMENTS) for key in keys)),
+        ("weakened-runtime", bool(runtime_weakeners(keys))),
+        ("tcc-entitled", any(key.startswith(TCC_ENTITLEMENT) for key in keys)),
         ("xpc-server-candidate", bool(record["xpc"])),
     ]
     return [label for label, applies in checks if applies]
@@ -181,11 +198,6 @@ def load_scan(path: Path) -> ScanResult:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         raise ScanFileError(f"cannot read scan file {path}: {exc}") from exc
-    if isinstance(data, dict) and data.get("schema") == 4:
-        for item in data.get("inventory", []):
-            if isinstance(item, dict) and isinstance(item.get("file"), dict):
-                item["file"].setdefault("xpc", [])
-        data["schema"] = SCHEMA_VERSION
     if not isinstance(data, dict) or data.get("schema") != SCHEMA_VERSION:
         found = data.get("schema") if isinstance(data, dict) else type(data).__name__
         raise ScanFileError(
@@ -195,34 +207,18 @@ def load_scan(path: Path) -> ScanResult:
     return scan
 
 
-def _path_status(path: str, probe: ProbeOutput, shims_active: bool) -> PathStatus:
-    record = probe["files"].get(path)
-    if record is None:
-        return "missing"
-    if record["is_dev_shim"] and not shims_active:
-        return "inactive-shim"
-    return "present"
+def _technique_refs(catalog: Catalog, technique_ids: tuple[str, ...]) -> list[TechniqueRef]:
+    return [TechniqueRef(id=t, name=catalog.techniques[t].name) for t in technique_ids]
 
 
-def _entry_finding(
-    catalog: Catalog, entry: Entry, probe: ProbeOutput, shims_active: bool
-) -> EntryFinding:
-    paths = [
-        PathFinding(path=path, status=_path_status(path, probe, shims_active))
-        for path in entry.paths
-    ]
-    statuses = {finding["status"] for finding in paths}
-    status: PathStatus = next(s for s in ("present", "inactive-shim", "missing") if s in statuses)
-    summaries = (probe["files"][p].get("summary") for p in entry.paths if p in probe["files"])
-    return EntryFinding(
-        name=entry.name,
-        status=status,
-        tactics=catalog.tactics_for(entry),
-        techniques=[TechniqueRef(id=t, name=catalog.techniques[t].name) for t in entry.techniques],
-        privilege=entry.privilege,
-        abuse=entry.abuse,
-        xpc_functionality=entry.xpc_functionality,
-        description=next((s for s in summaries if s), None),
+def _note_ref(catalog: Catalog, note: Note) -> NoteRef:
+    return NoteRef(
+        name=note.name,
+        paths=list(note.paths),
+        techniques=_technique_refs(catalog, note.techniques),
+        tactics=catalog.tactics_for(note.techniques),
+        privilege=note.privilege,
+        abuse=note.abuse,
         examples=[
             ExampleRef(
                 title=example.title,
@@ -230,17 +226,26 @@ def _entry_finding(
                 explanation=example.explanation,
                 privilege=example.privilege,
             )
-            for example in entry.examples
+            for example in note.examples
         ],
-        paths=paths,
     )
 
 
-def _inventory_item(
-    record: FileRecord, catalog_entry: str | None, grants: list[TccGrant]
-) -> InventoryItem:
+def _inventory_item(catalog: Catalog, record: FileRecord, grants: list[TccGrant]) -> InventoryItem:
     matched = tcc_grants_for(record, grants)
     flags = file_flags(record)
     if any(grant["auth"] == "allowed" for grant in matched):
         flags.append("tcc-granted")
-    return InventoryItem(file=record, catalog_entry=catalog_entry, flags=flags, tcc=matched)
+    capabilities = []
+    for cap in catalog.capabilities:
+        evidence = cap.evidence(record["imports"], record["libraries"])
+        if evidence:
+            capabilities.append(CapabilityMatch(id=cap.id, evidence=evidence))
+    note = catalog.note_for(record["path"])
+    return InventoryItem(
+        file=record,
+        capabilities=capabilities,
+        note=note.name if note else None,
+        flags=flags,
+        tcc=matched,
+    )

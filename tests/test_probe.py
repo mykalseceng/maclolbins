@@ -6,6 +6,7 @@ import pytest
 from conftest import ENTITLEMENTS_PLIST, SHIM_CODESIGN, b64, f_record, probe_text
 
 from maclolbins.probe import (
+    DEFAULT_PATH_SOURCES,
     HEREDOC_DELIMITER,
     ProbeError,
     build_script,
@@ -65,7 +66,6 @@ def test_parse_output_joins_stats_hashes_and_entitlements():
             "S\tabc123\t/bin/ps",
             f_record("/bin/ps", ents=ENTITLEMENTS_PLIST, link="../ps"),
             f_record("/usr/bin/swift", codesign=SHIM_CODESIGN),
-            "M\t/usr/bin/gone",
         )
     )
     ps = output["files"]["/bin/ps"]
@@ -81,8 +81,21 @@ def test_parse_output_joins_stats_hashes_and_entitlements():
     assert output["files"]["/usr/bin/swift"]["is_dev_shim"] is True
     assert output["files"]["/usr/bin/swift"]["sha256"] is None
     assert output["files"]["/usr/bin/swift"]["bsd_flags"] == []
-    assert output["missing"] == ["/usr/bin/gone"]
     assert output["facts"]["developer_dir"] == "none"
+
+
+def test_parse_output_splits_evidence_into_imports_and_libraries():
+    tokens = b64("_curl_easy_perform\n/usr/lib/libcurl.4.dylib\n_curl_easy_perform\n\n")
+    output = parse_output(
+        probe_text(
+            f_record("/usr/bin/curl"), f_record("/usr/bin/true"), f"C\t/usr/bin/curl\t{tokens}"
+        )
+    )
+    curl = output["files"]["/usr/bin/curl"]
+    assert curl["imports"] == ["_curl_easy_perform"]
+    assert curl["libraries"] == ["/usr/lib/libcurl.4.dylib"]
+    assert output["files"]["/usr/bin/true"]["imports"] == []
+    assert output["files"]["/usr/bin/true"]["libraries"] == []
 
 
 def test_parse_output_reads_tcc_sources_and_grants():
@@ -163,6 +176,8 @@ def test_parse_output_converts_plist_data_to_json_safe_values():
     [
         ("H\tonly-key\n", "expected 2"),
         ("Z\twhat\n", "unknown record"),
+        ("M\t/gone\n", "unknown record"),
+        ("C\t/x\tnot-base64!\nE\tok\n", "invalid base64"),
         ("H\tk\tv\n", "truncated"),
         ("F\t/x\t\t0\tnot-base64!\t\nE\tok\n", "invalid base64"),
         (f"F\t/x\t\t0\t\t{b64('<plist><array/></plist>')}\nE\tok\n", "not a dictionary"),
@@ -200,26 +215,45 @@ def test_parse_output_rejects_malformed_input(text, message):
         parse_output(text)
 
 
+def test_build_script_carries_path_sources_and_symbols():
+    script = build_script(["_curl_easy_perform"], ["/etc/paths", "/etc/paths.d"])
+    assert "LOLBINS_PATH_SOURCES=$(cat <<'__LOLBINS_EOF__'\n/etc/paths\n/etc/paths.d\n" in script
+    assert "LOLBINS_SYMBOLS=$(cat <<'__LOLBINS_EOF__'\n_curl_easy_perform\n" in script
+    assert DEFAULT_PATH_SOURCES == ("/etc/paths", "/etc/paths.d")
+
+
 def test_build_script_rejects_values_that_would_break_the_heredoc():
     with pytest.raises(ProbeError, match="cannot be passed"):
-        build_script(["/bin"], ["/a\nb"])
+        build_script(["_a\nb"])
     with pytest.raises(ProbeError, match="cannot be passed"):
-        build_script(["/bin"], [HEREDOC_DELIMITER])
+        build_script(["_x"], [HEREDOC_DELIMITER])
 
 
 def test_run_probe_reports_missing_command():
     with pytest.raises(ProbeError, match="not found on PATH"):
-        run_probe(["/nonexistent/prlctl"], ["/bin"], [], timeout=5)
+        run_probe(["/nonexistent/prlctl"], [], timeout=5)
 
 
 def test_run_probe_reports_failure_with_stderr():
     with pytest.raises(ProbeError, match=r"exit code 3.*boom"):
-        run_probe(["/bin/sh", "-c", "echo boom >&2; exit 3"], ["/bin"], [], timeout=5)
+        run_probe(["/bin/sh", "-c", "echo boom >&2; exit 3"], [], timeout=5)
 
 
 def test_run_probe_reports_timeout():
     with pytest.raises(ProbeError, match="did not finish"):
-        run_probe(["/bin/sh", "-c", "exec /bin/sleep 5"], ["/bin"], [], timeout=0.2)
+        run_probe(["/bin/sh", "-c", "exec /bin/sleep 5"], [], timeout=0.2)
+
+
+def path_sources(tmp_path: Path, *dirs: Path) -> list[str]:
+    """Write a paths file and a paths.d directory listing dirs, as /etc/paths does."""
+    first, *rest = dirs
+    paths = tmp_path / "paths"
+    paths.write_text(f"# default PATH\n{first}\n\n{first}\n")
+    paths_d = tmp_path / "paths.d"
+    paths_d.mkdir()
+    for index, directory in enumerate(rest):
+        (paths_d / f"{90 - index:02d}-extra").write_text(f"{directory}\n")
+    return [str(paths), str(paths_d), str(tmp_path / "no-such-source")]
 
 
 @pytest.mark.skipif(sys.platform != "darwin", reason="probe.sh relies on macOS tools")
@@ -237,11 +271,18 @@ def test_probe_script_end_to_end_on_this_mac(tmp_path: Path):
     spaced.write_text("#!/bin/sh\n")
     # A setuid file owned by the test user in a private temp dir, so the flag can be observed.
     os.chmod(spaced, 0o4755)  # noqa: S103
+    later_dir = tmp_path / "later"
+    later_dir.mkdir()
 
     output = run_probe(
-        LOCAL_BASH, [str(scan_dir)], [str(spaced), str(tmp_path / "missing")], timeout=60
+        LOCAL_BASH,
+        [],
+        timeout=60,
+        path_sources=path_sources(tmp_path, scan_dir, later_dir, space_dir),
     )
 
+    # paths.d files are read in name order, so 89-extra (space_dir) comes before 90-extra.
+    assert output["facts"]["path_dirs"] == f"{scan_dir}:{space_dir}:{later_dir}"
     assert set(output["files"]) == {str(script), str(scan_dir / "link"), str(spaced)}
     hello = output["files"][str(script)]
     assert hello["is_script"] is True
@@ -251,19 +292,38 @@ def test_probe_script_end_to_end_on_this_mac(tmp_path: Path):
     assert output["files"][str(scan_dir / "link")]["link_target"] == "hello.sh"
     assert output["files"][str(spaced)]["perms"] == "-rwsr-xr-x"
     assert hello["bsd_flags"] == []
-    assert output["missing"] == [str(tmp_path / "missing")]
+    assert hello["imports"] == []  # scripts get no evidence record
     assert {source["scope"] for source in output["tcc"]["sources"]} == {"system", "user"}
     assert output["facts"]["user"]
     assert "collected_at" in output["facts"]
 
 
+def linked_system_tools(tmp_path: Path, *tools: str) -> Path:
+    """Make a PATH directory of symlinks to real system binaries."""
+    bin_dir = tmp_path / "sysbin"
+    bin_dir.mkdir()
+    for tool in tools:
+        (bin_dir / Path(tool).name).symlink_to(tool)
+    return bin_dir
+
+
 @pytest.mark.skipif(sys.platform != "darwin", reason="probe.sh relies on macOS tools")
-def test_probe_script_reads_real_entitlements():
-    output = run_probe(LOCAL_BASH, [], ["/usr/bin/tccutil"], timeout=60)
-    record = output["files"]["/usr/bin/tccutil"]
-    assert record["signing"]["platform_binary"] is True
-    assert "restricted" in record["bsd_flags"]
-    assert any(key.startswith("com.apple.private.tcc.") for key in record["entitlements"])
+def test_probe_script_reads_real_entitlements_and_evidence(tmp_path: Path):
+    bin_dir = linked_system_tools(tmp_path, "/usr/bin/tccutil", "/usr/bin/curl")
+    output = run_probe(
+        LOCAL_BASH,
+        ["_curl_easy_perform", "_TCCAccessReset", "_no_such_symbol"],
+        timeout=60,
+        path_sources=path_sources(tmp_path, bin_dir),
+    )
+    tccutil = output["files"][str(bin_dir / "tccutil")]
+    assert tccutil["signing"]["platform_binary"] is True
+    assert "restricted" in tccutil["bsd_flags"]
+    assert any(key.startswith("com.apple.private.tcc.") for key in tccutil["entitlements"])
+    assert tccutil["imports"] == ["_TCCAccessReset"]
+    curl = output["files"][str(bin_dir / "curl")]
+    assert curl["imports"] == ["_curl_easy_perform"]
+    assert any(lib.endswith("/libcurl.4.dylib") for lib in curl["libraries"])
 
 
 def test_parse_whatis_prefers_most_specific_page():
@@ -296,8 +356,9 @@ def test_parse_output_attaches_summary_by_basename():
 
 
 @pytest.mark.skipif(sys.platform != "darwin", reason="probe.sh relies on macOS tools")
-def test_probe_script_collects_man_page_summaries():
-    output = run_probe(LOCAL_BASH, [], ["/usr/bin/tccutil"], timeout=120)
-    summary = output["files"]["/usr/bin/tccutil"]["summary"]
+def test_probe_script_collects_man_page_summaries(tmp_path: Path):
+    bin_dir = linked_system_tools(tmp_path, "/usr/bin/tccutil")
+    output = run_probe(LOCAL_BASH, [], timeout=120, path_sources=path_sources(tmp_path, bin_dir))
+    summary = output["files"][str(bin_dir / "tccutil")]["summary"]
     assert summary is not None
     assert "privacy" in summary.lower()

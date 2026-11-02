@@ -1,42 +1,65 @@
-# The MacLOLBins report, its flags and statuses
+# The MacLOLBins report, its scope, evidence and flags
 
 ## What the report contains
 
 `index.html` is a column browser over the scanned filesystem, reading `assets/data.js`:
 
-- **Columns** walk the directory tree; file rows carry glyphs for catalogued LOLBin,
-  setuid/setgid, TCC access, weakened runtime, entitlements, script, developer shim, unreadable.
-- **Smart folders**: catalogued LOLBins, setuid or setgid, unsigned, private entitlements, TCC
-  access, scripts.
-- **Inspector** for the selected file: what it is, why it matters (abuse, ATT&CK techniques,
-  worked commands), XPC-server evidence, permission matrix, SIP protection, privacy and code
+- **Columns** walk the directory tree; file rows carry glyphs for worked commands (a catalogue
+  note), setuid/setgid, TCC access, weakened runtime, entitlements, XPC candidate, script,
+  unreadable.
+- **Smart folders**: with worked commands, setuid or setgid, unsigned, private entitlements, TCC
+  access, weakened runtime, scripts. **Capabilities**: one folder per capability rule that
+  matched, strongest evidence first.
+- **Inspector** for the selected file: what it is, why it matters (capabilities with the symbols
+  or libraries that show them, the note's abuse text if any, ATT&CK techniques, evidence score),
+  XPC-server evidence, worked commands, permission matrix, SIP protection, privacy and code
   integrity (TCC grants and entitlements, hardened runtime, weakening entitlements), signing
   chain, and every entitlement with its value, grouped by namespace and linked to Apple's page
   when documented.
-- **Search** over name, path, catalogue entry, tactic, technique, man-page summary, signing
+- **Search** over name, path, note, capability, tactic, technique, man-page summary, signing
   identifier and entitlement key. `index.html#/usr/bin/curl` selects a file directly.
+- The overview (`#/`) shows the PATH that was scanned, how many executables were inventoried,
+  and the fifteen binaries with the strongest evidence.
 
 ## Which binaries are in it
 
-The probe inventories every executable in `/bin`, `/sbin`, `/usr/bin`, `/usr/sbin` and
-`/usr/libexec` plus every catalogue path (about 1,650 files on macOS 26). The report, and the MCP
-server's `list_lolbins`/`get_lolbin`, show only files that are
+The probe reads the target's default PATH the way `path_helper` builds it: `/etc/paths`, then
+each file in `/etc/paths.d` in name order (`path_dirs` in `list_scans`). It inventories every
+executable at the top level of those directories (`inventoried`). App bundles, frameworks,
+`/usr/libexec` and other helpers that are not on PATH are out of scope: they are services other
+programs start, not commands someone runs by name.
 
-1. a catalogued path, and
-2. not an inactive xcode-select shim, and
-3. Apple platform-signed, or carrying SIP's `restricted` flag (which keeps unsigned Apple
-   scripts such as `kickstart`).
+The report, and the MCP server's `list_lolbins`/`get_lolbin`, keep a file when it is
 
-So `lolbins_in_report` (116 on a stock macOS 26.6.2 VM) is smaller than the inventory and can
-exceed the number of catalogue entries, because one entry may list several paths (e.g. "Unix
-shells").
+1. part of the Apple install: platform-signed, or carrying SIP's `restricted` flag (which keeps
+   Apple's unsigned system scripts), and
+2. not an inactive xcode-select shim.
 
-## Catalogue entry statuses (`catalogued_present`, `catalogued_absent`)
+Evidence does not decide inclusion; it ranks. A tool whose abuse is its normal job (`id`,
+`base64`, `chmod`) imports nothing distinctive, so it is listed with a `score` of 0 rather than
+dropped. `lolbins_in_report` is smaller than `inventoried` only because of third-party
+executables and inactive shims. The privilege signals are `setuid`, `setgid`,
+`private-entitled`, `tcc-entitled`, `tcc-granted`, `weakened-runtime` and
+`xpc-server-candidate`.
 
-- `present`: at least one of the entry's paths exists and is usable.
-- `inactive-shim`: the path is an xcode-select stub that does nothing until Command Line Tools
-  are installed (`python3`, `swift` on a VM without them).
-- `missing`: no path exists.
+## Capabilities and evidence
+
+Each capability rule in the catalogue lists imported symbols (`_posix_spawn`,
+`_OBJC_CLASS_$_NSURLSession`, ...) and linked library names (`libcurl`, `Tcl`, ...). The probe
+reads both from the binary's own string tables, so `evidence` shows exactly which imports or
+libraries matched. A capability says what the code can do, not that a caller can drive it from
+the command line: `runs-programs` on a binary that only starts a fixed helper is still a match.
+Functionality compiled into the binary (`sqlite3`, `zip`) leaves no import, so it shows only if
+another symbol or library gives it away. Scripts get no capabilities.
+
+`score` is one point per capability plus two per privilege signal; `list_lolbins` returns rows
+highest score first, and binaries with no evidence come last with 0.
+
+## Notes and worked commands
+
+Catalogue notes are hand-written abuse text and worked commands for specific paths. They show in
+`abuse` and `examples` when a reported binary has one, and add their techniques, but they never
+decide whether a binary is reported or change its score. `has_note` in `list_lolbins` says which rows have one.
 
 ## File flags
 
@@ -51,6 +74,7 @@ shells").
 | `unreadable` | codesign could not read it | Signing facts unknown |
 | `third-party` | Signed with a Team ID | Not part of the Apple install |
 | `sip-unprotected` | No SIP `restricted` flag | Root can modify or replace it |
+| `private-entitled` | Holds a `com.apple.private.*` or `com.apple.rootless.*` entitlement | Reserved for Apple code; Apple services trust these keys |
 | `weakened-runtime` | Holds a code-signing protection weakener set to true | Host for injected code or a debugger target |
 | `tcc-entitled` | Holds a `com.apple.private.tcc.*` entitlement | `allow` and `allow.overridable` reach the services in `tcc_services` with no prompt; manager keys change TCC grants; others, such as `allow-prompting`, are undocumented |
 | `tcc-granted` | A TCC database grants it `allowed` | Consent was recorded on this Mac |

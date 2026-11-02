@@ -11,7 +11,7 @@
         "Scanned the Parallels VM with scan_target using a prlctl exec command",
         "Report index.html is byte-identical to maclolbins' report page",
         "Report data.js is byte-identical to `maclolbins render` of the scan's scan.json",
-        "Report contains the same 116 binaries as the reference report for this VM",
+        "Report contains the same 1,181 binaries as the reference report for this VM",
         "Answer gives the path to the report's index.html",
         "No report files were written or edited by hand"
       ]

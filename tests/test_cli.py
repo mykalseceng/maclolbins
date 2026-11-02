@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from conftest import f_record, probe_text
+from conftest import c_record, f_record, probe_text
 
 from maclolbins import cli
 from maclolbins.catalog import load_catalog
@@ -9,10 +9,17 @@ from maclolbins.scan import load_scan
 
 
 def test_scan_writes_json_and_html(tmp_path: Path, monkeypatch, capsys):
-    def fake_run_probe(command, scan_dirs, extra_paths, timeout):
+    def fake_run_probe(command, symbols, timeout):
         assert command[:3] == ["prlctl", "exec", "my vm"]
-        assert "/usr/bin/curl" in extra_paths
-        return parse_output(probe_text(f_record("/usr/bin/curl")))
+        assert "_curl_easy_perform" in symbols
+        return parse_output(
+            probe_text(
+                f_record("/usr/bin/curl"),
+                c_record("/usr/bin/curl", "_curl_easy_perform"),
+                f_record("/usr/bin/true"),
+                facts={"collected_at": "2026-10-26T17:00:00Z", "path_dirs": "/usr/bin:/bin"},
+            )
+        )
 
     monkeypatch.setattr(cli, "run_probe", fake_run_probe)
     assert cli.main(["scan", "--vm", "my vm", "--out", str(tmp_path)]) == 0
@@ -22,8 +29,14 @@ def test_scan_writes_json_and_html(tmp_path: Path, monkeypatch, capsys):
     assert (out_dir / "index.html").is_file()
     assert (out_dir / "assets" / "data.js").is_file()
     assert '"/usr/bin/curl"' in (out_dir / "assets" / "data.js").read_text()
-    assert capsys.readouterr().out.strip() == str(out_dir / "index.html")
-    assert len(load_scan(out_dir / "scan.json")["entries"]) == len(load_catalog().entries)
+    output = capsys.readouterr()
+    assert output.out.strip() == str(out_dir / "index.html")
+    assert "2 Apple binaries in the report out of 2 executables on PATH (/usr/bin, /bin)" in (
+        output.err
+    )
+    scan = load_scan(out_dir / "scan.json")
+    assert len(scan["capabilities"]) == len(load_catalog().capabilities)
+    assert scan["scan_dirs"] == ["/usr/bin", "/bin"]
 
     rendered = tmp_path / "again"
     assert cli.main(["render", str(out_dir / "scan.json"), "-o", str(rendered)]) == 0

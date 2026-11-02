@@ -2,13 +2,16 @@
 
 probe.sh prints one tab-separated record per line:
 
-    H  key  value                                       host fact
+    H  key  value                                       host fact; path_dirs is the default
+                                                        PATH, colon-separated
     P  perms  owner  group  size  flags  path           stat -L of an existing path; flags are
                                                         BSD file flags such as restricted, or -
     S  sha256  path                                     SHA-256 of a readable file
     F  path  link_target  is_script  codesign  ents     codesign -dv text and entitlements
                                                         plist, both base64-encoded
-    M  path                                             path does not exist
+    C  path  tokens                                     capability evidence: matched imported
+                                                        symbols and linked library paths, one
+                                                        per line, base64-encoded
     W  whatis_line                                      man-page summary line from whatis
     D  scope  status  detail                            a TCC database: scope is system or
                                                         user, status ok, unreadable or missing
@@ -29,16 +32,18 @@ from collections.abc import Iterable, Sequence
 from datetime import datetime
 from importlib import resources
 from pathlib import PurePosixPath
-from typing import Any, Literal, TypedDict
+from typing import Any, Literal, NamedTuple, TypedDict
 
 HEREDOC_DELIMITER = "__LOLBINS_EOF__"
+# Where path_helper reads the default PATH from on macOS.
+DEFAULT_PATH_SOURCES = ("/etc/paths", "/etc/paths.d")
 SHIM_IDENTIFIER_PREFIX = "com.apple.dt.xcode_select.tool-shim"
 RECORD_FIELDS = {
     "H": 2,
     "P": 6,
     "S": 2,
     "F": 5,
-    "M": 1,
+    "C": 2,
     "W": 1,
     "D": 3,
     "T": 6,
@@ -62,6 +67,16 @@ XPC_LISTENER_MARKERS = {
     "xpc_connection_create_mach_service",
     "xpc_connection_set_event_handler",
 }
+
+
+class _FileFacts(NamedTuple):
+    """What other probe records say about one path, gathered before building its FileRecord."""
+
+    stat: tuple[str, str, str, int, str] | None
+    sha256: str | None
+    summary: str | None
+    evidence: list[str]
+    xpc: list["XpcRegistration"]
 
 
 class ProbeError(RuntimeError):
@@ -114,6 +129,8 @@ class FileRecord(TypedDict):
     bsd_flags: list[str]
     signing: Signing
     entitlements: dict[str, Any]
+    imports: list[str]
+    libraries: list[str]
     xpc: list[XpcRegistration]
 
 
@@ -151,11 +168,10 @@ class TccSnapshot(TypedDict):
 
 
 class ProbeOutput(TypedDict):
-    """Parsed probe output: host facts, files keyed by path, missing paths and TCC grants."""
+    """Parsed probe output: host facts, files keyed by path and TCC grants."""
 
     facts: dict[str, str]
     files: dict[str, FileRecord]
-    missing: list[str]
     tcc: TccSnapshot
 
 
@@ -164,27 +180,35 @@ def parallels_command(vm: str) -> list[str]:
     return ["prlctl", "exec", vm, "--current-user", "/bin/bash", "-s"]
 
 
-def build_script(scan_dirs: Sequence[str], extra_paths: Sequence[str]) -> str:
+def build_script(symbols: Sequence[str], path_sources: Sequence[str] = DEFAULT_PATH_SOURCES) -> str:
     """Prefix probe.sh with heredoc assignments carrying its inputs."""
     body = resources.files("maclolbins").joinpath("probe.sh").read_text(encoding="utf-8")
-    preamble = _heredoc_assignment("LOLBINS_SCAN_DIRS", scan_dirs) + _heredoc_assignment(
-        "LOLBINS_EXTRA_PATHS", extra_paths
+    preamble = _heredoc_assignment("LOLBINS_PATH_SOURCES", path_sources) + _heredoc_assignment(
+        "LOLBINS_SYMBOLS", symbols
     )
     return preamble + body
 
 
 def run_probe(
     command: Sequence[str],
-    scan_dirs: Sequence[str],
-    extra_paths: Sequence[str],
+    symbols: Sequence[str],
     timeout: float,
+    path_sources: Sequence[str] = DEFAULT_PATH_SOURCES,
 ) -> ProbeOutput:
     """Pipe the probe into `command` (which must run bash reading stdin) and parse the result.
+
+    Args:
+        command: argv run on this host that starts bash reading a script from stdin on the
+            target.
+        symbols: Imported symbol names the capability rules look for.
+        timeout: Seconds to wait for the probe.
+        path_sources: Files on the target listing PATH directories, or directories of such
+            files; /etc/paths and /etc/paths.d unless a test points elsewhere.
 
     Raises:
         ProbeError: If the command is missing, fails, times out, or its output is malformed.
     """
-    script = build_script(scan_dirs, extra_paths)
+    script = build_script(symbols, path_sources)
     try:
         proc = subprocess.run(
             list(command),
@@ -215,7 +239,7 @@ def run_probe(
 
 
 def parse_output(text: str) -> ProbeOutput:
-    """Parse probe.sh output into facts, per-file records and missing paths.
+    """Parse probe.sh output into facts, per-file records and TCC data.
 
     Raises:
         ProbeError: On malformed records or when the end marker is absent.
@@ -230,6 +254,7 @@ def parse_output(text: str) -> ProbeOutput:
     stats = {f[5]: (f[0], f[1], f[2], int(f[3]), f[4]) for f in records["P"]}
     hashes = {f[1]: f[0] for f in records["S"]}
     summaries = parse_whatis(f[0] for f in records["W"])
+    evidence = {f[0]: _evidence_tokens(f[1], f[0]) for f in records["C"]}
     xpc_by_path: dict[str, list[XpcRegistration]] = {}
     for fields in records["X"]:
         path, registration = _xpc_registration(fields)
@@ -237,17 +262,19 @@ def parse_output(text: str) -> ProbeOutput:
     files = {
         f[0]: _file_record(
             f,
-            stats.get(f[0]),
-            hashes.get(f[0]),
-            summaries.get(PurePosixPath(f[0]).name),
-            xpc_by_path.get(f[0], []),
+            _FileFacts(
+                stat=stats.get(f[0]),
+                sha256=hashes.get(f[0]),
+                summary=summaries.get(PurePosixPath(f[0]).name),
+                evidence=evidence.get(f[0], []),
+                xpc=xpc_by_path.get(f[0], []),
+            ),
         )
         for f in records["F"]
     }
     return ProbeOutput(
         facts={key: value for key, value in records["H"]},
         files=files,
-        missing=[f[0] for f in records["M"]],
         tcc=TccSnapshot(
             sources=[_tcc_source(f) for f in records["D"]],
             grants=[_tcc_grant(f) for f in records["T"]],
@@ -400,20 +427,14 @@ def _xpc_registration(fields: list[str]) -> tuple[str, XpcRegistration]:
     )
 
 
-def _file_record(
-    fields: list[str],
-    stat: tuple[str, str, str, int, str] | None,
-    sha256: str | None,
-    summary: str | None,
-    xpc: list[XpcRegistration],
-) -> FileRecord:
+def _file_record(fields: list[str], facts: _FileFacts) -> FileRecord:
     path, link_target, is_script, codesign_b64, entitlements_b64 = fields
     signing = parse_codesign(_b64decode(codesign_b64, path).decode("utf-8", errors="replace"))
-    perms, owner, group, size, flags = stat or (None, None, None, None, "-")
+    perms, owner, group, size, flags = facts.stat or (None, None, None, None, "-")
     identifier = signing["identifier"] or ""
     return FileRecord(
         path=path,
-        summary=summary,
+        summary=facts.summary,
         link_target=link_target or None,
         is_script=is_script == "1",
         is_dev_shim=identifier.startswith(SHIM_IDENTIFIER_PREFIX),
@@ -421,12 +442,19 @@ def _file_record(
         owner=owner,
         group=group,
         size=size,
-        sha256=sha256,
+        sha256=facts.sha256,
         bsd_flags=[] if flags in ("", "-") else flags.split(","),
         signing=signing,
         entitlements=_parse_entitlements(entitlements_b64, path),
-        xpc=xpc,
+        imports=[token for token in facts.evidence if not token.startswith("/")],
+        libraries=[token for token in facts.evidence if token.startswith("/")],
+        xpc=facts.xpc,
     )
+
+
+def _evidence_tokens(value: str, path: str) -> list[str]:
+    text = _b64decode(value, path).decode("utf-8", errors="replace")
+    return sorted({line for line in text.splitlines() if line})
 
 
 def _b64decode(value: str, path: str) -> bytes:

@@ -44,3 +44,8 @@ def probe_text(*records: str, facts: dict[str, str] | None = None) -> str:
     lines.extend(records)
     lines.append("E\tok")
     return "\n".join(lines) + "\n"
+
+
+def c_record(path: str, *tokens: str) -> str:
+    """A probe evidence record: matched imported symbols and linked library paths."""
+    return f"C\t{path}\t{b64(chr(10).join(tokens))}"

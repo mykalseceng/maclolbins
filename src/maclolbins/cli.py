@@ -8,14 +8,13 @@ from maclolbins.catalog import CatalogError, load_catalog
 from maclolbins.probe import ProbeError, parallels_command, run_probe
 from maclolbins.reports import write_report
 from maclolbins.scan import (
-    DEFAULT_SCAN_DIRS,
     ScanFileError,
     build_scan,
     load_scan,
     rejoin_catalog,
 )
 from maclolbins.server import build_server
-from maclolbins.site import render_site
+from maclolbins.site import in_report, render_site
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -40,7 +39,7 @@ def _parser() -> argparse.ArgumentParser:
     commands = parser.add_subparsers(dest="command", required=True)
 
     scan = commands.add_parser(
-        "scan", help="probe a Parallels VM and write scan.json plus index.html"
+        "scan", help="probe a Parallels VM's PATH and write scan.json plus index.html"
     )
     scan.add_argument("--vm", required=True, help="Parallels VM name or UUID (see prlctl list)")
     scan.add_argument(
@@ -71,17 +70,16 @@ def _parser() -> argparse.ArgumentParser:
 
 def _scan(args: argparse.Namespace) -> int:
     catalog = load_catalog(args.catalog)
-    scan_dirs = list(DEFAULT_SCAN_DIRS)
-    print(f"Probing {args.vm} ({len(catalog.entries)} catalog entries)…", file=sys.stderr)
-    probe = run_probe(parallels_command(args.vm), scan_dirs, catalog.all_paths(), args.timeout)
-    scan = build_scan(catalog, probe, target=args.vm, scan_dirs=scan_dirs)
+    print(f"Probing {args.vm} ({len(catalog.capabilities)} capability rules)…", file=sys.stderr)
+    probe = run_probe(parallels_command(args.vm), catalog.all_symbols(), args.timeout)
+    scan = build_scan(catalog, probe, target=args.vm)
 
     out_dir = write_report(scan, args.out)
 
-    present = sum(1 for entry in scan["entries"] if entry["status"] == "present")
+    in_report_count = sum(1 for item in scan["inventory"] if in_report(item))
     print(
-        f"{present}/{len(scan['entries'])} catalogued LOLBins present, "
-        f"{len(scan['inventory'])} binaries inventoried",
+        f"{in_report_count} Apple binaries in the report out of {len(scan['inventory'])} "
+        f"executables on PATH ({', '.join(scan['scan_dirs'])})",
         file=sys.stderr,
     )
     print(out_dir / "index.html")
