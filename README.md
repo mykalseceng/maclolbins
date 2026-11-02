@@ -25,7 +25,7 @@ uv run maclolbins mcp --reports reports           # serve scans to agents over M
 ```
 
 `scan` pipes a read-only probe into `prlctl exec <vm> --current-user /bin/bash -s`, so it needs a
-running VM with a logged-in user; a scan takes two to three minutes. Open `index.html` in the
+running VM with a logged-in user; a scan takes about two minutes. Open `index.html` in the
 scan directory; `index.html#/usr/bin/curl` selects a binary.
 
 `mcp` serves the same data to agents over MCP and is registered for Claude Code in `.mcp.json`. Its

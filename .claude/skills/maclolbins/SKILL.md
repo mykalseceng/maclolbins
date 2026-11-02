@@ -26,7 +26,7 @@ tools are missing, see [When the tools are not connected](#when-the-tools-are-no
 The server does not decide where the binaries live; you do.
 
 1. If the user is asking about a scan that already exists, call `list_scans` first. Scans take
-   two to three minutes, so reuse a scan when the question is about its data; state its
+   about two minutes, so reuse a scan when the question is about its data; state its
    `scan_id`, `collected_at` and macOS version so the user knows how fresh it is. Scan again
    when they ask for a new report, a fresh scan, or a target with no scan.
 2. Otherwise call `discover_targets`. It lists this Mac, Parallels, Tart, VMware Fusion and UTM
