@@ -40,7 +40,7 @@ def _parser() -> argparse.ArgumentParser:
     commands = parser.add_subparsers(dest="command", required=True)
 
     scan = commands.add_parser(
-        "scan", help="probe a Parallels VM and write scan.json plus report.html"
+        "scan", help="probe a Parallels VM and write scan.json plus index.html"
     )
     scan.add_argument("--vm", required=True, help="Parallels VM name or UUID (see prlctl list)")
     scan.add_argument(

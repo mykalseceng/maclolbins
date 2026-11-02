@@ -145,8 +145,8 @@ class Tools:
 
         Runs `command` on this host and pipes the probe script into it. The probe reads file
         metadata, code signatures, entitlements, man-page summaries, launchd plists and the TCC
-        databases; it writes nothing outside its own temp directory. A full scan takes one to
-        two minutes.
+        databases; it writes nothing outside its own temp directory. A full scan takes two to
+        three minutes.
         """
         await ctx.report_progress(0, 1, f"probing {target}")
         probe_run = partial(
