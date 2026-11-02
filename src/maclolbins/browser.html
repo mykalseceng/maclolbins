@@ -768,7 +768,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
     <li><svg class="g f c-ent"><use href="#g-shield"/></svg><span><b>Private entitlements.</b> Holds Apple-internal, TCC, SIP or task-port keys.</span></li>
     <li><svg class="g c-ent"><use href="#g-shield"/></svg><span><b>Entitlements.</b> Holds only public entitlement keys.</span></li>
     <li><svg class="g f c-tcc"><use href="#g-privacy"/></svg><span><b>TCC grant.</b> This Mac's privacy database allows it a protected service, such as Full Disk Access.</span></li>
-    <li><svg class="g c-tcc"><use href="#g-privacy"/></svg><span><b>TCC entitlements.</b> Reaches protected services by entitlement, without a prompt.</span></li>
+    <li><svg class="g c-tcc"><use href="#g-privacy"/></svg><span><b>TCC entitlements.</b> Holds a private TCC entitlement. Those that grant services skip the prompt.</span></li>
     <li><svg class="g c-inj"><use href="#g-inject"/></svg><span><b>Weakened runtime.</b> Holds an entitlement that lets other code be injected into it or attach to it.</span></li>
     <li><svg class="g c-xpc"><use href="#g-xpc"/></svg><span><b>XPC server candidate.</b> launchd registers a Mach service for this executable and the scan found static listener evidence. Reachability and authorization are not tested.</span></li>
     <li><svg class="g c-muted"><use href="#g-code"/></svg><span><b>Script.</b> Interpreted text; scripts carry no code signature.</span></li>
@@ -1536,6 +1536,9 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
   }
 
   const tccLabel = (svc) => D.tcc_labels[svc] || svc;
+  /* Keys whose listed services are granted with no prompt. Other private TCC keys, such as
+     allow-prompting, are not known to grant access, so they are shown by summary instead. */
+  const TCC_GRANT_KEYS = new Set(['com.apple.private.tcc.allow', 'com.apple.private.tcc.allow.overridable']);
   const AUTH_WORD = { allowed: 'Allowed', denied: 'Denied', limited: 'Limited', unknown: 'Not decided' };
   const authWord = (g) => AUTH_WORD[g.auth] || `Code ${g.auth_value}`;
 
@@ -1547,7 +1550,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
     const byEnt = [];
     for (const k of tccKeys) {
       const services = Array.isArray(raw[k]) ? raw[k] : [];
-      if (k.startsWith('com.apple.private.tcc.allow') && services.length) {
+      if (TCC_GRANT_KEYS.has(k) && services.length) {
         for (const svc of services) {
           byEnt.push(`<li><span class="cap-name">${esc(tccLabel(svc))}</span><span class="auth entitled">By entitlement</span>` +
             `<span class="cap-how">No prompt: <span class="mono">${esc(k)}</span> lists <span class="mono">${esc(svc)}</span></span></li>`);

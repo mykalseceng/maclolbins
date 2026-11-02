@@ -20,8 +20,9 @@ NAMESPACES: tuple[tuple[str, str, str], ...] = (
     (
         "com.apple.private.tcc.",
         "Private TCC",
-        "Reaches privacy-protected data, or manages the grants themselves, without the usual "
-        "consent prompt.",
+        "Apple-private TCC key. allow and allow.overridable reach the listed services with no "
+        "consent prompt, and manager keys read or change TCC grants; the others, such as "
+        "allow-prompting, have no public documentation.",
     ),
     (
         "com.apple.rootless.",

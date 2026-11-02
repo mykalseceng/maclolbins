@@ -100,9 +100,11 @@ When you write the answer:
 - **Link entitlements.** Use `apple_docs_url` when `documented` is true. An undocumented key
   has no Apple page; say it is undocumented and give its namespace meaning (`summary`),
   rather than guessing a URL.
-- **Separate how a binary reaches TCC data.** A `com.apple.private.tcc.allow` entitlement
-  (`tcc_services` names the services) works with no prompt on any Mac; a `tcc_grants` entry
-  is a decision recorded on this Mac. Say which applies.
+- **Separate how a binary reaches TCC data.** A `com.apple.private.tcc.allow` or
+  `.allow.overridable` entitlement (`tcc_services` names the services) works with no prompt on
+  any Mac; a `tcc_grants` entry is a decision recorded on this Mac. Say which applies. Other
+  `com.apple.private.tcc.*` keys, such as `allow-prompting`, have empty `tcc_services`: they
+  are not known to grant access, so explain them by `summary` and never as a grant.
 - **Explain flags in words.** `references/report-and-flags.md` says what each flag means and
   why it matters.
 - **Use worked commands as they are.** `examples` come from the catalogue, with their privilege

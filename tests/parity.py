@@ -11,6 +11,9 @@ from typing import Any
 from mcp import Client
 from mcp.server.mcpserver import MCPServer
 
+# Mirrors TCC_GRANT_KEYS in browser.html, independently of maclolbins.views.
+TCC_GRANT_KEYS = {"com.apple.private.tcc.allow", "com.apple.private.tcc.allow.overridable"}
+
 
 def report_data(report_dir: Path) -> dict[str, Any]:
     """Read window.LOLBINS from a rendered report."""
@@ -98,7 +101,7 @@ def _expected_detail(
                 "tcc_services": [
                     {"service": s, "label": data["tcc_labels"].get(s, s)}
                     for s in (value if isinstance(value, list) else [])
-                    if key.startswith("com.apple.private.tcc.allow") and isinstance(s, str)
+                    if key in TCC_GRANT_KEYS and isinstance(s, str)
                 ],
             }
             for key, value in sorted(file["entitlements"].items())

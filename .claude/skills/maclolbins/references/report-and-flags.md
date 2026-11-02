@@ -52,7 +52,7 @@ shells").
 | `third-party` | Signed with a Team ID | Not part of the Apple install |
 | `sip-unprotected` | No SIP `restricted` flag | Root can modify or replace it |
 | `weakened-runtime` | Holds a code-signing protection weakener set to true | Host for injected code or a debugger target |
-| `tcc-entitled` | Holds a `com.apple.private.tcc.*` entitlement | Reaches privacy-protected data without the usual prompt |
+| `tcc-entitled` | Holds a `com.apple.private.tcc.*` entitlement | `allow` and `allow.overridable` reach the services in `tcc_services` with no prompt; manager keys change TCC grants; others, such as `allow-prompting`, are undocumented |
 | `tcc-granted` | A TCC database grants it `allowed` | Consent was recorded on this Mac |
 | `xpc-server-candidate` | Registered as a launchd Mach service | Possible XPC attack surface; not verified |
 

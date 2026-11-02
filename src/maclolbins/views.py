@@ -12,7 +12,12 @@ from maclolbins.scan import ExampleRef, ScanResult
 from maclolbins.site import site_data
 from maclolbins.tcc import service_label
 
-TCC_ALLOW_PREFIX = "com.apple.private.tcc.allow"
+# Keys whose value lists TCC services granted without a consent prompt. Other
+# com.apple.private.tcc.* keys (allow-prompting, manager.*) also list services but are not
+# known to grant access to them, so they get no tcc_services.
+TCC_GRANT_KEYS = frozenset(
+    {"com.apple.private.tcc.allow", "com.apple.private.tcc.allow.overridable"}
+)
 
 
 class NotInReport(ValueError):
@@ -216,7 +221,7 @@ def explain_entitlement(key: str) -> EntitlementExplanation:
 def entitlement_info(key: str, value: Any) -> EntitlementInfo:
     """Explain an entitlement a binary holds, naming any TCC services its value lists."""
     services: list[TccService] = []
-    if key.startswith(TCC_ALLOW_PREFIX) and isinstance(value, list):
+    if key in TCC_GRANT_KEYS and isinstance(value, list):
         services = [
             TccService(service=item, label=service_label(item))
             for item in value
