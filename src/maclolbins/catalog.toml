@@ -218,7 +218,7 @@ id = "opens-apps"
 title = "Opens apps, files and URLs"
 summary = "Calls Launch Services or NSWorkspace to open items with their default app."
 techniques = ["T1059"]
-symbols = ["_LSOpenURLsWithCompletionHandler", "_LSOpenFromURLSpec", "_LSOpenCFURLRef", "_OBJC_CLASS_$_NSWorkspace"]
+symbols = ["__LSOpenURLsWithCompletionHandler", "_LSOpenFromURLSpec", "_LSOpenCFURLRef", "_OBJC_CLASS_$_NSWorkspace"]
 
 [[capability]]
 id = "manages-launchd"

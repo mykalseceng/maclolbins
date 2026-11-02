@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 from conftest import ENTITLEMENTS_PLIST, SHIM_CODESIGN, b64, f_record, probe_text
 
+from maclolbins.catalog import load_catalog
 from maclolbins.probe import (
     DEFAULT_PATH_SOURCES,
     HEREDOC_DELIMITER,
@@ -324,6 +325,22 @@ def test_probe_script_reads_real_entitlements_and_evidence(tmp_path: Path):
     curl = output["files"][str(bin_dir / "curl")]
     assert curl["symbols"] == ["_curl_easy_perform"]
     assert any(lib.endswith("/libcurl.4.dylib") for lib in curl["library_paths"])
+
+
+@pytest.mark.skipif(sys.platform != "darwin", reason="probe.sh relies on macOS tools")
+def test_packaged_catalog_matches_open_by_its_real_import(tmp_path: Path):
+    bin_dir = linked_system_tools(tmp_path, "/usr/bin/open")
+    catalog = load_catalog()
+    output = run_probe(
+        LOCAL_BASH,
+        catalog.all_symbols(),
+        timeout=60,
+        path_sources=path_sources(tmp_path, bin_dir),
+    )
+    record = output["files"][str(bin_dir / "open")]
+    (opens_apps,) = (cap for cap in catalog.capabilities if cap.id == "opens-apps")
+    evidence = opens_apps.evidence(record["symbols"], record["library_paths"])
+    assert "__LSOpenURLsWithCompletionHandler" in evidence  # the Mach-O name of the SPI
 
 
 def test_parse_whatis_prefers_most_specific_page():
