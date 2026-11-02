@@ -814,7 +814,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
   let nextId = 0;
   const nodes = new Map();
   const files = [];
-  const blankStats = () => ({ files: 0, lol: 0, setid: 0, priv: 0, script: 0, unsigned: 0, shim: 0, tcc: 0, weak: 0 });
+  const blankStats = () => ({ files: 0, ev: 0, lol: 0, setid: 0, priv: 0, script: 0, unsigned: 0, shim: 0, tcc: 0, weak: 0 });
 
   function makeDir(path, name, parent) {
     const n = { id: nextId++, path, name, parent, dir: true, kids: [], kidMap: new Map(), st: blankStats() };
@@ -828,6 +828,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
     const priv = keys.filter((k) => ENT[k] && PRIVATE_NS.has(ENT[k].namespace)).length;
     return {
       lol: !!f.note,
+      ev: f.score > 0,
       caps: f.capabilities.map((c) => c.id),
       suid: f.flags.includes('setuid'),
       sgid: f.flags.includes('setgid'),
@@ -863,6 +864,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
     files.push(n);
     for (let a = cur; a; a = a.parent) {
       a.st.files++;
+      if (t.ev) a.st.ev++;
       if (t.lol) a.st.lol++;
       if (t.suid || t.sgid) a.st.setid++;
       if (t.priv) a.st.priv++;
@@ -885,6 +887,9 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
   const depth = (n) => chainFrom(n).length - 1;
 
   const SMART = [
+    { key: 'evidence', label: 'With evidence', glyph: 'code', cls: 'c-xpc',
+      test: (t) => t.ev,
+      blurb: 'Binaries with at least one capability or privilege signal, strongest evidence first. The rest of the report has an evidence score of 0.' },
     { key: 'notes', label: 'With worked commands', glyph: 'lol', cls: 'c-lol', fill: true,
       test: (t) => t.lol,
       blurb: 'Binaries the catalogue has hand-written abuse notes and worked commands for.' },
@@ -909,6 +914,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
   ];
   const byScore = (a, b) => b.f.score - a.f.score || byName(a, b);
   for (const s of SMART) s.items = files.filter((n) => s.test(n.t));
+  SMART.find((x) => x.key === 'evidence').items.sort(byScore);
   /* One folder per capability rule that matched anything, strongest evidence first. */
   const CAP_SMART = Object.values(CAPS).map((c) => ({
     key: `cap:${c.id}`, label: c.title, glyph: 'code', cls: 'c-xpc',
@@ -953,7 +959,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
   const traitWords = (t) => traitList(t).map((x) => x[3]).join(', ');
 
   function dirSummary(d) {
-    const bits = [`${d.st.files} LOLBin paths`];
+    const bits = [`${d.st.files} Apple binaries`];
     if (d.st.lol) bits.push(`${d.st.lol} with worked commands`);
     if (d.st.setid) bits.push(`${d.st.setid} setuid or setgid`);
     return bits.join(', ');
@@ -1624,6 +1630,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
 
   function statRows(st, clickable) {
     const rows = [
+      ['evidence', 'code', 'c-xpc', false, 'With evidence', st.ev],
       ['notes', 'lol', 'c-lol', true, 'With worked commands', st.lol],
       ['setid', 'key', 'c-suid', false, 'Setuid or setgid', st.setid],
       ['private', 'shield', 'c-ent', true, 'Private entitlements', st.priv],
@@ -1691,9 +1698,9 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
       ['Tool:', esc(D.tool_version)],
     ]);
     const strongest = [...files].sort(byScore).slice(0, 15);
-    return inspectHeader(root, 'Scanned host', `${fmtNum(files.length)} LOLBins on PATH`) +
+    return inspectHeader(root, 'Scanned host', `${fmtNum(files.length)} Apple binaries on PATH`) +
       secs(sec('host', 'Host', null, host) + secHostTcc() +
-      sec('found', 'Apple LOLBins on this Mac', `${fmtNum(files.length)} binaries`, statRows(root.st, true) +
+      sec('found', 'Apple binaries on this Mac', `${fmtNum(files.length)} binaries`, statRows(root.st, true) +
         `<h4 class="sub-h">Strongest evidence</h4>${nameList(strongest)}`) +
       sec('scope', 'Probe scope', null, scope));
   }
@@ -1706,7 +1713,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
     const general = kv([
       ['Kind:', 'Folder'],
       ['Where:', n.parent === root ? goBtn('/', 'Macintosh HD') : goBtn(n.parent.path)],
-      ['Contains:', `${fmtNum(n.st.files)} LOLBin paths${sub.length ? ` in ${sub.length + (direct.length ? 1 : 0)} folders` : ''}`],
+      ['Contains:', `${fmtNum(n.st.files)} Apple binaries${sub.length ? ` in ${sub.length + (direct.length ? 1 : 0)} folders` : ''}`],
     ]);
     let notable = '';
     if (lol.length) notable += `<h4 class="sub-h">With worked commands here</h4>${nameList(lol)}`;
@@ -1816,13 +1823,13 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
       title = dir === root ? 'Macintosh HD' : dir.name;
       sub = dir === root ? D.facts.hostname : dir.path;
       const container = n === state.base ? n : n.parent;
-      status = `${fmtNum(container.kids.length)} ${container.kids.length === 1 ? 'item' : 'items'}` + (container.st.lol ? `, ${container.st.lol} LOLBin paths` : '') +
+      status = `${fmtNum(container.kids.length)} ${container.kids.length === 1 ? 'item' : 'items'}` + (container.st.ev ? `, ${container.st.ev} with evidence` : '') +
         (container.st.setid ? `, ${container.st.setid} setuid or setgid` : '');
     } else if (state.mode === 'folder') {
       const s = smartByKey.get(state.folder);
       title = s.label; sub = 'Smart folder'; status = `${s.items.length} ${s.items.length === 1 ? 'item' : 'items'}`;
     } else {
-      title = `Searching “${state.query}”`; sub = 'All usable Apple LOLBins'; status = `${listItems.length} matches`;
+      title = `Searching “${state.query}”`; sub = 'All Apple binaries on PATH'; status = `${listItems.length} matches`;
     }
     if (narrow()) {
       if (state.mpane === 'inspector' && n) { title = n === root ? D.facts.hostname : n.name; sub = n.path; }
