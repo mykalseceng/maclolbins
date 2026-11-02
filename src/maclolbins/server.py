@@ -150,8 +150,8 @@ class Tools:
         target's default PATH from /etc/paths and /etc/paths.d, then each executable's metadata,
         code signature, entitlements, imported symbols and linked libraries, plus man-page
         summaries, launchd plists and the TCC databases; it writes nothing outside its own temp
-        directory. A full scan takes two to
-        three minutes.
+        directory. A full scan takes about
+        two minutes.
         """
         await ctx.report_progress(0, 1, f"probing {target}")
         probe_run = partial(run_probe, command, self.catalog.all_symbols(), timeout_seconds)
