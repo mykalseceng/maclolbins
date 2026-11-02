@@ -84,7 +84,6 @@ def _expected_detail(file: dict[str, Any], data: dict[str, Any]) -> dict[str, An
             }
             for match in file["capabilities"]
         ],
-        "libraries": file["libraries"],
         "abuse": note["abuse"] if note else None,
         "privilege": file["privilege"],
         "tactics": file["tactics"],

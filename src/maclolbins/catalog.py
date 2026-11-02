@@ -28,7 +28,7 @@ class Technique:
 
 @dataclass(frozen=True)
 class Capability:
-    """Something a binary can do, recognised by the symbols it imports or libraries it links."""
+    """Something a binary can do, recognised by symbol names or library paths in its strings."""
 
     id: str
     title: str
@@ -37,10 +37,10 @@ class Capability:
     symbols: tuple[str, ...]
     libraries: tuple[str, ...]
 
-    def evidence(self, imports: Iterable[str], libraries: Iterable[str]) -> list[str]:
-        """Return the imports and linked libraries that show this capability, sorted."""
-        found = {symbol for symbol in imports if symbol in self.symbols}
-        found |= {lib for lib in libraries if library_names(lib) & set(self.libraries)}
+    def evidence(self, symbols: Iterable[str], library_paths: Iterable[str]) -> list[str]:
+        """Return the symbols and library paths found in a binary that show this capability."""
+        found = {symbol for symbol in symbols if symbol in self.symbols}
+        found |= {lib for lib in library_paths if library_names(lib) & set(self.libraries)}
         return sorted(found)
 
 
@@ -93,7 +93,7 @@ class Catalog:
 
 
 def library_names(path: str) -> set[str]:
-    """Return the names a linked library answers to: its file name and any framework it is in.
+    """Return the names a library path answers to: its file name and any framework it is in.
 
     Directories and version suffixes are dropped, so /usr/lib/libcurl.4.dylib is {libcurl},
     /System/Library/Frameworks/Tcl.framework/Versions/8.5/Tcl is {Tcl}, and a dylib inside a

@@ -91,7 +91,7 @@ def in_report(item: InventoryItem) -> bool:
     It must be part of the stock Apple install, shown by a platform signature or by SIP's
     restricted flag (which keeps Apple's unsigned system scripts), and not an inactive
     xcode-select shim. Evidence does not decide inclusion: a binary whose abuse is its normal
-    job (id, base64) imports nothing distinctive, so it is listed with a score of 0.
+    job (id, base64) shows nothing distinctive, so it is listed with a score of 0.
     """
     record = item["file"]
     apple = record["signing"]["platform_binary"] or "restricted" in record["bsd_flags"]
@@ -148,7 +148,6 @@ def _file(
         "flags": item["flags"],
         "tcc": item["tcc"],
         "capabilities": item["capabilities"],
-        "libraries": record["libraries"],
         "note": item["note"],
         "techniques": list(techniques.values()),
         "tactics": list(tactics),

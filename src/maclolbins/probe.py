@@ -9,9 +9,9 @@ probe.sh prints one tab-separated record per line:
     S  sha256  path                                     SHA-256 of a readable file
     F  path  link_target  is_script  codesign  ents     codesign -dv text and entitlements
                                                         plist, both base64-encoded
-    C  path  tokens                                     capability evidence: matched imported
-                                                        symbols and linked library paths, one
-                                                        per line, base64-encoded
+    C  path  tokens                                     capability evidence: matched symbol
+                                                        names and library paths found in the
+                                                        file, one per line, base64-encoded
     W  whatis_line                                      man-page summary line from whatis
     D  scope  status  detail                            a TCC database: scope is system or
                                                         user, status ok, unreadable or missing
@@ -129,8 +129,8 @@ class FileRecord(TypedDict):
     bsd_flags: list[str]
     signing: Signing
     entitlements: dict[str, Any]
-    imports: list[str]
-    libraries: list[str]
+    symbols: list[str]
+    library_paths: list[str]
     xpc: list[XpcRegistration]
 
 
@@ -446,8 +446,8 @@ def _file_record(fields: list[str], facts: _FileFacts) -> FileRecord:
         bsd_flags=[] if flags in ("", "-") else flags.split(","),
         signing=signing,
         entitlements=_parse_entitlements(entitlements_b64, path),
-        imports=[token for token in facts.evidence if not token.startswith("/")],
-        libraries=[token for token in facts.evidence if token.startswith("/")],
+        symbols=[token for token in facts.evidence if not token.startswith("/")],
+        library_paths=[token for token in facts.evidence if token.startswith("/")],
         xpc=facts.xpc,
     )
 

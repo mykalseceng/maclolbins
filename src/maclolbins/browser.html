@@ -1691,7 +1691,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
       ['Scanned as:', `<span class="mono">${esc(F.user)}</span>`],
       ['Dev tools:', F.developer_dir === 'none' ? 'Not installed' : `<span class="mono">${esc(F.developer_dir)}</span>`],
     ]);
-    const scope = '<p class="note" style="margin-top:0">The probe inventories every executable on this Mac\'s default PATH, read from /etc/paths and /etc/paths.d. The report lists every Apple binary on it, ranked by evidence: capabilities (from the symbols they import and the libraries they link) and privilege signals.</p>' + kv([
+    const scope = '<p class="note" style="margin-top:0">The probe inventories every executable on this Mac\'s default PATH, read from /etc/paths and /etc/paths.d. The report lists every Apple binary on it, ranked by evidence: capabilities (from symbol names and library paths found in each binary) and privilege signals.</p>' + kv([
       ['PATH:', `<div class="names">${D.scan_dirs.map((p) => (nodes.has(p) ? goBtn(p) : `<span class="muted mono">${esc(p)}</span>`)).join('')}</div>`],
       ['Inventoried:', `${fmtNum(D.inventoried)} executables, ${fmtNum(files.length)} in the report`],
       ['Catalogue:', `${esc(D.catalog_version)}, ${Object.keys(CAPS).length} capability rules, ${Object.keys(NOTES).length} notes`],

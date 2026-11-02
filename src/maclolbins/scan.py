@@ -9,7 +9,7 @@ from maclolbins.catalog import Catalog, Note
 from maclolbins.entitlements import runtime_weakeners
 from maclolbins.probe import FileRecord, ProbeOutput, TccGrant, TccSnapshot
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 TCC_ENTITLEMENT = "com.apple.private.tcc."
 PRIVATE_ENTITLEMENTS = ("com.apple.private.", "com.apple.rootless.")
 
@@ -53,7 +53,7 @@ class NoteRef(TypedDict):
 
 
 class CapabilityMatch(TypedDict):
-    """A capability one file shows, and the imports or libraries that show it."""
+    """A capability one file shows, and the symbols or library paths that show it."""
 
     id: str
     evidence: list[str]
@@ -238,7 +238,7 @@ def _inventory_item(catalog: Catalog, record: FileRecord, grants: list[TccGrant]
         flags.append("tcc-granted")
     capabilities = []
     for cap in catalog.capabilities:
-        evidence = cap.evidence(record["imports"], record["libraries"])
+        evidence = cap.evidence(record["symbols"], record["library_paths"])
         if evidence:
             capabilities.append(CapabilityMatch(id=cap.id, evidence=evidence))
     note = catalog.note_for(record["path"])

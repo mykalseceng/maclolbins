@@ -53,8 +53,9 @@ list_candidates() {
 	done <"$WORK/path_dirs"
 }
 
-# Capability evidence for a compiled binary: the imported symbols the catalog asks about, plus the
-# library paths it links. Mach-O string tables keep both as NUL-separated tokens.
+# Capability evidence for a compiled binary: the symbol names the catalog asks about and the
+# system library paths found anywhere in the file. Usually these are imports and load commands,
+# but a symbol the binary defines or a name in a text string matches too.
 emit_evidence() {
 	local path=$1 tokens
 	tokens=$(LC_ALL=C grep -aoE '[A-Za-z0-9_$./+-]{4,}' "$path" 2>/dev/null |
