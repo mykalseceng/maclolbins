@@ -53,9 +53,10 @@ def test_tactics_are_derived_from_techniques(tmp_path):
 
 def test_capability_evidence_matches_symbols_and_library_names(tmp_path):
     (cap,) = load_catalog(write(tmp_path, TECHNIQUES + GOOD_CAPABILITY + GOOD_NOTE)).capabilities
-    imports = ["_curl_easy_perform", "_printf"]
-    libraries = ["/usr/lib/libcurl.4.dylib", "/usr/lib/libSystem.B.dylib"]
-    assert cap.evidence(imports, libraries) == ["/usr/lib/libcurl.4.dylib", "_curl_easy_perform"]
+    symbols = ["_curl_easy_perform", "_printf"]
+    library_paths = ["/usr/lib/libcurl.4.dylib", "/usr/lib/libSystem.B.dylib"]
+    found = cap.evidence(symbols, library_paths)
+    assert found == ["/usr/lib/libcurl.4.dylib", "_curl_easy_perform"]
     assert cap.evidence(["_printf"], ["/usr/lib/libcurlish.dylib"]) == []
 
 

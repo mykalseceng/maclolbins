@@ -161,7 +161,9 @@ def test_file_without_note_derives_privilege_from_permissions(site_dir: Path):
     curl = next(f for f in loaded_data(site_dir)["inventory"] if f["path"] == "/usr/bin/curl")
     assert curl["note"] is None
     assert curl["privilege"] == "root"  # -rwx------: others cannot run it
-    assert curl["libraries"] == ["/usr/lib/libcurl.4.dylib"]
+    assert curl["capabilities"] == [
+        {"id": "fetches-urls", "evidence": ["/usr/lib/libcurl.4.dylib"]}
+    ]
 
 
 def test_evidence_score_counts_capabilities_once_and_signals_twice(scan):

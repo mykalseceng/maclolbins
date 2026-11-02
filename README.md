@@ -3,7 +3,7 @@
 Finds the Apple living-off-the-land binaries (LOLBins) on a Mac or macOS VM and shows what each one
 can do there. The scan reads the target's default PATH from `/etc/paths` and `/etc/paths.d`,
 inventories every executable on it, and reports every Apple binary there, ranked by evidence.
-Capabilities come from the symbols a binary imports and the libraries it links (for example
+Capabilities come from symbol names and library paths found in each binary (for example
 `_curl_easy_perform` or `libcurl` for making HTTP requests); privilege signals are setuid/setgid,
 private or TCC entitlements, a weakened runtime and launchd XPC services. The tool derives all of
 it from the binaries themselves rather than a list of names, and a binary with no evidence is

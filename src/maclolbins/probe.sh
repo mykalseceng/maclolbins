@@ -31,7 +31,7 @@ collect_facts() {
 }
 
 # The default PATH: each source file's lines in order, each source directory's files in name
-# order, first occurrence of a directory wins; this is what path_helper does with /etc/paths.d.
+# order, first occurrence of a directory wins. This is close to what path_helper does.
 list_path_dirs() {
 	local source file
 	while IFS= read -r source; do
@@ -53,8 +53,9 @@ list_candidates() {
 	done <"$WORK/path_dirs"
 }
 
-# Capability evidence for a compiled binary: the imported symbols the catalog asks about, plus the
-# library paths it links. Mach-O string tables keep both as NUL-separated tokens.
+# Capability evidence for a compiled binary: the symbol names the catalog asks about and the
+# system library paths found anywhere in the file. Usually these are imports and load commands,
+# but a symbol the binary defines or a name in a text string matches too.
 emit_evidence() {
 	local path=$1 tokens
 	tokens=$(LC_ALL=C grep -aoE '[A-Za-z0-9_$./+-]{4,}' "$path" 2>/dev/null |

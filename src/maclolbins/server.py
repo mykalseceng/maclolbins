@@ -45,7 +45,7 @@ from maclolbins.views import (
 INSTRUCTIONS = """\
 Enumerates macOS living-off-the-land binaries (LOLBins) on a Mac or macOS VM. The probe
 inventories every executable on the target's default PATH; the report keeps every Apple binary on
-it, ranked by evidence: capabilities (from the symbols they import and libraries they link) and
+it, ranked by evidence: capabilities (from symbol names and library paths found in each binary) and
 privilege signals (setuid, private or TCC entitlements, weakened runtime, XPC service). For each
 one: its capabilities and their evidence, MITRE ATT&CK techniques, code signature, every
 entitlement with Apple's documentation link, SIP protection and TCC grants, plus hand-written
@@ -148,7 +148,7 @@ class Tools:
 
         Runs `command` on this host and pipes the probe script into it. The probe reads the
         target's default PATH from /etc/paths and /etc/paths.d, then each executable's metadata,
-        code signature, entitlements, imported symbols and linked libraries, plus man-page
+        code signature, entitlements, symbol names and library paths, plus man-page
         summaries, launchd plists and the TCC databases; it writes nothing outside its own temp
         directory. A full scan takes about two minutes.
         """
@@ -245,7 +245,7 @@ class Tools:
     ) -> LolbinDetail:
         """Return everything the report says about one binary.
 
-        Includes its capabilities with the imported symbols or linked libraries that show each,
+        Includes its capabilities with the symbol names or library paths that show each,
         ATT&CK techniques with links, any hand-written abuse note and worked commands, file
         facts and SIP protection, code signature, every entitlement with its exact value and
         Apple documentation link, TCC grants and XPC-service evidence.

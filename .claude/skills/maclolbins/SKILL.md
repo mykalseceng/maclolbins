@@ -1,14 +1,14 @@
 ---
 name: maclolbins
-description: Scan a Mac or macOS VM for living-off-the-land binaries (LOLBins) with the MacLOLBins MCP server, reproduce the MacLOLBins HTML report exactly, and answer questions about the binaries it finds — capabilities and the imports that show them, abuse, MITRE ATT&CK techniques and tactics with links, entitlements with Apple documentation links, code signing, SIP and TCC. Use this skill whenever the user mentions macOS LOLBins or LOOBins, a LOLBin report or scan, abusable or dual-use macOS system binaries, entitlements or TCC/SIP posture of Apple binaries, ATT&CK mapping for macOS tools, or scanning a Parallels, VMware Fusion, UTM, Tart or local Mac target, even if they don't name the MacLOLBins tools.
+description: Scan a Mac or macOS VM for living-off-the-land binaries (LOLBins) with the MacLOLBins MCP server, reproduce the MacLOLBins HTML report exactly, and answer questions about the binaries it finds — capabilities and the symbols that show them, abuse, MITRE ATT&CK techniques and tactics with links, entitlements with Apple documentation links, code signing, SIP and TCC. Use this skill whenever the user mentions macOS LOLBins or LOOBins, a LOLBin report or scan, abusable or dual-use macOS system binaries, entitlements or TCC/SIP posture of Apple binaries, ATT&CK mapping for macOS tools, or scanning a Parallels, VMware Fusion, UTM, Tart or local Mac target, even if they don't name the MacLOLBins tools.
 ---
 
 # MacLOLBins
 
 The MacLOLBins MCP server (tools appear as `mcp__maclolbins__<tool>`) probes a Mac read-only. It
 inventories every executable on the target's default PATH, keeps the Apple binaries, ranks them
-by evidence (capabilities from the symbols they import and libraries they link, and privilege
-signals), and renders an HTML report.
+by evidence (capabilities from symbol names and library paths found in each binary, and
+privilege signals), and renders an HTML report.
 This skill covers the two things people want from it, often in the same conversation:
 
 - **The report.** A browsable `index.html` showing every reported binary on the target. It
@@ -96,8 +96,8 @@ explains any key without a scan.
 When you write the answer:
 
 - **Ground it in the scan.** Name the `scan_id` and macOS version, and say what the data does
-  not show: a capability means the code imports an API, not that a caller can drive it from
-  the command line; XPC entries are candidates from launchd plists and strings, not tested
+  not show: a capability means a symbol name or library path appears in the binary, not
+  that a caller can drive it from the command line; XPC entries are candidates from launchd plists and strings, not tested
   connections; TCC grants exist only if the database was readable.
 - **Quote the evidence.** When you say a binary can do something, name the capability and the
   `evidence` that shows it (`_curl_easy_perform`, `libcurl`), so the claim can be checked.

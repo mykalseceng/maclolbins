@@ -34,7 +34,7 @@ class TechniqueInfo(TypedDict):
 
 
 class CapabilityInfo(TypedDict):
-    """A capability a binary shows, with the imports or libraries that show it."""
+    """A capability a binary shows, with the symbols or library paths that show it."""
 
     id: str
     title: str
@@ -111,7 +111,6 @@ class LolbinDetail(TypedDict):
     description: str | None
     score: int
     capabilities: list[CapabilityInfo]
-    libraries: list[str]
     abuse: str | None
     privilege: str
     tactics: list[str]
@@ -180,7 +179,6 @@ class ReportView:
             description=file["summary"],
             score=file["score"],
             capabilities=[self._capability_info(match) for match in file["capabilities"]],
-            libraries=file["libraries"],
             abuse=note["abuse"] if note else None,
             privilege=file["privilege"],
             tactics=file["tactics"],

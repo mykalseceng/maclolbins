@@ -2,9 +2,11 @@
 #
 # The scan decides which binaries to report from evidence, not from a list of names:
 #
-# - [[capability]] rules say what a binary can do. A rule matches when the binary imports one
-#   of its `symbols` or links a library named in `libraries` (matched by file name, ignoring
-#   version suffixes). Every reported binary shows the symbols and libraries that matched.
+# - [[capability]] rules say what a binary can do. A rule matches when one of its `symbols`, or
+#   the path of a library named in `libraries` (matched by file name, ignoring version
+#   suffixes), appears in the binary's strings. That is usually an import or a linked library,
+#   but can be a symbol the binary defines or plain text. Every reported binary shows the
+#   symbols and library paths that matched.
 # - [[note]] entries are hand-written abuse notes and worked commands, matched by path. They
 #   are shown when present and never decide whether a binary is reported.
 #
@@ -99,21 +101,21 @@ platform = "macOS"
 [[capability]]
 id = "runs-programs"
 title = "Starts other programs"
-summary = "Imports a process-spawning API, so it can start another executable."
+summary = "Uses a process-spawning API, so it can start another executable."
 techniques = ["T1059"]
 symbols = ["_posix_spawn", "_posix_spawnp", "_execv", "_execve", "_execvp", "_execl", "_execlp", "_system", "_popen", "_OBJC_CLASS_$_NSTask"]
 
 [[capability]]
 id = "interprets-scripts"
 title = "Embeds a script interpreter"
-summary = "Links a Perl, Ruby, Tcl or Python runtime, so it can run arbitrary script code."
+summary = "Uses a Perl, Ruby, Tcl or Python runtime, so it can run arbitrary script code."
 techniques = ["T1059"]
 libraries = ["libperl", "libruby", "Tcl", "Python", "Python3"]
 
 [[capability]]
 id = "runs-javascript"
 title = "Runs JavaScript"
-summary = "Links JavaScriptCore or calls its evaluation API."
+summary = "Uses JavaScriptCore or its evaluation API."
 techniques = ["T1059.007"]
 symbols = ["_JSEvaluateScript", "_OBJC_CLASS_$_JSContext"]
 libraries = ["JavaScriptCore"]
@@ -136,14 +138,14 @@ libraries = ["libcurl"]
 [[capability]]
 id = "connects-network"
 title = "Opens network connections"
-summary = "Imports a socket or Network framework connect API."
+summary = "Uses a socket or Network framework connect API."
 techniques = ["T1095", "T1048"]
 symbols = ["_connect", "_nw_connection_create", "_CFStreamCreatePairWithSocketToHost"]
 
 [[capability]]
 id = "listens-network"
 title = "Listens for network connections"
-summary = "Imports listen/accept or a Network framework listener API."
+summary = "Uses listen/accept or a Network framework listener API."
 techniques = ["T1095"]
 symbols = ["_listen", "_accept", "_nw_listener_create", "_nw_listener_create_with_port"]
 
@@ -216,7 +218,7 @@ id = "opens-apps"
 title = "Opens apps, files and URLs"
 summary = "Calls Launch Services or NSWorkspace to open items with their default app."
 techniques = ["T1059"]
-symbols = ["_LSOpenURLsWithCompletionHandler", "_LSOpenFromURLSpec", "_LSOpenCFURLRef", "_OBJC_CLASS_$_NSWorkspace"]
+symbols = ["__LSOpenURLsWithCompletionHandler", "_LSOpenFromURLSpec", "_LSOpenCFURLRef", "_OBJC_CLASS_$_NSWorkspace"]
 
 [[capability]]
 id = "manages-launchd"

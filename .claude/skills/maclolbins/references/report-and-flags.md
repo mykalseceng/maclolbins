@@ -11,7 +11,7 @@
   access, weakened runtime, scripts. **Capabilities**: one folder per capability rule that
   matched, strongest evidence first.
 - **Inspector** for the selected file: what it is, why it matters (capabilities with the symbols
-  or libraries that show them, the note's abuse text if any, ATT&CK techniques, evidence score),
+  or library paths that show them, the note's abuse text if any, ATT&CK techniques, evidence score),
   XPC-server evidence, worked commands, permission matrix, SIP protection, privacy and code
   integrity (TCC grants and entitlements, hardened runtime, weakening entitlements), signing
   chain, and every entitlement with its value, grouped by namespace and linked to Apple's page
@@ -36,7 +36,7 @@ The report, and the MCP server's `list_lolbins`/`get_lolbin`, keep a file when i
 2. not an inactive xcode-select shim.
 
 Evidence does not decide inclusion; it ranks. A tool whose abuse is its normal job (`id`,
-`base64`, `chmod`) imports nothing distinctive, so it is listed with a `score` of 0 rather than
+`base64`, `chmod`) shows nothing distinctive, so it is listed with a `score` of 0 rather than
 dropped. `lolbins_in_report` is smaller than `inventoried` only because of third-party
 executables and inactive shims. The privilege signals are `setuid`, `setgid`,
 `private-entitled`, `tcc-entitled`, `tcc-granted`, `weakened-runtime` and
@@ -44,12 +44,15 @@ executables and inactive shims. The privilege signals are `setuid`, `setgid`,
 
 ## Capabilities and evidence
 
-Each capability rule in the catalogue lists imported symbols (`_posix_spawn`,
-`_OBJC_CLASS_$_NSURLSession`, ...) and linked library names (`libcurl`, `Tcl`, ...). The probe
-reads both from the binary's own string tables, so `evidence` shows exactly which imports or
-libraries matched. A capability says what the code can do, not that a caller can drive it from
+Each capability rule in the catalogue lists symbol names (`_posix_spawn`,
+`_OBJC_CLASS_$_NSURLSession`, ...) and library names (`libcurl`, `Tcl`, ...). The probe greps the
+whole binary for them, so `evidence` shows exactly which symbols or library paths matched. Most
+are imports and load commands, but a symbol the binary defines, or a name inside a text string,
+matches too: `DirectoryService` matches Open Directory names it implements itself, and `open`
+carries a table of framework paths it never loads. Read `evidence` as "found in the binary", not
+"imported". A capability says what the code can do, not that a caller can drive it from
 the command line: `runs-programs` on a binary that only starts a fixed helper is still a match.
-Functionality compiled into the binary (`sqlite3`, `zip`) leaves no import, so it shows only if
+Functionality compiled into the binary (`sqlite3`, `zip`) leaves no symbol to find, so it shows only if
 another symbol or library gives it away. Scripts get no capabilities.
 
 `score` is one point per capability plus two per privilege signal; `list_lolbins` returns rows

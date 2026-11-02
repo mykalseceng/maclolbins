@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 from conftest import ENTITLEMENTS_PLIST, SHIM_CODESIGN, b64, f_record, probe_text
 
+from maclolbins.catalog import load_catalog
 from maclolbins.probe import (
     DEFAULT_PATH_SOURCES,
     HEREDOC_DELIMITER,
@@ -84,7 +85,7 @@ def test_parse_output_joins_stats_hashes_and_entitlements():
     assert output["facts"]["developer_dir"] == "none"
 
 
-def test_parse_output_splits_evidence_into_imports_and_libraries():
+def test_parse_output_splits_evidence_into_symbols_and_library_paths():
     tokens = b64("_curl_easy_perform\n/usr/lib/libcurl.4.dylib\n_curl_easy_perform\n\n")
     output = parse_output(
         probe_text(
@@ -92,10 +93,10 @@ def test_parse_output_splits_evidence_into_imports_and_libraries():
         )
     )
     curl = output["files"]["/usr/bin/curl"]
-    assert curl["imports"] == ["_curl_easy_perform"]
-    assert curl["libraries"] == ["/usr/lib/libcurl.4.dylib"]
-    assert output["files"]["/usr/bin/true"]["imports"] == []
-    assert output["files"]["/usr/bin/true"]["libraries"] == []
+    assert curl["symbols"] == ["_curl_easy_perform"]
+    assert curl["library_paths"] == ["/usr/lib/libcurl.4.dylib"]
+    assert output["files"]["/usr/bin/true"]["symbols"] == []
+    assert output["files"]["/usr/bin/true"]["library_paths"] == []
 
 
 def test_parse_output_reads_tcc_sources_and_grants():
@@ -292,7 +293,7 @@ def test_probe_script_end_to_end_on_this_mac(tmp_path: Path):
     assert output["files"][str(scan_dir / "link")]["link_target"] == "hello.sh"
     assert output["files"][str(spaced)]["perms"] == "-rwsr-xr-x"
     assert hello["bsd_flags"] == []
-    assert hello["imports"] == []  # scripts get no evidence record
+    assert hello["symbols"] == []  # scripts get no evidence record
     assert {source["scope"] for source in output["tcc"]["sources"]} == {"system", "user"}
     assert output["facts"]["user"]
     assert "collected_at" in output["facts"]
@@ -320,10 +321,26 @@ def test_probe_script_reads_real_entitlements_and_evidence(tmp_path: Path):
     assert tccutil["signing"]["platform_binary"] is True
     assert "restricted" in tccutil["bsd_flags"]
     assert any(key.startswith("com.apple.private.tcc.") for key in tccutil["entitlements"])
-    assert tccutil["imports"] == ["_TCCAccessReset"]
+    assert tccutil["symbols"] == ["_TCCAccessReset"]
     curl = output["files"][str(bin_dir / "curl")]
-    assert curl["imports"] == ["_curl_easy_perform"]
-    assert any(lib.endswith("/libcurl.4.dylib") for lib in curl["libraries"])
+    assert curl["symbols"] == ["_curl_easy_perform"]
+    assert any(lib.endswith("/libcurl.4.dylib") for lib in curl["library_paths"])
+
+
+@pytest.mark.skipif(sys.platform != "darwin", reason="probe.sh relies on macOS tools")
+def test_packaged_catalog_matches_open_by_its_real_import(tmp_path: Path):
+    bin_dir = linked_system_tools(tmp_path, "/usr/bin/open")
+    catalog = load_catalog()
+    output = run_probe(
+        LOCAL_BASH,
+        catalog.all_symbols(),
+        timeout=60,
+        path_sources=path_sources(tmp_path, bin_dir),
+    )
+    record = output["files"][str(bin_dir / "open")]
+    (opens_apps,) = (cap for cap in catalog.capabilities if cap.id == "opens-apps")
+    evidence = opens_apps.evidence(record["symbols"], record["library_paths"])
+    assert "__LSOpenURLsWithCompletionHandler" in evidence  # the Mach-O name of the SPI
 
 
 def test_parse_whatis_prefers_most_specific_page():
