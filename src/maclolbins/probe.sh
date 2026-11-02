@@ -31,7 +31,7 @@ collect_facts() {
 }
 
 # The default PATH: each source file's lines in order, each source directory's files in name
-# order, first occurrence of a directory wins; this is what path_helper does with /etc/paths.d.
+# order, first occurrence of a directory wins. This is close to what path_helper does.
 list_path_dirs() {
 	local source file
 	while IFS= read -r source; do
