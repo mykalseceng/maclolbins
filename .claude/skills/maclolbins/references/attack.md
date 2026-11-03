@@ -53,6 +53,7 @@ replacement.
 | T1140 Deobfuscate/Decode Files or Information | Defense Evasion | tactic Stealth |
 | T1564.001 Hide Artifacts: Hidden Files and Directories | Defense Evasion | tactic Stealth |
 | T1497.001 Virtualization/Sandbox Evasion: System Checks | Defense Evasion, Discovery | tactics Stealth, Discovery |
+| T1548.001 Abuse Elevation Control Mechanism: Setuid and Setgid | Privilege Escalation, Defense Evasion | tactic Privilege Escalation only |
 | T1548.003 Abuse Elevation Control Mechanism: Sudo and Sudo Caching | Privilege Escalation, Defense Evasion | tactic Privilege Escalation only |
 | T1055 Process Injection | Defense Evasion, Privilege Escalation | tactics Stealth, Privilege Escalation |
 
