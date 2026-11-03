@@ -343,6 +343,22 @@ def test_packaged_catalog_matches_open_by_its_real_import(tmp_path: Path):
     assert "__LSOpenURLsWithCompletionHandler" in evidence  # the Mach-O name of the SPI
 
 
+@pytest.mark.skipif(sys.platform != "darwin", reason="probe.sh relies on macOS tools")
+def test_packaged_catalog_matches_diskutil_by_its_erase_classes(tmp_path: Path):
+    bin_dir = linked_system_tools(tmp_path, "/usr/sbin/diskutil")
+    catalog = load_catalog()
+    output = run_probe(
+        LOCAL_BASH,
+        catalog.all_symbols(),
+        timeout=60,
+        path_sources=path_sources(tmp_path, bin_dir),
+    )
+    record = output["files"][str(bin_dir / "diskutil")]
+    (erases_disks,) = (cap for cap in catalog.capabilities if cap.id == "erases-disks")
+    evidence = erases_disks.evidence(record["symbols"], record["library_paths"])
+    assert {"_OBJC_CLASS_$_DMEraseDisk", "_OBJC_CLASS_$_SKAPFSSnapshotDisk"} <= set(evidence)
+
+
 def test_parse_whatis_prefers_most_specific_page():
     summaries = parse_whatis(
         [

