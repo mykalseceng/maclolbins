@@ -58,8 +58,10 @@ if the user wants something different, that is an answer or a new artifact, name
   name; it becomes the `scan_id` prefix. Tell the user it takes a few minutes before starting.
 - **Out-of-band probe output:** `import_probe_output(output_path, target)`.
 - **Existing scan:** `render_report(scan_id)` rebuilds `index.html` and `data.js` with the
-  current catalogue, so edited capability rules and notes reach an old scan. Use it when the
-  report is missing, or the user asks to regenerate it.
+  current catalogue, so edited notes, library rules and technique mappings reach an old scan.
+  A rule that names a new symbol needs a new scan, because the probe only records the symbols
+  the catalogue asked for at scan time. Use it when the report is missing, or the user asks to
+  regenerate it.
 
 Each returns a summary. Give the user:
 

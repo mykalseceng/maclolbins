@@ -148,13 +148,14 @@ a:hover { text-decoration: underline; }
 /* Window frame */
 .window {
   display: grid;
-  grid-template-columns: 232px minmax(0, 1fr);
+  --side-w: 232px;
+  grid-template-columns: var(--side-w) minmax(0, 1fr);
   grid-template-rows: 52px minmax(0, 1fr) auto;
   height: 100vh;
   height: 100dvh;
 }
 .sidebar {
-  grid-row: 1 / -1;
+  grid-column: 1; grid-row: 1 / -1;
   margin: 8px 0 8px 8px;
   border-radius: 16px;
   background: var(--side);
@@ -166,6 +167,15 @@ a:hover { text-decoration: underline; }
   overflow: hidden;
   -webkit-backdrop-filter: blur(30px) saturate(1.6);
   backdrop-filter: blur(30px) saturate(1.6);
+}
+/* Drag the sidebar's right edge to set its width; double-click restores the default. */
+.sidegrip {
+  grid-column: 1; grid-row: 1 / -1; justify-self: end; position: relative; z-index: 4;
+  width: 9px; margin-right: -5px; cursor: col-resize; touch-action: none; outline: none;
+}
+.sidegrip::after { content: ""; position: absolute; top: 8px; bottom: 8px; left: 4px; width: 1px; }
+.sidegrip:hover::after, .sidegrip.drag::after, .sidegrip:focus-visible::after {
+  background: var(--blue); box-shadow: 0 0 0 1px var(--blue);
 }
 .lights { display: flex; gap: 8px; padding: 14px 16px 6px; flex: none; }
 .lights i { width: 12px; height: 12px; border-radius: 50%; display: block; box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.18); }
@@ -259,7 +269,7 @@ a:hover { text-decoration: underline; }
 .lights-t { display: none; padding: 0 6px 0 2px; }
 @media (min-width: 821px) {
   body.side-off .window { grid-template-columns: 0 minmax(0, 1fr); }
-  body.side-off .sidebar { display: none; }
+  body.side-off .sidebar, body.side-off .sidegrip { display: none; }
   body.side-off .lights-t { display: flex; }
 }
 .browser { --col-w: 236px; flex: 0 1 auto; min-width: calc(var(--col-w) + 4px); display: flex; overflow-x: auto; overflow-y: hidden; position: relative; }
@@ -371,9 +381,10 @@ mark { background: var(--mark); color: inherit; border-radius: 2px; padding: 0 1
 body:not([data-mode="browse"]) .splitter { display: none; }
 body.resizing, body.resizing * { cursor: col-resize !important; user-select: none; }
 
-/* Long folders get a pinned filter bar and sticky letter headings. */
+/* Long folders get a pinned filter bar and sticky letter headings. Both pin 5px above the
+   column's top padding, so no row shows between the bar and the column's top edge. */
 .colbar {
-  position: sticky; top: 0; z-index: 2; height: 66px; margin: -5px 0 2px;
+  position: sticky; top: -5px; z-index: 2; height: 66px; margin: -5px 0 2px;
   display: grid; grid-template-rows: 24px 24px; gap: 6px; padding: 6px 8px;
   background: var(--win); border-bottom: 0.5px solid var(--sep);
 }
@@ -387,7 +398,7 @@ body.resizing, body.resizing * { cursor: col-resize !important; user-select: non
 .cf-row select { flex: 1; padding: 0 4px; }
 .cf-n { font-size: 11px; color: var(--text2); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .lh {
-  position: sticky; top: 66px; z-index: 1; height: 20px; line-height: 20px; padding: 0 12px;
+  position: sticky; top: 61px; z-index: 1; height: 20px; line-height: 20px; padding: 0 12px;
   font-size: 11px; font-weight: 600; color: var(--text2); background: var(--win);
 }
 
@@ -438,11 +449,11 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
   .colgrip::before { content: ""; position: absolute; inset: 0 -4px; }
   .colgrip:hover, .colgrip.drag, .colgrip:focus-visible { background: var(--blue); box-shadow: 0 0 0 1px var(--blue); }
   .isecs > details.sec[data-k="ents"] { grid-column: 1 / -1; }
-  .isecs > details.sec[data-k="ents"] > .sb { max-width: none; columns: 2; column-gap: 28px; }
-  .isecs .ns { break-inside: avoid; }
-}
-@container insp (min-width: 1240px) {
-  .isecs > details.sec[data-k="ents"] > .sb { columns: 3; }
+  .isecs > details.sec[data-k="ents"] > .sb {
+    max-width: none; padding: 0; display: grid;
+    grid-template-columns: minmax(300px, var(--lf, 1fr)) 1px minmax(300px, var(--rf, 1fr));
+  }
+  .estack { min-width: 0; padding: 0 28px 16px; }
 }
 
 .kv { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 5px 10px; margin: 0; }
@@ -624,7 +635,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
   .row .ic { width: 22px; height: 22px; }
   .row .g { width: 13px; height: 13px; }
   .inspector { display: none; flex: 1 1 auto; min-width: 0; border-left: 0; }
-  .splitter { display: none; }
+  .splitter, .sidegrip { display: none; }
   body[data-mpane="inspector"] .inspector { display: block; }
   body[data-mpane="inspector"] .browser, body[data-mpane="inspector"] .list { display: none; }
   body[data-mpane="cols"] .list, body[data-mpane="list"] .browser { display: none; }
@@ -712,7 +723,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
 </svg>
 
 <div class="window">
-  <aside class="sidebar" aria-label="Sidebar">
+  <aside class="sidebar" id="side" aria-label="Sidebar">
     <div class="lights" aria-hidden="true"><i></i><i></i><i></i></div>
     <a class="appid" href="#/" data-go="/" title="Go to the Macintosh HD overview"><svg aria-hidden="true" focusable="false" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lolbins-body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff6a55"/><stop offset="1" stop-color="#d4223f"/></linearGradient></defs><path d="M16 8.6c0-2.1.6-4 2-5.4" fill="none" stroke="#5b3a29" stroke-width="1.7" stroke-linecap="round"/><path d="M18.3 5.7c.8-2.5 3.2-3.8 6.1-3.4-.6 2.7-3 4.1-6.1 3.4Z" fill="#3fa34d"/><path d="M16 8.3C14.6 6.7 12.6 6 10.4 6H9.6C6 6 3 9 3 12.6v10.8C3 27 6 30 9.6 30h12.8c3.6 0 6.6-3 6.6-6.6V12.6C29 9 26 6 22.4 6h-.8c-2.2 0-4.2.7-5.6 2.3Z" fill="url(#lolbins-body)" stroke="rgba(120,10,30,.35)" stroke-width=".6"/><path d="M9.4 15.4l3.6 3.1-3.6 3.1" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M15.4 22.2h6.4" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round"/></svg><div><strong>MacLOLBins</strong><span>Living-off-the-land binaries</span></div></a>
     <nav class="side-scroll" aria-label="Locations and smart folders">
@@ -725,6 +736,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
     </nav>
     <section class="host" id="host" aria-label="Scanned host"></section>
   </aside>
+  <div class="sidegrip" id="sidegrip" role="separator" aria-orientation="vertical" aria-controls="side" aria-label="Sidebar width" aria-valuemin="180" aria-valuemax="420" tabindex="0" title="Drag to resize. Double-click to restore the default width."></div>
 
   <header class="toolbar">
     <button class="back-m cap" id="mback" type="button"><svg class="g"><use href="#g-back"/></svg><span id="mback-l">Back</span></button>
@@ -1772,13 +1784,11 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
       left.className = 'stack l';
       right = document.createElement('div');
       right.className = 'stack r';
-      const grip = document.createElement('div');
-      grip.className = 'colgrip';
+      const grip = colGrip();
       grip.tabIndex = 0;
       grip.setAttribute('role', 'separator');
       grip.setAttribute('aria-orientation', 'vertical');
       grip.setAttribute('aria-label', 'Section column width');
-      grip.title = 'Drag to resize. Double-click to split evenly.';
       const parts = [...box.querySelectorAll(':scope > details.sec:not([data-k="ents"])')];
       box.prepend(left, grip, right);
       left.append(...parts);
@@ -1786,6 +1796,37 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
       left.append(...right.children);
     }
     splitWide = isWide();
+    balance(left, right);
+    splitEnts();
+  }
+  function colGrip() {
+    const grip = document.createElement('div');
+    grip.className = 'colgrip';
+    grip.title = 'Drag to resize. Double-click to split evenly.';
+    return grip;
+  }
+  /* Entitlement groups sit in the same two columns as the sections above, and the divider
+     continues between them. The keyboard uses the divider above, so this one is not focusable. */
+  function splitEnts() {
+    const sb = inspEl.querySelector('details.sec[data-k="ents"] > .sb');
+    if (!sb || !sb.querySelector('.ns')) return;
+    let left = sb.querySelector(':scope > .estack.l');
+    let right = sb.querySelector(':scope > .estack.r');
+    if (!left) {
+      left = document.createElement('div');
+      left.className = 'estack l';
+      right = document.createElement('div');
+      right.className = 'estack r';
+      const grip = colGrip();
+      grip.setAttribute('aria-hidden', 'true');
+      left.append(...sb.querySelectorAll(':scope > .ns'));
+      sb.append(left, grip, right);
+    } else {
+      left.append(...right.children);
+    }
+    balance(left, right);
+  }
+  function balance(left, right) {
     const parts = [...left.children];
     if (parts.length < 2) return;
     const heights = parts.map((el) => el.offsetHeight);
@@ -2224,6 +2265,36 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
     setSecSplit(clampSplit(secFraction() + step, box.getBoundingClientRect().width), true);
     e.preventDefault();
   });
+  const SIDE_MIN = 180;
+  const SIDE_MAX = 420;
+  const winEl = $('.window');
+  const sideEl = $('.sidebar');
+  const sideGrip = $('#sidegrip');
+  function setSideW(w, save) {
+    if (w == null) winEl.style.removeProperty('--side-w');
+    else winEl.style.setProperty('--side-w', `${Math.round(Math.min(SIDE_MAX, Math.max(SIDE_MIN, w)))}px`);
+    const now = Math.round(sideEl.getBoundingClientRect().right);
+    sideGrip.setAttribute('aria-valuenow', now);
+    if (save) store.set('pb.sideW', w == null ? null : String(now));
+    keepActiveVisible();
+  }
+  sideGrip.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return;
+    const startX = e.clientX;
+    const startW = sideEl.getBoundingClientRect().right;
+    sideGrip.classList.add('drag');
+    dragWith(e, sideGrip, (x) => setSideW(startW + x - startX, false), () => {
+      sideGrip.classList.remove('drag');
+      setSideW(sideEl.getBoundingClientRect().right, true);
+    });
+  });
+  sideGrip.addEventListener('dblclick', () => setSideW(null, true));
+  sideGrip.addEventListener('keydown', (e) => {
+    const step = { ArrowLeft: -16, ArrowRight: 16 }[e.key];
+    if (!step) return;
+    setSideW(sideEl.getBoundingClientRect().right + step, true);
+    e.preventDefault();
+  });
   const sideBtn = $('#side-toggle');
   function setSidebar(hidden, save) {
     document.body.classList.toggle('side-off', hidden);
@@ -2243,6 +2314,7 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
   setSidebar(store.get('pb.sideOff') === '1', false);
   { const saved = Number(store.get('pb.secSplit')); if (saved) setSecSplit(saved, false); }
   { const saved = Number(store.get('pb.inspW')); if (saved) setInspW(saved, false); }
+  { const saved = Number(store.get('pb.sideW')); if (saved) setSideW(saved, false); }
   store.set('pb.colW', null);
 
   listBody.addEventListener('keydown', (e) => {
@@ -2332,7 +2404,9 @@ details.sec > summary:focus-visible { outline-offset: -2px; }
 
   inspEl.addEventListener('toggle', (e) => {
     const d = e.target;
-    if (d.matches && d.matches('details.sec')) openState[d.dataset.k] = d.open;
+    if (!d.matches || !d.matches('details.sec')) return;
+    openState[d.dataset.k] = d.open;
+    if (d.open && d.dataset.k === 'ents') splitEnts();
   }, true);
 
   function copyText(text, btn) {
